@@ -1,0 +1,12 @@
+target/
+**/target/
+__pycache__/
+*.pyc
+*-venv/
+.venv/
+*.pw
+*.pem
+*.key
+secrets/
+.env
+*.env

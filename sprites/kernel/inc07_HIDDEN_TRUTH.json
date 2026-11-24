@@ -1,0 +1,25 @@
+{
+  "_written": "2026-11-24, before any probe, from published documentation only",
+  "httpbin": {
+    "_sources": ["httpbin.org documentation: /status/{code} returns the given status; /cache/{n} sets 'Cache-Control: public, max-age=n'; /anything echoes the request's query arguments and headers"],
+    "status_code": ["kind", "n"],
+    "cache_control": ["kind", "n"],
+    "echo_q": ["kind", "q"],
+    "echo_header": ["kind", "h"],
+    "_nondeterministic": [],
+    "_latitude": []
+  },
+  "dns": {
+    "_sources": ["RFC 1035 4.1.1 (RD copied into the response)", "RFC 4035 3.2.2 (CD copied into the response)",
+                 "RFC 4035 3.2.1 (RRSIG/NSEC records added when DO is set and the zone is signed)", "RFC 2308 (negative answers carry the SOA in the authority section)",
+                 "RFC 6840 5.7-5.8 and resolver practice (AD, cache-only answers when RD is clear, truncation by size: resolver latitude)"],
+    "rcode": ["qname"],
+    "an_count": ["qname", "qtype", "do"],
+    "ns_count": ["qname", "qtype", "do"],
+    "answer_types": ["qname", "qtype", "do"],
+    "rd_echo": ["rd"],
+    "cd_echo": ["cd"],
+    "_nondeterministic": ["min_ttl", "id_echo"],
+    "_latitude": ["rcode<-rd", "an_count<-rd", "ns_count<-rd", "answer_types<-rd", "ad<-*", "tc<-*", "aa<-*", "ra<-*", "an_count<-cd", "ns_count<-cd", "answer_types<-cd", "rcode<-cd"]
+  }
+}
