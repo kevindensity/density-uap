@@ -1,0 +1,184 @@
+{
+  "seed": 1379796260,
+  "synth": {
+    "identity": {
+      "product": "LEGACY-OMS",
+      "version": "4.2",
+      "host": "fixture-01"
+    },
+    "inputs": [
+      "discount_code",
+      "note",
+      "qty",
+      "region",
+      "ts",
+      "unit_price"
+    ],
+    "outputs": [
+      "ref",
+      "request_id",
+      "server",
+      "status",
+      "tax",
+      "total"
+    ],
+    "nondeterministic": [
+      "request_id"
+    ],
+    "never_varied_in_passive": [
+      "server"
+    ],
+    "n_negative_nulls": 84,
+    "candidates": [
+      {
+        "output": "tax",
+        "input": "discount_code",
+        "score": 1.0,
+        "p_false": 0.011764705882352941
+      },
+      {
+        "output": "total",
+        "input": "discount_code",
+        "score": 1.0,
+        "p_false": 0.011764705882352941
+      },
+      {
+        "output": "ref",
+        "input": "note",
+        "score": 1.0,
+        "p_false": 0.011764705882352941
+      },
+      {
+        "output": "tax",
+        "input": "qty",
+        "score": 1.0,
+        "p_false": 0.011764705882352941
+      },
+      {
+        "output": "total",
+        "input": "qty",
+        "score": 1.0,
+        "p_false": 0.011764705882352941
+      },
+      {
+        "output": "tax",
+        "input": "region",
+        "score": 1.0,
+        "p_false": 0.011764705882352941
+      },
+      {
+        "output": "tax",
+        "input": "unit_price",
+        "score": 1.0,
+        "p_false": 0.011764705882352941
+      },
+      {
+        "output": "total",
+        "input": "unit_price",
+        "score": 1.0,
+        "p_false": 0.011764705882352941
+      }
+    ],
+    "echo_like": [
+      "ref<-note"
+    ],
+    "decisions": {
+      "ref<-discount_code": "UNRESOLVED:NO_WITNESS",
+      "request_id<-discount_code": "NOT_APPLICABLE:NONDETERMINISTIC",
+      "server<-discount_code": "UNRESOLVED:NO_WITNESS",
+      "status<-discount_code": "UNRESOLVED:NO_WITNESS",
+      "tax<-discount_code": "CANDIDATE",
+      "total<-discount_code": "CANDIDATE",
+      "ref<-note": "CANDIDATE",
+      "request_id<-note": "NOT_APPLICABLE:NONDETERMINISTIC",
+      "server<-note": "UNRESOLVED:NO_WITNESS",
+      "status<-note": "UNRESOLVED:NO_WITNESS",
+      "tax<-note": "UNRESOLVED:NO_WITNESS",
+      "total<-note": "UNRESOLVED:NO_WITNESS",
+      "ref<-qty": "UNRESOLVED:NO_WITNESS",
+      "request_id<-qty": "NOT_APPLICABLE:NONDETERMINISTIC",
+      "server<-qty": "UNRESOLVED:NO_WITNESS",
+      "status<-qty": "UNRESOLVED:NO_WITNESS",
+      "tax<-qty": "CANDIDATE",
+      "total<-qty": "CANDIDATE",
+      "ref<-region": "UNRESOLVED:NO_WITNESS",
+      "request_id<-region": "NOT_APPLICABLE:NONDETERMINISTIC",
+      "server<-region": "UNRESOLVED:NO_WITNESS",
+      "status<-region": "UNRESOLVED:NO_WITNESS",
+      "tax<-region": "CANDIDATE",
+      "total<-region": "UNRESOLVED:NO_WITNESS",
+      "ref<-ts": "UNRESOLVED:NO_WITNESS",
+      "request_id<-ts": "NOT_APPLICABLE:NONDETERMINISTIC",
+      "server<-ts": "UNRESOLVED:NO_WITNESS",
+      "status<-ts": "UNRESOLVED:NO_WITNESS",
+      "tax<-ts": "UNRESOLVED:NO_WITNESS",
+      "total<-ts": "UNRESOLVED:NO_WITNESS",
+      "ref<-unit_price": "UNRESOLVED:NO_WITNESS",
+      "request_id<-unit_price": "NOT_APPLICABLE:NONDETERMINISTIC",
+      "server<-unit_price": "UNRESOLVED:NO_WITNESS",
+      "status<-unit_price": "UNRESOLVED:NO_WITNESS",
+      "tax<-unit_price": "CANDIDATE",
+      "total<-unit_price": "CANDIDATE"
+    }
+  },
+  "verifier_receipts": [
+    {
+      "consequence": "dep:tax<-discount_code",
+      "constant_value": "true"
+    },
+    {
+      "consequence": "dep:total<-discount_code",
+      "constant_value": "true"
+    },
+    {
+      "consequence": "dep:ref<-note",
+      "constant_value": "true"
+    },
+    {
+      "consequence": "dep:tax<-qty",
+      "constant_value": "true"
+    },
+    {
+      "consequence": "dep:total<-qty",
+      "constant_value": "true"
+    },
+    {
+      "consequence": "dep:tax<-region",
+      "constant_value": "true"
+    },
+    {
+      "consequence": "dep:tax<-unit_price",
+      "constant_value": "true"
+    },
+    {
+      "consequence": "dep:total<-unit_price",
+      "constant_value": "true"
+    }
+  ],
+  "settled": [
+    "dep:ref<-note",
+    "dep:tax<-discount_code",
+    "dep:tax<-qty",
+    "dep:tax<-region",
+    "dep:tax<-unit_price",
+    "dep:total<-discount_code",
+    "dep:total<-qty",
+    "dep:total<-unit_price"
+  ],
+  "refused": [],
+  "self_settle_attempt": "ERROR:  ILLEGAL_STRENGTHENING_CAST: no refinement receipt for dep:status<-region",
+  "doc_hint": {
+    "total": "qty * unit_price (discount_code is informational only)",
+    "status": "depends on region",
+    "tax": "flat 5%"
+  },
+  "effect": {
+    "guarded": {
+      "first_ack": "NO_ACK",
+      "successor_fence": "ALREADY_COMMITTED",
+      "lookup_found": true
+    },
+    "guarded_world_effects": 1,
+    "naive_world_effects": 2
+  }
+}

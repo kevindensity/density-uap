@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "total": ["qty", "unit_price", "discount_code"],
+    "tax": ["qty", "unit_price", "discount_code", "region"],
+    "status": ["qty", "unit_price", "discount_code"],
+    "ref": ["note"]
+  },
+  "nondeterministic_outputs": ["request_id"],
+  "constant_outputs": ["server"],
+  "echo_outputs": {"ref": "note"},
+  "doc_claims_false": [["status","region"], ["total","discount_code","claimed_absent"]],
+  "effect_idempotent_natively": false
+}

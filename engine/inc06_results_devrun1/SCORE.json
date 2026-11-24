@@ -1,0 +1,114 @@
+{
+  "predictions_sha256": "f3b99bd4fd80ec308e75809397a53f3305a840e526336cb63e5b1bcca4ae1480",
+  "freeze": "20b0f3ba821f87274a129200761d1fd8c33d00d89ac6266f8b776f4179b1a9df",
+  "legs": {
+    "file": {
+      "descent_level": 4,
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": false,
+        "twin_certified_cp": true,
+        "negative_reference_yields_no_claims": true,
+        "probing_left_no_effect": true,
+        "archive_pairs_reconstructed": true
+      },
+      "passed": 6,
+      "total": 7,
+      "recall": 0.0,
+      "false_promotions": [],
+      "missed": [
+        "dep:invoice_total<-disc",
+        "dep:invoice_total<-qty",
+        "dep:invoice_total<-unit_price",
+        "dep:ref_out<-customer_ref",
+        "dep:review<-disc",
+        "dep:review<-qty",
+        "dep:review<-unit_price"
+      ],
+      "probe_calls": 213,
+      "seconds": 2.3
+    },
+    "protocol": {
+      "descent_level": 5,
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": false,
+        "twin_certified_cp": true,
+        "negative_reference_yields_no_claims": true,
+        "unique_grammar_matches_truth": true,
+        "wrong_grammars_rejected": true,
+        "frames_roundtrip_exact": true
+      },
+      "passed": 7,
+      "total": 8,
+      "recall": 0.0,
+      "false_promotions": [],
+      "missed": [
+        "dep:r17<-t1",
+        "dep:r17<-t2",
+        "dep:r17<-t3",
+        "dep:r17<-t4",
+        "dep:r18<-t1",
+        "dep:r18<-t2",
+        "dep:r18<-t3",
+        "dep:r18<-t4",
+        "dep:r20<-t5"
+      ],
+      "probe_calls": 275,
+      "seconds": 0.1
+    },
+    "ui": {
+      "descent_level": 6,
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": false,
+        "twin_certified_cp": true,
+        "negative_reference_yields_no_claims": true,
+        "form_fields_found_from_screen": true
+      },
+      "passed": 5,
+      "total": 6,
+      "recall": 0.0,
+      "false_promotions": [],
+      "missed": [
+        "dep:NOTE ECHO<-ADJUSTER NOTE",
+        "dep:RESERVE<-CLAIM AMOUNT",
+        "dep:RESERVE<-POLICY TYPE",
+        "dep:ROUTE<-CLAIM AMOUNT",
+        "dep:ROUTE<-DAYS SINCE LOSS"
+      ],
+      "probe_calls": 206,
+      "seconds": 12.4
+    },
+    "behavior": {
+      "descent_level": 7,
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": true,
+        "twin_certified_cp": true,
+        "negative_reference_yields_no_claims": true,
+        "raw_timing_never_settled": true
+      },
+      "passed": 6,
+      "total": 6,
+      "recall": 0.0,
+      "false_promotions": [],
+      "missed": [
+        "dep:accepted<-qty",
+        "dep:accepted<-unit_price",
+        "dep:latency_level<-priority",
+        "dep:latency_level<-qty"
+      ],
+      "probe_calls": 166,
+      "seconds": 7.1
+    }
+  },
+  "totals": {
+    "passed": 24,
+    "total": 27
+  }
+}

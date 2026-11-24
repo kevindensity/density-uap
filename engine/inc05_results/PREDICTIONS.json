@@ -1,0 +1,337 @@
+{
+  "seed": 3584342256,
+  "custody": {
+    "source": {
+      "run_id": "UAP-INC-05#127f8ebfa5a94fba8a6e8cca540d9467",
+      "root": "c99925bccbeb3da9a765f5690607de295df75fc83efd87c266ce0b95be3133b7",
+      "kind": "ORIGINAL_FREEZE"
+    },
+    "upstream": {
+      "run_id": "UAP-INC-04-RESULTS#04da0ea1f63d4b99ae8a14c2eecc7d07",
+      "root": "fa553c64fd5e7db97b19a493b01598294260d4fea7db593b25e31ebacbb9e330"
+    }
+  },
+  "bridges": {
+    "oms.total->order.amount_usd": {
+      "state": "CANONICAL_EQUIVALENT",
+      "survivors": [
+        {
+          "scale": 1.0
+        }
+      ],
+      "anchor_count": 6,
+      "verifier": {
+        "ok": true,
+        "misses": [],
+        "transform": {
+          "scale": 1.0
+        }
+      }
+    },
+    "oms.status->order.requires_approval": {
+      "state": "RECOVERABLE_BY_MAP",
+      "survivors": [
+        {
+          "map": {
+            "\"HOLD\"": true,
+            "\"OK\"": false
+          }
+        }
+      ],
+      "anchor_count": 6,
+      "verifier": {
+        "ok": true,
+        "misses": [],
+        "transform": {
+          "map": {
+            "\"HOLD\"": true,
+            "\"OK\"": false
+          }
+        }
+      }
+    },
+    "oms.tax->order.tax_usd": {
+      "state": "CONTRADICTORY",
+      "survivors": [],
+      "anchor_count": 6,
+      "verifier": {
+        "ok": false,
+        "reason": "fit not unique"
+      }
+    },
+    "erp.line_total->order.amount_usd": {
+      "state": "CANONICAL_EQUIVALENT",
+      "survivors": [
+        {
+          "scale": 1.0
+        }
+      ],
+      "anchor_count": 6,
+      "verifier": {
+        "ok": true,
+        "misses": [],
+        "transform": {
+          "scale": 1.0
+        }
+      }
+    },
+    "erp.needs_approval->order.requires_approval": {
+      "state": "CANONICAL_EQUIVALENT",
+      "survivors": [
+        {
+          "map": {
+            "false": false,
+            "true": true
+          }
+        }
+      ],
+      "anchor_count": 6,
+      "verifier": {
+        "ok": true,
+        "misses": [],
+        "transform": {
+          "map": {
+            "false": false,
+            "true": true
+          }
+        }
+      }
+    },
+    "erp.shipping->shipment.cost_usd": {
+      "state": "DOMAIN_LOCAL_ONLY",
+      "survivors": [
+        {
+          "scale": 1.0
+        },
+        {
+          "scale": 0.01
+        },
+        {
+          "scale": 100.0
+        },
+        {
+          "scale": 0.001
+        },
+        {
+          "scale": 1000.0
+        }
+      ],
+      "anchor_count": 0,
+      "verifier": {
+        "ok": null
+      }
+    },
+    "cli.rate->shipment.cost_cents": {
+      "state": "RECOVERABLE_BY_MAP",
+      "survivors": [
+        {
+          "scale": 100.0
+        }
+      ],
+      "anchor_count": 6,
+      "verifier": {
+        "ok": true,
+        "misses": [],
+        "transform": {
+          "scale": 100.0
+        }
+      }
+    },
+    "cli.eta_days->shipment.transit_days": {
+      "state": "DOMAIN_LOCAL_ONLY",
+      "survivors": [
+        {
+          "scale": 1.0
+        },
+        {
+          "scale": 24.0
+        },
+        {
+          "scale": 0.14285714285714285
+        }
+      ],
+      "anchor_count": 0,
+      "verifier": {
+        "ok": null
+      }
+    }
+  },
+  "icc": {
+    "oms.total->order.amount_usd": {
+      "core": [
+        "VALUE",
+        "ORDERING",
+        "ZERO_SET",
+        "RATIO_BETWEEN_RECORDS",
+        "SINGLE_CUT_EXISTS",
+        "CUT_VALUE_IN_CANONICAL_UNITS"
+      ],
+      "not_core": [],
+      "separating_evidence": null
+    },
+    "oms.status->order.requires_approval": {
+      "core": [
+        "VALUE",
+        "PARTITION_RULE_THRESHOLD"
+      ],
+      "not_core": [],
+      "separating_evidence": null
+    },
+    "oms.tax->order.tax_usd": {
+      "core": [],
+      "not_core": [
+        "ALL (no interpretation survives)"
+      ],
+      "separating_evidence": null
+    },
+    "erp.line_total->order.amount_usd": {
+      "core": [
+        "VALUE",
+        "ORDERING",
+        "ZERO_SET",
+        "RATIO_BETWEEN_RECORDS",
+        "SINGLE_CUT_EXISTS",
+        "CUT_VALUE_IN_CANONICAL_UNITS"
+      ],
+      "not_core": [],
+      "separating_evidence": null
+    },
+    "erp.needs_approval->order.requires_approval": {
+      "core": [
+        "VALUE",
+        "PARTITION_RULE_THRESHOLD"
+      ],
+      "not_core": [],
+      "separating_evidence": null
+    },
+    "erp.shipping->shipment.cost_usd": {
+      "core": [
+        "ORDERING",
+        "ZERO_SET",
+        "RATIO_BETWEEN_RECORDS"
+      ],
+      "not_core": [
+        "VALUE",
+        "DIFFERENCES_IN_CANONICAL_UNITS",
+        "CROSS_SYSTEM_SUM"
+      ],
+      "separating_evidence": {
+        "evidence": "one anchor record with a nonzero canonical value on an admissible channel",
+        "cost": 1
+      }
+    },
+    "cli.rate->shipment.cost_cents": {
+      "core": [
+        "VALUE",
+        "ORDERING",
+        "ZERO_SET",
+        "RATIO_BETWEEN_RECORDS"
+      ],
+      "not_core": [],
+      "separating_evidence": null
+    },
+    "cli.eta_days->shipment.transit_days": {
+      "core": [
+        "ORDERING",
+        "ZERO_SET",
+        "RATIO_BETWEEN_RECORDS",
+        "PARTITION_RULE_LOOKUP"
+      ],
+      "not_core": [
+        "VALUE",
+        "DIFFERENCES_IN_CANONICAL_UNITS",
+        "CROSS_SYSTEM_SUM"
+      ],
+      "separating_evidence": {
+        "evidence": "one anchor record with a nonzero canonical value on an admissible channel",
+        "cost": 1
+      }
+    }
+  },
+  "canonical_writes": {
+    "oms.total->order.amount_usd": "ACCEPTED",
+    "oms.status->order.requires_approval": "ACCEPTED",
+    "oms.tax->order.tax_usd": "ERROR:  BRIDGE_UNPROVEN: tax -> order.tax_usd",
+    "erp.line_total->order.amount_usd": "ACCEPTED",
+    "erp.needs_approval->order.requires_approval": "ACCEPTED",
+    "erp.shipping->shipment.cost_usd": "ERROR:  BRIDGE_UNPROVEN: shipping -> shipment.cost_usd",
+    "cli.rate->shipment.cost_cents": "ACCEPTED",
+    "cli.eta_days->shipment.transit_days": "ERROR:  BRIDGE_UNPROVEN: eta_days -> shipment.transit_days"
+  },
+  "mcd": {
+    "with_source_system": {
+      "status": "DISTINCTION_FOUND",
+      "conflicts_found": 14,
+      "minimal_distinction": [
+        "source_system"
+      ]
+    },
+    "holdout_after_distinction": {
+      "status": "NO_CONFLICT",
+      "conflicts_found": 0,
+      "minimal_distinction": []
+    },
+    "without_source_system": {
+      "status": "NO_DISTINCTION_AVAILABLE",
+      "conflicts_found": 14,
+      "minimal_distinction": null
+    },
+    "records": 324
+  },
+  "pie": {
+    "order.amount_usd": {
+      "allowed": [
+        "CROSS_COMPARE_ABSOLUTE",
+        "CROSS_RANK",
+        "CROSS_SUM",
+        "WITHIN_A_RANK",
+        "WITHIN_B_RANK"
+      ],
+      "forbidden": [],
+      "required_distinctions": []
+    },
+    "order.requires_approval": {
+      "allowed": [
+        "CROSS_COUNT",
+        "CROSS_EQUALITY",
+        "POLICY_TRANSFER_CONDITIONED"
+      ],
+      "forbidden": [
+        "POLICY_TRANSFER"
+      ],
+      "required_distinctions": [
+        "source_system"
+      ]
+    },
+    "shipment.cost": {
+      "allowed": [
+        "WITHIN_A_RANK",
+        "WITHIN_B_RANK"
+      ],
+      "forbidden": [
+        "CROSS_COMPARE_ABSOLUTE",
+        "CROSS_RANK",
+        "CROSS_SUM"
+      ],
+      "required_distinctions": []
+    }
+  },
+  "cadr": {
+    "closure": [
+      "cli.rate",
+      "erp.quote_view",
+      "finance.anchors",
+      "oms.lookup",
+      "oms.quote",
+      "recon.oms_erp"
+    ],
+    "closure_after_erp_revocation": [
+      "cli.rate",
+      "finance.anchors",
+      "oms.lookup",
+      "oms.quote"
+    ],
+    "erp_bridge_after_revocation": "ERROR:  NATIVE_CHANNEL_WITHOUT_ACCESS_STANDING: line_total via erp.quote_view",
+    "docs_bridge_attempt": "ERROR:  BRIDGE_EVIDENCE_WITHOUT_ACCESS_STANDING: total via docs.v2"
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "channel": "finance.anchors",
+  "note": "Operator-provided reference records from Density's finance and logistics ledgers. Independent of the target systems' self-description. order.tax_usd in this ledger uses a different tax basis.",
+  "oms": [
+    {
+      "inputs": {
+        "qty": 2,
+        "unit_price": 12.5,
+        "discount_code": "NONE",
+        "region": "CA",
+        "note": "a",
+        "ts": 1700000000
+      },
+      "order.amount_usd": 25.0,
+      "order.requires_approval": false,
+      "order.tax_usd": 2.06
+    },
+    {
+      "inputs": {
+        "qty": 30,
+        "unit_price": 40.0,
+        "discount_code": "VIP",
+        "region": "TX",
+        "note": "a",
+        "ts": 1700000000
+      },
+      "order.amount_usd": 1020.0,
+      "order.requires_approval": true,
+      "order.tax_usd": 73.95
+    },
+    {
+      "inputs": {
+        "qty": 5,
+        "unit_price": 19.99,
+        "discount_code": "STAFF",
+        "region": "NY",
+        "note": "a",
+        "ts": 1700000000
+      },
+      "order.amount_usd": 69.96,
+      "order.requires_approval": false,
+      "order.tax_usd": 3.5
+    },
+    {
+      "inputs": {
+        "qty": 40,
+        "unit_price": 40.0,
+        "discount_code": "NONE",
+        "region": "OR",
+        "note": "a",
+        "ts": 1700000000
+      },
+      "order.amount_usd": 1600.0,
+      "order.requires_approval": true,
+      "order.tax_usd": 16.0
+    },
+    {
+      "inputs": {
+        "qty": 8,
+        "unit_price": 5.0,
+        "discount_code": "PROMO5",
+        "region": "CA",
+        "note": "a",
+        "ts": 1700000000
+      },
+      "order.amount_usd": 38.0,
+      "order.requires_approval": false,
+      "order.tax_usd": 3.13
+    },
+    {
+      "inputs": {
+        "qty": 26,
+        "unit_price": 40.0,
+        "discount_code": "NONE",
+        "region": "TX",
+        "note": "a",
+        "ts": 1700000000
+      },
+      "order.amount_usd": 1040.0,
+      "order.requires_approval": true,
+      "order.tax_usd": 75.4
+    }
+  ],
+  "erp": [
+    {
+      "inputs": {
+        "sku": "A100",
+        "qty": 3,
+        "promo_code": "NONE",
+        "warehouse": "W1",
+        "memo": "std",
+        "operator": "ann"
+      },
+      "order.amount_usd": 37.5,
+      "order.requires_approval": false
+    },
+    {
+      "inputs": {
+        "sku": "D400",
+        "qty": 25,
+        "promo_code": "SPRING",
+        "warehouse": "W2",
+        "memo": "std",
+        "operator": "ann"
+      },
+      "order.amount_usd": 2227.5,
+      "order.requires_approval": true
+    },
+    {
+      "inputs": {
+        "sku": "B200",
+        "qty": 60,
+        "promo_code": "NONE",
+        "warehouse": "W3",
+        "memo": "std",
+        "operator": "ann"
+      },
+      "order.amount_usd": 2400.0,
+      "order.requires_approval": true
+    },
+    {
+      "inputs": {
+        "sku": "C300",
+        "qty": 9,
+        "promo_code": "CLEAR",
+        "warehouse": "W1",
+        "memo": "std",
+        "operator": "ann"
+      },
+      "order.amount_usd": 39.15,
+      "order.requires_approval": false
+    },
+    {
+      "inputs": {
+        "sku": "D400",
+        "qty": 30,
+        "promo_code": "NONE",
+        "warehouse": "W2",
+        "memo": "std",
+        "operator": "ann"
+      },
+      "order.amount_usd": 2970.0,
+      "order.requires_approval": true
+    },
+    {
+      "inputs": {
+        "sku": "B200",
+        "qty": 10,
+        "promo_code": "SPRING",
+        "warehouse": "W3",
+        "memo": "std",
+        "operator": "ann"
+      },
+      "order.amount_usd": 360.0,
+      "order.requires_approval": false
+    }
+  ],
+  "cli": [
+    {
+      "inputs": {
+        "weight": 1.5,
+        "zone": "Z1",
+        "account": "ACME",
+        "label": "box",
+        "express": false
+      },
+      "shipment.cost_cents": 165
+    },
+    {
+      "inputs": {
+        "weight": 12.0,
+        "zone": "Z2",
+        "account": "ACME",
+        "label": "box",
+        "express": true
+      },
+      "shipment.cost_cents": 3150
+    },
+    {
+      "inputs": {
+        "weight": 20.0,
+        "zone": "Z3",
+        "account": "ACME",
+        "label": "box",
+        "express": false
+      },
+      "shipment.cost_cents": 4800
+    },
+    {
+      "inputs": {
+        "weight": 60.0,
+        "zone": "Z1",
+        "account": "ACME",
+        "label": "box",
+        "express": true
+      },
+      "shipment.cost_cents": 12400
+    },
+    {
+      "inputs": {
+        "weight": 4.5,
+        "zone": "Z3",
+        "account": "ACME",
+        "label": "box",
+        "express": true
+      },
+      "shipment.cost_cents": 1620
+    },
+    {
+      "inputs": {
+        "weight": 8.0,
+        "zone": "Z2",
+        "account": "ACME",
+        "label": "box",
+        "express": false
+      },
+      "shipment.cost_cents": 1400
+    }
+  ]
+}

@@ -1,0 +1,441 @@
+version: 0.4.0
+generated_from: Architecture tab laws K01–K59 (rev 78)
+laws:
+- id: K01
+  law: Knowledge never confers authority
+  tier: core
+  phase: B0
+  machines: port
+  contracts: Candidate, NoAuthority
+  tests: []
+- id: K02
+  law: Generation ≠ admission ≠ standing ≠ authority
+  tier: core
+  phase: B0
+  machines: port, node_genesis
+  contracts: Candidate, Admitted
+  tests:
+  - reference-kernel::Admitted (compile_fail doctest)
+- id: K03
+  law: Signature ≠ standing; no compiler manufactures its own evidence
+  tier: core
+  phase: B0
+  machines: settlement
+  contracts: Signed, Attestation
+  tests: []
+- id: K04
+  law: No self-ratification
+  tier: core
+  phase: B0
+  machines: node_genesis
+  contracts: AdmissionRequest
+  tests:
+  - laws::k04_self_ratification_refused
+- id: K05
+  law: Proposing a Node is not admitting one
+  tier: core
+  phase: B0
+  machines: port, node_genesis
+  contracts: Admitted
+  tests:
+  - machines::ungranted_admission_path_is_forbidden
+  - laws::p0_exactly_one_successor_per_predecessor
+  - laws::p0_crash_replay_converges
+- id: K06
+  law: CAN ≠ MAY ≠ DID; acknowledgement ≠ finality
+  tier: core
+  phase: B0 (oracle), B8 (live)
+  machines: effect
+  contracts: Grant, Effect, EffectState
+  tests:
+  - laws::k06_acknowledgement_is_not_finality
+  - laws::k06_unknown_outcome_is_reconciled_never_reemitted
+  - laws::grant_single_use_and_retry_only_if_allowed
+  - laws::release_rechecks_epoch_and_revocation
+  - tla::FinalOnlyByIndependentObserver
+- id: K07
+  law: Requested ≠ commanded ≠ applied ≠ observed
+  tier: extension
+  phase: B8
+  machines: effect
+  contracts: BindingRecord
+  tests: []
+- id: K08
+  law: Lossy projection narrows authority by intersection
+  tier: core
+  phase: B2
+  machines: mapping_version
+  contracts: QuotientClass
+  tests: []
+- id: K09
+  law: Lawfulness precedes optimization
+  tier: core
+  phase: B0
+  machines: kernel order
+  contracts: KernelOp
+  tests: []
+- id: K10
+  law: Strengthening needs an independent receipt; weakening is free
+  tier: core
+  phase: B0
+  machines: settlement, standing
+  contracts: Standing, SettlementReceipt
+  tests:
+  - laws::k10_settlement_needs_a_different_verifier_key
+  - dc-types::weakening_is_free_and_revoked_is_terminal
+  - machines::weakening_is_always_allowed
+- id: K11
+  law: Shared roots are not independent witnesses
+  tier: core
+  phase: B2
+  machines: settlement
+  contracts: IndependenceReceipt
+  tests: []
+- id: K12
+  law: No observed change ≠ observed no change
+  tier: core
+  phase: B2
+  machines: monitor
+  contracts: MonitorConstitution
+  tests: []
+- id: K13
+  law: Unknown is typed; refusal is a conformant answer
+  tier: core
+  phase: B0
+  machines: all
+  contracts: Outcome, Unknown, Refusal
+  tests:
+  - dc-types::only_proceed_commits
+  - laws::missing_predecessor_is_typed_unknown
+- id: K14
+  law: Observation ≠ existence; identities distinct
+  tier: core
+  phase: B2
+  machines: individuation
+  contracts: ObjectId, identity newtypes
+  tests: []
+- id: K15
+  law: Values and models support only earned operations
+  tier: extension
+  phase: B3
+  machines: capability
+  contracts: EntitledOperations
+  tests: []
+- id: K16
+  law: A semantic type is not the image of an operation
+  tier: extension
+  phase: B3
+  machines: mapping_version
+  contracts: SemanticMapping
+  tests: []
+- id: K17
+  law: Exact quotienting; open-set descent
+  tier: extension
+  phase: B5
+  machines: descent
+  contracts: QuotientClass, GrammarRejection
+  tests: []
+- id: K18
+  law: Discovery stops at consequential sufficiency
+  tier: extension
+  phase: B3
+  machines: probe plan
+  contracts: ClosureProfile
+  tests: []
+- id: K19
+  law: Invalidation is dependency-exact
+  tier: core
+  phase: B2
+  machines: requalification
+  contracts: ValidityEnvelope
+  tests:
+  - dc-types::validity_tracks_generations_and_exits
+- id: K20
+  law: 'No Frankenconstitution: no assembly across incompatible cuts or epochs'
+  tier: core
+  phase: B0
+  machines: all
+  contracts: EpochVector, CausalCut
+  tests:
+  - dc-types::epoch_compatibility
+  - laws::k20_copied_receipt_from_another_epoch_or_tenant_refused
+- id: K21
+  law: No silent response-law drift
+  tier: extension
+  phase: B5
+  machines: monitor
+  contracts: DriftReceipt
+  tests: []
+- id: K22
+  law: Port proof ≠ system proof ≠ Fabric proof
+  tier: extension
+  phase: B4
+  machines: system constitution
+  contracts: BoundaryCertificate
+  tests: []
+- id: K23
+  law: Knowledge transfer ≠ standing transfer
+  tier: extension
+  phase: B7
+  machines: capability
+  contracts: NetworkPrior
+  tests: []
+- id: K24
+  law: One root of truth; projections reconstructible
+  tier: core
+  phase: B0
+  machines: projection
+  contracts: Projection
+  tests: []
+- id: K25
+  law: Credential possession is never the programming model
+  tier: core
+  phase: B1
+  machines: connection
+  contracts: CredentialHandle
+  tests: []
+- id: K26
+  law: Experiments preserve protection and the ability to learn
+  tier: extension
+  phase: B3
+  machines: exploratory actuation
+  contracts: EpistemicViabilityCheck
+  tests: []
+- id: K27
+  law: Scoring is authority-blind
+  tier: core
+  phase: B2
+  machines: mapping_version
+  contracts: SanitizedScoringInput
+  tests: []
+- id: K28
+  law: No activation without corridor and coalition proof
+  tier: extension
+  phase: B8
+  machines: activation
+  contracts: ActivationCertificate
+  tests: []
+- id: K29
+  law: Meaning-bearing change creates a successor; rejections remembered
+  tier: core
+  phase: B2
+  machines: connection, mapping_version
+  contracts: ConnectionIdentity, RejectionMemory
+  tests: []
+- id: K30
+  law: 'Forced kernel order: authority, viability, optimization'
+  tier: core
+  phase: B0
+  machines: kernel order
+  contracts: KernelOp
+  tests: []
+- id: K31
+  law: Authority attaches to effects, not operation names
+  tier: extension
+  phase: B8
+  machines: activation, remediation
+  contracts: MechanismDiff
+  tests: []
+- id: K32
+  law: Witness individuation is earned
+  tier: extension
+  phase: B6
+  machines: settlement
+  contracts: IndependenceReceipt
+  tests: []
+- id: K33
+  law: Containment governs continuity
+  tier: extension
+  phase: B6
+  machines: sandbox
+  contracts: ContinuityReceipt
+  tests: []
+- id: K34
+  law: No untrusted signal becomes canonical substrate
+  tier: core
+  phase: B2
+  machines: substrate mutation
+  contracts: SubstrateMutationAttempt
+  tests: []
+- id: K35
+  law: Authority is never resurrected
+  tier: core
+  phase: B0
+  machines: effect, grant
+  contracts: DurableLog
+  tests:
+  - laws::k35_restore_never_resurrects_authority
+  - laws::k35_restore_never_reissues_an_identifier
+  - laws::k35_restore_between_release_and_emit_never_double_emits
+  - tla::EmitAtMostOnce
+  - tla::NoEffectWithoutConsumedGrant
+- id: K36
+  law: No destructive acquisition
+  tier: extension
+  phase: B3
+  machines: probe plan
+  contracts: EvidenceEscrow
+  tests: []
+- id: K37
+  law: Lawful impossibility is a typed answer
+  tier: extension
+  phase: B3
+  machines: all
+  contracts: LawfulImpossibilityCert
+  tests: []
+- id: K38
+  law: Reference-machine conformance
+  tier: core
+  phase: B0
+  machines: all
+  contracts: reference-kernel
+  tests:
+  - laws::k38_randomized_traces_preserve_kernel_invariants
+  - tla::AtMostOneSuccessor
+- id: K39
+  law: Constitutive closure; DENY_PROTECTED_VALUE
+  tier: extension
+  phase: B6
+  machines: effect
+  contracts: ProtectedValueBinding
+  tests: []
+- id: K40
+  law: No circular objective
+  tier: extension
+  phase: B6
+  machines: node_genesis
+  contracts: OpportunityProposal
+  tests: []
+- id: K41
+  law: No self-certified completeness
+  tier: extension
+  phase: B7
+  machines: genesis
+  contracts: GenesisClaim
+  tests: []
+- id: K42
+  law: Identity is automorphism-relative
+  tier: extension
+  phase: B4
+  machines: individuation
+  contracts: ObjectOrbit
+  tests: []
+- id: K43
+  law: Safety laws are inferred
+  tier: extension
+  phase: B3 (research)
+  machines: exploratory actuation
+  contracts: SafetyLawSet
+  tests: []
+- id: K44
+  law: 'Semantic continuity: bridges, fossils, debt'
+  tier: extension
+  phase: B5
+  machines: semantic_epoch
+  contracts: SemanticBridgeSet, Fossil, ContinuityDebt
+  tests: []
+- id: K45
+  law: Restoration is accessibility restoration; no false discharge
+  tier: extension
+  phase: B8
+  machines: restoration
+  contracts: RestorationCertificate
+  tests: []
+- id: K46
+  law: Availability is a quantitative access profile
+  tier: extension
+  phase: B5
+  machines: capability
+  contracts: AccessProfile
+  tests: []
+- id: K47
+  law: Warrant is claim-relative
+  tier: core
+  phase: B2
+  machines: settlement
+  contracts: ClaimUnderstandingCandidate
+  tests: []
+- id: K48
+  law: Independent verification needs implementation diversity
+  tier: core
+  phase: B0
+  machines: settlement
+  contracts: VerificationBasis, VerifierLineage
+  tests: []
+- id: K49
+  law: Effects are admitted at the strongest available fence
+  tier: extension
+  phase: B8
+  machines: fence, effect
+  contracts: FenceClass, FenceState, FencedApply
+  tests: []
+- id: K50
+  law: Issuer quorum; no root ratifies its own successor
+  tier: extension
+  phase: B6
+  machines: issuer
+  contracts: IssuerRecord, QuorumGrant, RootTransferEvent
+  tests: []
+- id: K51
+  law: Grants are history-bound
+  tier: extension
+  phase: B6
+  machines: effect
+  contracts: HistoryBinding
+  tests: []
+- id: K52
+  law: Connection depth is decision-relative
+  tier: extension
+  phase: B3
+  machines: node decision
+  contracts: DecisionScope, NodeDecision
+  tests: []
+- id: K53
+  law: Formation gating for durable substrate
+  tier: extension
+  phase: B7
+  machines: formation
+  contracts: FormationMetrics, FormationReceipt
+  tests: []
+- id: K54
+  law: Fencing is positive evidence
+  tier: extension
+  phase: B8
+  machines: writer_fence
+  contracts: WriterFence
+  tests: []
+- id: K55
+  law: Constitutional secure boot
+  tier: extension
+  phase: B6
+  machines: amendment
+  contracts: SecureBootRecord, GroundedAdmission
+  tests: []
+- id: K56
+  law: Non-amplifying lineage
+  tier: extension
+  phase: B6
+  machines: identity_transition
+  contracts: LineageAuthorityTransport
+  tests: []
+- id: K57
+  law: Independence is earned against the target
+  tier: extension
+  phase: B3
+  machines: independence
+  contracts: IndependenceRegistration
+  tests: []
+- id: K58
+  law: One causal-access truth
+  tier: extension
+  phase: B3
+  machines: access_certificate
+  contracts: CausalAccessCertificate, AccessBound
+  tests: []
+- id: K59
+  law: Execution binds the certified live prestate
+  tier: extension
+  phase: B8
+  machines: effect
+  contracts: PrestateBinding
+  tests: []

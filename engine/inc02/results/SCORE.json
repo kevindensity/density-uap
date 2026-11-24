@@ -1,0 +1,86 @@
+{
+  "predictions_sha256": "3de955fbb8295b21a1036268304ee55d6cc07643d8d30093f14d4114b33a452b",
+  "legs": {
+    "api": {
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": true,
+        "unauthorized_stage_refused": true,
+        "ladder_skip_refused": true,
+        "ladder_understood": true,
+        "use_envelope_refuses_delete": true,
+        "twin_certified_cp": true
+      },
+      "passed": 8,
+      "total": 8,
+      "recall": 0.909,
+      "false_promotions": [],
+      "missed": [
+        "dep:status<-discount_code"
+      ],
+      "probe_calls": 552
+    },
+    "db": {
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": true,
+        "unauthorized_stage_refused": true,
+        "ladder_skip_refused": true,
+        "ladder_understood": true,
+        "use_envelope_refuses_delete": true,
+        "twin_certified_cp": true
+      },
+      "passed": 8,
+      "total": 8,
+      "recall": 0.818,
+      "false_promotions": [],
+      "missed": [
+        "dep:needs_approval<-promo_code",
+        "dep:needs_approval<-sku"
+      ],
+      "probe_calls": 252
+    },
+    "cli": {
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": true,
+        "unauthorized_stage_refused": true,
+        "ladder_skip_refused": true,
+        "ladder_understood": true,
+        "use_envelope_refuses_delete": true,
+        "twin_certified_cp": true
+      },
+      "passed": 8,
+      "total": 8,
+      "recall": 1.0,
+      "false_promotions": [],
+      "missed": [],
+      "probe_calls": 246
+    }
+  },
+  "dca_uap_02": {
+    "gates": {
+      "drift_detected": true,
+      "ladder_reset_on_new_epoch": true,
+      "no_standing_carryover": true,
+      "zero_false_promotions_v4_3": true,
+      "new_dependency_channel_found": true,
+      "old_credential_refused": true
+    },
+    "passed": 6,
+    "total": 6,
+    "recall_v4_3": 0.857,
+    "new": [
+      "dep:tax<-channel",
+      "dep:total<-channel"
+    ],
+    "gone": [],
+    "missed": [
+      "dep:status<-channel",
+      "dep:status<-discount_code"
+    ]
+  }
+}

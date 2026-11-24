@@ -1,0 +1,88 @@
+{
+  "predictions_sha256": "8b7d1a14d71ac08324cda815635bb1f3f7fa95badef4d491e3afa01d25824caa",
+  "freeze": "20b0f3ba821f87274a129200761d1fd8c33d00d89ac6266f8b776f4179b1a9df",
+  "legs": {
+    "file": {
+      "descent_level": 4,
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": true,
+        "twin_certified_cp": true,
+        "negative_reference_yields_no_claims": true,
+        "probing_left_no_effect": true,
+        "archive_pairs_reconstructed": true
+      },
+      "passed": 7,
+      "total": 7,
+      "recall": 1.0,
+      "false_promotions": [],
+      "missed": [],
+      "probe_calls": 499,
+      "seconds": 3.3
+    },
+    "protocol": {
+      "descent_level": 5,
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": true,
+        "twin_certified_cp": true,
+        "negative_reference_yields_no_claims": true,
+        "unique_grammar_matches_truth": true,
+        "wrong_grammars_rejected": true,
+        "frames_roundtrip_exact": true
+      },
+      "passed": 8,
+      "total": 8,
+      "recall": 0.778,
+      "false_promotions": [],
+      "missed": [
+        "dep:r18<-t3",
+        "dep:r18<-t4"
+      ],
+      "probe_calls": 679,
+      "seconds": 0.2
+    },
+    "ui": {
+      "descent_level": 6,
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": true,
+        "twin_certified_cp": true,
+        "negative_reference_yields_no_claims": true,
+        "form_fields_found_from_screen": true
+      },
+      "passed": 6,
+      "total": 6,
+      "recall": 1.0,
+      "false_promotions": [],
+      "missed": [],
+      "probe_calls": 473,
+      "seconds": 17.5
+    },
+    "behavior": {
+      "descent_level": 7,
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": true,
+        "twin_certified_cp": true,
+        "negative_reference_yields_no_claims": true,
+        "raw_timing_never_settled": true
+      },
+      "passed": 6,
+      "total": 6,
+      "recall": 1.0,
+      "false_promotions": [],
+      "missed": [],
+      "probe_calls": 349,
+      "seconds": 12.0
+    }
+  },
+  "totals": {
+    "passed": 27,
+    "total": 27
+  }
+}

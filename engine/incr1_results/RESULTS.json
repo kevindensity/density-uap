@@ -1,0 +1,25 @@
+{
+  "campaign": "UAP-INC-R1", "target": "Density Intelligence Workspace (dbhuqgoknhltcyjaajgs)", "mode": "read-only passive, SELECT only",
+  "snapshot_cutoff_utc": "2026-11-21T12:40:06Z", "plan_freeze": {"vault_seq": 11, "root": "58ce3b76db2ecf33dd774eeab8624a81245686f87d5fc396ff3c6207c49816df", "published_before_first_row_read": true},
+  "rows_in_scope": {"cron.job_run_details": 14937, "dica.field_investigations": 4661, "dica.field_claims": 1561, "dica.source_claim_bindings": 1545,
+                    "dica.field_lineage_events": 1561, "dica.extraction_semantic_candidates": 1570, "dica.extraction_page_receipts": 1003,
+                    "dica.extraction_coverage_gaps": 517, "dica.extraction_repair_obligations": 517, "dica.run_events": 134,
+                    "dica.intelligence_runs": 21, "dica.jobs": 21, "dica.run_attempts": 18, "dica.field_investigation_decisions": 17, "dica.extraction_jobs": 5},
+  "settled_true_17": [
+    "job_id -> workspace_id in coverage_gaps, page_receipts, semantic_candidates, repair_obligations; source_job_id -> workspace_id in field_investigations",
+    "repair_obligations: gap_code, action and priority determine each other (6 dependencies)",
+    "coverage_gaps <-> repair_obligations one-to-one on (job, page, code)",
+    "every source_claim_binding has a field_claim", "field_claims <-> field_lineage_events one-to-one",
+    "binding span and page equal the claim's span and page", "span_end >= span_start in claims and bindings"],
+  "verifier": "independent SQL formulation (self-join and left anti-join) - 0 counterexamples on all 17; same operator and session, not a separate process or key",
+  "unresolved_8": [
+    "decisions: score <-> estimated_cost <-> gap_code (17 rows, below support)", "intelligence_runs: status -> failure_code, status -> fence (21 rows, below support)",
+    "run lifecycle grammar (21 runs, below support)", "all 6 runs through cognitive.route ended run.failed (correlation)",
+    "16 unbound claims (all EQUATION, 1524 EQUATIONs bound): no available distinction",
+    "cron status never varied (14937 runs)", "claims standing/state/maturity/polarity never varied", "decisions expected_information_gain always null"],
+  "partial_relation": "1545 of 1561 field_claims have a binding (16 without)",
+  "lifecycle_observed": "accepted -> context.frozen -> (response.delta+ -> response.final -> run.completed) | (cognitive.route ->)? run.failed; 3 runs stopped after accepted (matches 3 runs without finished_at)",
+  "privacy": "only column names, counts, event-type labels and rule statements left the target; no free text, no ids, no row copies",
+  "writes_to_target": 0,
+  "density_uap_writes": {"settled": 17, "unresolved": 8, "projections": 17, "port_ladder": "UNDERSTOOD"}
+}

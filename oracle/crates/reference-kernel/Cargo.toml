@@ -1,0 +1,9 @@
+[package]
+name = "reference-kernel"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+dc-types = { path = "../dc-types" }
+serde.workspace = true

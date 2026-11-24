@@ -1,0 +1,23 @@
+{
+  "bridges": {
+    "oms.total->order.amount_usd": "CANONICAL_EQUIVALENT",
+    "oms.status->order.requires_approval": "RECOVERABLE_BY_MAP",
+    "oms.tax->order.tax_usd": "CONTRADICTORY",
+    "erp.line_total->order.amount_usd": "CANONICAL_EQUIVALENT",
+    "erp.needs_approval->order.requires_approval": "CANONICAL_EQUIVALENT",
+    "erp.shipping->shipment.cost_usd": "DOMAIN_LOCAL_ONLY",
+    "cli.rate->shipment.cost_cents": "RECOVERABLE_BY_MAP",
+    "cli.eta_days->shipment.transit_days": "DOMAIN_LOCAL_ONLY"
+  },
+  "transforms": {"oms.status->order.requires_approval": {"\"HOLD\"": true, "\"OK\"": false}, "cli.rate->shipment.cost_cents": 100.0},
+  "icc_must_include": {"erp.shipping->shipment.cost_usd": ["ORDERING", "ZERO_SET"], "cli.eta_days->shipment.transit_days": ["ORDERING", "PARTITION_RULE_LOOKUP"]},
+  "icc_must_exclude": {"erp.shipping->shipment.cost_usd": ["VALUE"], "cli.eta_days->shipment.transit_days": ["VALUE"]},
+  "pie": {
+    "order.amount_usd": {"allowed": ["CROSS_SUM", "CROSS_COMPARE_ABSOLUTE", "CROSS_RANK"]},
+    "order.requires_approval": {"forbidden": ["POLICY_TRANSFER"], "required_distinctions": ["source_system"]},
+    "shipment.cost": {"forbidden": ["CROSS_SUM", "CROSS_COMPARE_ABSOLUTE", "CROSS_RANK"], "allowed": ["WITHIN_A_RANK"]}
+  },
+  "mcd": {"with_source_system": ["source_system"], "without_source_system": "NO_DISTINCTION_AVAILABLE"},
+  "cadr": {"in_closure": ["oms.quote", "oms.lookup", "erp.quote_view", "cli.rate", "finance.anchors", "recon.oms_erp"],
+           "not_in_closure": ["docs.v2", "bulk.v2"], "after_erp_revocation_not_in_closure": ["erp.quote_view", "recon.oms_erp"]}
+}

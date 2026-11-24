@@ -1,0 +1,140 @@
+{
+  "predictions_sha256": "b60cb3a4767eb116ee295b64f4c30752717ec24780c2fb3caa0b61179e641038",
+  "legs": {
+    "api": {
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": true,
+        "unauthorized_stage_refused": true,
+        "ladder_skip_refused": true,
+        "ladder_understood": true,
+        "use_envelope_refuses_delete": true,
+        "twin_certified_cp": true
+      },
+      "passed": 8,
+      "total": 8,
+      "recall": 1.0,
+      "false_promotions": [],
+      "missed": [],
+      "probe_calls": 869
+    },
+    "db": {
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": true,
+        "unauthorized_stage_refused": true,
+        "ladder_skip_refused": true,
+        "ladder_understood": true,
+        "use_envelope_refuses_delete": true,
+        "twin_certified_cp": true
+      },
+      "passed": 8,
+      "total": 8,
+      "recall": 1.0,
+      "false_promotions": [],
+      "missed": [],
+      "probe_calls": 428
+    },
+    "cli": {
+      "gates": {
+        "zero_false_promotions": true,
+        "nondeterministic_caught": true,
+        "echo_flagged": true,
+        "unauthorized_stage_refused": true,
+        "ladder_skip_refused": true,
+        "ladder_understood": true,
+        "use_envelope_refuses_delete": true,
+        "twin_certified_cp": true
+      },
+      "passed": 8,
+      "total": 8,
+      "recall": 1.0,
+      "false_promotions": [],
+      "missed": [],
+      "probe_calls": 279
+    }
+  },
+  "dca_uap_02": {
+    "gates": {
+      "drift_detected": true,
+      "ladder_reset_on_new_epoch": true,
+      "no_standing_carryover": true,
+      "zero_false_promotions_v4_3": true,
+      "new_dependency_channel_found": true,
+      "old_credential_refused": true
+    },
+    "passed": 6,
+    "total": 6,
+    "recall_v4_3": 1.0,
+    "new": [
+      "dep:status<-channel",
+      "dep:tax<-channel",
+      "dep:total<-channel"
+    ],
+    "gone": [],
+    "missed": []
+  },
+  "dca_uap_03": {
+    "api": {
+      "gates": {
+        "clean_once": true,
+        "ack_lost_no_resend": true,
+        "crash_before_resent_once": true,
+        "lookup_down_withholds": true,
+        "naive_control_duplicates": true,
+        "stale_owner_refused": true,
+        "payload_conflict_refused": true,
+        "verifier_agrees": true,
+        "authorized_needs_grant": true,
+        "reached_actionable": true
+      },
+      "passed": 10,
+      "total": 10
+    },
+    "db": {
+      "gates": {
+        "clean_once": true,
+        "ack_lost_no_resend": true,
+        "crash_before_resent_once": true,
+        "lookup_down_withholds": true,
+        "naive_control_duplicates": true,
+        "stale_owner_refused": true,
+        "payload_conflict_refused": true,
+        "verifier_agrees": true,
+        "authorized_needs_grant": true,
+        "reached_actionable": true
+      },
+      "passed": 10,
+      "total": 10
+    },
+    "cli": {
+      "gates": {
+        "clean_once": true,
+        "ack_lost_no_resend": true,
+        "crash_before_resent_once": true,
+        "lookup_down_withholds": true,
+        "naive_control_duplicates": true,
+        "stale_owner_refused": true,
+        "payload_conflict_refused": true,
+        "verifier_agrees": true,
+        "authorized_needs_grant": true,
+        "reached_actionable": true
+      },
+      "passed": 10,
+      "total": 10
+    }
+  },
+  "custody": {
+    "vault_run_id": "UAP-INC-03#9132a8d8ce984183a971093a32a6a9a5",
+    "merkle_root": "1baf35292743522669fff392f61227875e9646e35c384175e787f55f4c88e1f4",
+    "entry_hash": "6e6b9d81e8b86c5a3e7a600c911d21bbdcf5c519f1db188831127b0103d6ef65",
+    "kind": "ORIGINAL_FREEZE",
+    "source_files_checked": 10
+  },
+  "totals": {
+    "passed": 60,
+    "total": 60
+  }
+}

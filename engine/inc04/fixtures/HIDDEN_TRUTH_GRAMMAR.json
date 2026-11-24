@@ -1,0 +1,29 @@
+{
+  "api": {
+    "single": {"total": ["qty","unit_price","discount_code"], "tax": ["qty","unit_price","discount_code","region"],
+               "status": ["qty","unit_price","discount_code"], "ref": ["note"]},
+    "interactions": {"total": [["discount_code","qty"],["discount_code","unit_price"],["qty","unit_price"]],
+                     "tax": [["discount_code","qty"],["discount_code","region"],["discount_code","unit_price"],["qty","region"],["qty","unit_price"],["region","unit_price"]],
+                     "status": [["discount_code","qty"],["discount_code","unit_price"],["qty","unit_price"]]},
+    "additive_pairs_must_not_be_claimed": [],
+    "magnitude": [{"output": "status", "on": "total", "cut": 1000.0, "above": "HOLD"}],
+    "partitions": {"status": "threshold:total>1000=>HOLD"}
+  },
+  "db": {
+    "single": {"line_total": ["sku","qty","promo_code"], "shipping": ["sku","qty","promo_code","warehouse"],
+               "needs_approval": ["sku","qty","promo_code"], "memo_out": ["memo"]},
+    "interactions": {"line_total": [["promo_code","qty"],["promo_code","sku"],["qty","sku"]],
+                     "shipping": [["promo_code","qty"],["promo_code","sku"],["qty","sku"]],
+                     "needs_approval": [["promo_code","qty"],["promo_code","sku"],["qty","sku"]]},
+    "additive_pairs_must_not_be_claimed": [["shipping","promo_code","warehouse"],["shipping","qty","warehouse"],["shipping","sku","warehouse"]],
+    "magnitude": [{"output": "needs_approval", "on": "line_total", "cut": 2000.0, "above": true}],
+    "partitions": {"needs_approval": "threshold:line_total>2000=>true"}
+  },
+  "cli": {
+    "single": {"rate": ["weight","zone","express"], "eta_days": ["zone","express"], "label": ["label"]},
+    "interactions": {"rate": [["express","weight"],["express","zone"],["weight","zone"]]},
+    "additive_pairs_must_not_be_claimed": [["eta_days","express","zone"]],
+    "magnitude": [],
+    "partitions": {"eta_days": "lookup:zone,express"}
+  }
+}

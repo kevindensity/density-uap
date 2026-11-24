@@ -1,0 +1,14 @@
+-- PROPOSAL ONLY - not applied. Owner decision required (P0 contract change in AB1 Production).
+-- Adds contract density-uac-candidate-evidence/v2 beside v1 (v1 unchanged) so a durable, custody-rooted P1 source
+-- can submit candidates without declaring VOLATILE_MEMORY_ONLY. Everything else stays non-authorizing.
+--
+-- In projection.fg_candidate_intake_v01 (or a new fg_candidate_intake_v02), replace the persistence condition
+--   coalesce(p_bundle->>'persistence_class','')<>'VOLATILE_MEMORY_ONLY'
+-- with
+--   not (   (v_contract = 'density-uac-candidate-evidence/v1' and p_bundle->>'persistence_class' = 'VOLATILE_MEMORY_ONLY')
+--        or (v_contract = 'density-uac-candidate-evidence/v2' and p_bundle->>'persistence_class' = 'DURABLE_CUSTODY_ROOTED'
+--            and p_bundle->'custody' ? 'ledger_ref' and p_bundle->'custody' ? 'vault_seq'
+--            and (p_bundle->>'evidence_root') ~ '^[0-9a-f]{64}$') )
+-- and accept v_contract in ('density-uac-candidate-evidence/v1','density-uac-candidate-evidence/v2').
+-- Submission identity: create a dedicated AB1 auth user "Density UAP feeder" with membership in exactly one tenant,
+-- so submitted_by_user_id attributes candidates to the feeder rather than to a person.

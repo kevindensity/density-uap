@@ -1,0 +1,16 @@
+{
+  "campaign": "UAP-INC-R3", "target": "Density AB1 Production (rqryzvuulxfnluyuzedq)", "mode": "read-only, SELECT only, no role created, 0 writes",
+  "snapshot_cutoff_utc": "2026-11-21T13:07:17Z", "plan_freeze": {"vault_seq": 14, "published_before_first_row_read": true},
+  "rows": {"authority_ops.observations": 74249, "authority_ops.federation_observations": 74231, "authority_ops.amendment_observations": 26482},
+  "settled_true": [
+    "amendment_observations: comparison = AGREE iff expected hash = observed hash (26,482 rows; AGREE 26,481, DRIFT 1; 0 counterexamples)",
+    "observations: hash and ref equal => AGREE (74,249 rows; DRIFT never witnessed)",
+    "federation_observations: hashes equal => AGREE (74,231 rows; DRIFT never witnessed)"],
+  "finding_amendment_order": {"amendment_2_effective_at": "2026-11-03T07:23:18.72Z", "monitor_drift_at": "2026-11-03T07:24:00.64Z",
+                              "expectation_created_at": "2026-11-03T07:24:15.95Z", "agree_again_at": "2026-11-03T07:25:00.57Z",
+                              "effective_minus_created_s": -57.2},
+  "cadence": "60 s median on all three monitors; longest gap 360.7 s",
+  "state_changes": {"ops_state_hash": "2 values, switch at 2026-10-05T07:05:00Z", "amendment constitutions": 2},
+  "security_observation": "66 tables with RLS disabled; anon/authenticated have no schema usage or grants on them (latent, not currently exposed)",
+  "privacy": "no hash values, ids or detail payloads left the target"
+}

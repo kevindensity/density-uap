@@ -1,0 +1,17 @@
+{
+ "dica.extraction_coverage_gaps": "workspace_id job_id page_number code created_at",
+ "dica.extraction_jobs": "workspace_id kind status next_page total_pages fence attempts max_pages consecutive_failures created_at updated_at",
+ "dica.extraction_page_receipts": "workspace_id job_id page_number status parser_version created_at",
+ "dica.extraction_repair_obligations": "workspace_id job_id page_number gap_code action priority status created_at",
+ "dica.extraction_semantic_candidates": "workspace_id job_id page_number ordinal kind standing parser_version created_at",
+ "dica.field_claims": "workspace_id source_kind source_page source_ordinal anchor_ambiguous statement_kind facet_key polarity standing maturity state extractor_version span_start_cp span_end_cp revoked_at created_at",
+ "dica.field_investigation_decisions": "workspace_id source_page gap_code score expected_information_gain estimated_cost status standing created_at",
+ "dica.field_investigations": "workspace_id source_job_id page_number gap_code priority estimated_cost_class status created_at",
+ "dica.field_lineage_events": "workspace_id event_kind created_at",
+ "dica.intelligence_runs": "workspace_id status fence event_sequence failure_code base_revision created_at updated_at finished_at",
+ "dica.jobs": "workspace_id status worker_dispatch_attempts created_at updated_at",
+ "dica.run_attempts": "workspace_id fence status created_at",
+ "dica.run_events": "workspace_id sequence type created_at",
+ "dica.source_claim_bindings": "workspace_id source_page start_cp end_cp validator_version standing created_at",
+ "cron.job_run_details": "jobid status start_time end_time"
+}

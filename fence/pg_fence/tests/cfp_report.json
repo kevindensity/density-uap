@@ -1,0 +1,410 @@
+{
+  "total": 54,
+  "passed": 54,
+  "results": [
+    {
+      "test": "app_durable: T01 valid grant applies",
+      "expected": "OK",
+      "got": "OK",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T01 receipt written atomically",
+      "expected": 1,
+      "got": 1,
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T02 write without grant refused",
+      "expected": "CFP_NO_GRANT",
+      "got": "CFP_NO_GRANT",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T03 replay refused",
+      "expected": "CFP_REPLAY",
+      "got": "CFP_REPLAY",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T04 wrong audience",
+      "expected": "CFP_WRONG_AUDIENCE",
+      "got": "CFP_WRONG_AUDIENCE",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T05 changed prestate refused",
+      "expected": "CFP_PRESTATE_CHANGED",
+      "got": "CFP_PRESTATE_CHANGED",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T06 history mismatch refused",
+      "expected": "CFP_HISTORY_MISMATCH",
+      "got": "CFP_HISTORY_MISMATCH",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T07 quorum shortfall (one signer)",
+      "expected": "CFP_QUORUM",
+      "got": "CFP_QUORUM",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T08 grant claiming t=1",
+      "expected": "CFP_QUORUM_POLICY",
+      "got": "CFP_QUORUM_POLICY",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T09 unenrolled rogue signer",
+      "expected": "CFP_QUORUM",
+      "got": "CFP_QUORUM",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T10 forged signature for an enrolled issuer",
+      "expected": "CFP_QUORUM",
+      "got": "CFP_QUORUM",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T11 tampered grant",
+      "expected": "CFP_QUORUM",
+      "got": "CFP_QUORUM",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T12 grant for one row used on another",
+      "expected": "CFP_EFFECT_MISMATCH",
+      "got": "CFP_EFFECT_MISMATCH",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T13 update grant used for delete",
+      "expected": "CFP_EFFECT_MISMATCH",
+      "got": "CFP_EFFECT_MISMATCH",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T14 second row in one grant refused",
+      "expected": true,
+      "got": true,
+      "pass": true,
+      "note": "code CFP_GRANT_ALREADY_APPLIED; depends on row order"
+    },
+    {
+      "test": "app_durable: T14 neither row changed (statement aborted)",
+      "expected": [
+        122.0,
+        75.5
+      ],
+      "got": [
+        122.0,
+        75.5
+      ],
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T15 expired budget",
+      "expected": "CFP_BUDGET_EXPIRED",
+      "got": "CFP_BUDGET_EXPIRED",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T16 replica mode cannot bypass the guard",
+      "expected": "CFP_NO_GRANT",
+      "got": "CFP_NO_GRANT",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T17 rolled-back grant reusable once",
+      "expected": "OK",
+      "got": "OK",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T17 then consumed",
+      "expected": "CFP_REPLAY",
+      "got": "CFP_REPLAY",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T01 valid grant applies",
+      "expected": "OK",
+      "got": "OK",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T01 receipt written atomically",
+      "expected": 1,
+      "got": 1,
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T02 write without grant refused",
+      "expected": "CFP_NO_GRANT",
+      "got": "CFP_NO_GRANT",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T03 replay refused",
+      "expected": "CFP_REPLAY",
+      "got": "CFP_REPLAY",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T04 wrong audience",
+      "expected": "CFP_WRONG_AUDIENCE",
+      "got": "CFP_WRONG_AUDIENCE",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T05 changed prestate refused",
+      "expected": "CFP_PRESTATE_CHANGED",
+      "got": "CFP_PRESTATE_CHANGED",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T06 history mismatch refused",
+      "expected": "CFP_HISTORY_MISMATCH",
+      "got": "CFP_HISTORY_MISMATCH",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T07 quorum shortfall (one signer)",
+      "expected": "CFP_QUORUM",
+      "got": "CFP_QUORUM",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T08 grant claiming t=1",
+      "expected": "CFP_QUORUM_POLICY",
+      "got": "CFP_QUORUM_POLICY",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T09 unenrolled rogue signer",
+      "expected": "CFP_QUORUM",
+      "got": "CFP_QUORUM",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T10 forged signature for an enrolled issuer",
+      "expected": "CFP_QUORUM",
+      "got": "CFP_QUORUM",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T11 tampered grant",
+      "expected": "CFP_QUORUM",
+      "got": "CFP_QUORUM",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T12 grant for one row used on another",
+      "expected": "CFP_EFFECT_MISMATCH",
+      "got": "CFP_EFFECT_MISMATCH",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T13 update grant used for delete",
+      "expected": "CFP_EFFECT_MISMATCH",
+      "got": "CFP_EFFECT_MISMATCH",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T14 second row in one grant refused",
+      "expected": true,
+      "got": true,
+      "pass": true,
+      "note": "code CFP_GRANT_ALREADY_APPLIED; depends on row order"
+    },
+    {
+      "test": "app_local: T14 neither row changed (statement aborted)",
+      "expected": [
+        122.0,
+        75.5
+      ],
+      "got": [
+        122.0,
+        75.5
+      ],
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T15 expired budget",
+      "expected": "CFP_BUDGET_EXPIRED",
+      "got": "CFP_BUDGET_EXPIRED",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T16 replica mode cannot bypass the guard",
+      "expected": "CFP_NO_GRANT",
+      "got": "CFP_NO_GRANT",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T17 rolled-back grant reusable once",
+      "expected": "OK",
+      "got": "OK",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T17 then consumed",
+      "expected": "CFP_REPLAY",
+      "got": "CFP_REPLAY",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T18 effect admitted before revocation commits",
+      "expected": "OK",
+      "got": "OK",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T18 revocation waits for the in-flight effect",
+      "expected": true,
+      "got": true,
+      "pass": true,
+      "note": "revocation waited 1.52 s"
+    },
+    {
+      "test": "app_durable: T18 epoch advanced",
+      "expected": 2,
+      "got": 2,
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T19 old-epoch grant refused after revocation",
+      "expected": "CFP_STALE_EPOCH",
+      "got": "CFP_STALE_EPOCH",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T19 grant from revoked issuer refused at new epoch",
+      "expected": "CFP_QUORUM",
+      "got": "CFP_QUORUM",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T20 issuer cannot revoke itself",
+      "expected": "CFP_SELF_REVOCATION",
+      "got": "CFP_SELF_REVOCATION",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T21 restore drill, first use",
+      "expected": "OK",
+      "got": "OK",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T21 replay after restore [durable ledger, grant consumed and issuer revoked]",
+      "expected": "CFP_STALE_EPOCH",
+      "got": "CFP_STALE_EPOCH",
+      "pass": true,
+      "note": "refused: the ledger was not rolled back"
+    },
+    {
+      "test": "app_durable: T22 restore drill, first use",
+      "expected": "OK",
+      "got": "OK",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_durable: T22 replay after restore [durable ledger, grant consumed only]",
+      "expected": "CFP_REPLAY",
+      "got": "CFP_REPLAY",
+      "pass": true,
+      "note": "refused: the ledger was not rolled back"
+    },
+    {
+      "test": "app_local: T21 restore drill, first use",
+      "expected": "OK",
+      "got": "OK",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T21 replay after restore [local ledger (negative control), grant consumed and issuer revoked]",
+      "expected": "OK",
+      "got": "OK",
+      "pass": true,
+      "note": "negative control: a ledger restored with the application resurrects the consumed grant"
+    },
+    {
+      "test": "app_local: T22 restore drill, first use",
+      "expected": "OK",
+      "got": "OK",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "test": "app_local: T22 replay after restore [local ledger (negative control), grant consumed only]",
+      "expected": "OK",
+      "got": "OK",
+      "pass": true,
+      "note": "negative control: a ledger restored with the application resurrects the consumed grant"
+    }
+  ],
+  "overhead": [
+    {
+      "db": "app_durable",
+      "n": 200,
+      "plain_median_ms": 1.14,
+      "fenced_median_ms": 10.313
+    },
+    {
+      "db": "app_local",
+      "n": 200,
+      "plain_median_ms": 1.386,
+      "fenced_median_ms": 6.395
+    }
+  ]
+}

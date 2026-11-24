@@ -1,0 +1,22 @@
+{
+  "campaign": "UAP-INC-R4", "target": "Density AB1 Production (rqryzvuulxfnluyuzedq)", "mode": "read-only SELECT; timestamps and join keys only",
+  "snapshot_cutoff_utc": "2026-11-21T13:25:16Z",
+  "laws": {
+    "L01": "effect_identities.created_at <= authority_prepare_requests.created_at (same effect_id)",
+    "L02": "authority_prepare_requests.created_at <= prepared_execution_grant_receipts.prepared_at (authority_prepare_request_id)",
+    "L03": "prepared grant prepared_at <= provider_dispatches.created_at (prepared_execution_grant_receipt_id)",
+    "L04": "prepared grant prepared_at <= execution_release_receipts.released_at",
+    "L05": "release released_at <= provider_dispatches.sent_at (execution_release_receipt_id)  [authority released before effect sent]",
+    "L06": "provider_dispatches.sent_at <= release valid_until  [release not expired at send]",
+    "L07": "provider_dispatches.sent_at <= provider_acknowledgements.acknowledged_at",
+    "L08": "provider_dispatches.sent_at <= effect_observations.observed_at (provider_dispatch_id)",
+    "L09": "effect_observations.observed_at <= effect_verifications.verified_at (effect_observation_id)",
+    "L10": "max verified_at per attempt <= finality_receipts.finalized_at",
+    "L11": "finality_receipts.finalized_at <= execution_receipts.committed_at (finality_receipt_id)",
+    "L12": "execution_receipts.committed_at <= continuation_receipts.committed_at (execution_receipt_id)",
+    "L13": "consequence_attempts timeline monotone: prepared_at <= dispatch_started_at <= acknowledged_at <= finalized_at (where present)",
+    "L14": "authority_ops expected_root and expected_federation: created_at <= valid_from  [registration precedes validity]"
+  },
+  "verdict_rule": "a law holds when no pair violates it; any violation is reported with its size in seconds; nothing is enforced by this campaign",
+  "privacy": "no hashes, payloads, refs or ids leave the target; only per-law pair counts, violation counts and gap statistics"
+}

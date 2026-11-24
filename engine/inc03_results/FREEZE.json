@@ -1,0 +1,23 @@
+{
+  "custody": {
+    "vault_run_id": "UAP-INC-03#9132a8d8ce984183a971093a32a6a9a5",
+    "merkle_root": "1baf35292743522669fff392f61227875e9646e35c384175e787f55f4c88e1f4",
+    "entry_hash": "6e6b9d81e8b86c5a3e7a600c911d21bbdcf5c519f1db188831127b0103d6ef65",
+    "kind": "ORIGINAL_FREEZE",
+    "source_files_checked": 10
+  },
+  "source": {
+    "uapcore/carriers.py": "3c74c54c66d7c5023d58eabe5b9cf9a1c90ca3b228ba96db40f9b07d59f99d14",
+    "uapcore/discovery.py": "541b5a6058e340835993b23f346f0e646097b165a078b770aad667879a5e1e57",
+    "uapcore/verify.py": "9f3ecd16c7af0484605d38a3479f4cc2bd2d95d06f4df60606ce94b3006f53c3",
+    "uapcore/store.py": "dc66d2f268e80cfcdc1cc27b2fe510a2dfdf2b1bc26b1249e861244e241aa791",
+    "inc03/run_inc03.py": "dbbd95b90106b591e09f6d71a39e522578d79c3410671d825adacd7946e73ac8",
+    "uapcore/finality.py": "0e1f3dcd8f9d73e7468ddc4bf1a7f50ebc7bb5a35bc77e8b89643a87bb418b2e",
+    "supabase/migrations/0004_uap_finality.sql": "9908685c530737562657a89928392f14186bd249a39e385222b5e1f1457f2622",
+    "supabase/migrations/0001_uap_safety_spine.sql": "1e530dc0c82037a23d213b7760c364fb9df2892f20695714663f0d605c5873e5",
+    "supabase/migrations/0002_uap_canonical.sql": "f225c25d613d9e0e92b4cbd2e64c496b8a4408bde847c18ad2aa61ead98b7842",
+    "supabase/migrations/0003_uap_grant_epoch.sql": "a698c7540bc3755c212466828915c83f7e897e2dd34ec13143d6f102441d720d"
+  },
+  "hidden_truth_sha256": "d3c1f1bfe7a9a1e58295e23fb87b74db93717e6668539770da069970bcf724cd",
+  "at": 1795259902.758366
+}

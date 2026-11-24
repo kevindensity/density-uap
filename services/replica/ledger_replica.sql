@@ -1,0 +1,10 @@
+create schema ledger;
+create table ledger.issuers (issuer_id text primary key, pubkey bytea not null, root_gen int not null, status text not null default 'active', administrator text not null, enrolled_at timestamptz not null default now());
+create table ledger.recovery (id int primary key default 1 check (id = 1), pubkey bytea not null, administrator text not null);
+create table ledger.state (id int primary key default 1 check (id = 1), authority_epoch bigint not null default 1, updated_at timestamptz not null default now());
+insert into ledger.state default values;
+create table ledger.consumed (grant_id uuid primary key, consumed_at timestamptz not null default now(), consumer text not null);
+create table ledger.revocations (id bigint generated always as identity primary key, target_issuer text not null, new_epoch bigint not null, signer text not null, signer_sig text not null, recovery_sig text not null, at timestamptz not null default now());
+create table ledger.sent (grant_id uuid primary key, plan_digest text not null, emitter text not null, target text not null, request jsonb not null, sent_at timestamptz not null default now());
+create table ledger.outcomes (grant_id uuid primary key references ledger.sent, outcome text not null, detail jsonb, decided_by text not null, at timestamptz not null default now());
+create table ledger.id_sequence (name text primary key, last_value bigint not null);

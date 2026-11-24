@@ -1,0 +1,12 @@
+[package]
+name = "verifierd"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+p0-core = { path = "../p0-core" }
+tokio = { workspace = true }
+axum = { workspace = true }
+serde_json = { workspace = true }
+tokio-postgres = { workspace = true }
+anyhow = { workspace = true }
+uuid = { workspace = true }

@@ -1,0 +1,14 @@
+{
+  "source": {
+    "uapcore/carriers.py": "3c74c54c66d7c5023d58eabe5b9cf9a1c90ca3b228ba96db40f9b07d59f99d14",
+    "uapcore/discovery.py": "3d80be8cf1b0ab66d035ceff2a0996eff13643d9b01952d441ac2f0b07b5fa7c",
+    "uapcore/verify.py": "197329a90b8fffb3157f3dcef0337e4860d65f6fe75067d0bf576df54d79033e",
+    "uapcore/store.py": "46dce745365317fab0a210c928c248b2c7767c2ee54f1b5e2ae7e33aed238bc0",
+    "inc02/run_inc02.py": "cb1dc07a743aeff8efb7847c131457d9f9bc93c500cf885c5b6d2707f97352f3",
+    "supabase/migrations/0001_uap_safety_spine.sql": "1e530dc0c82037a23d213b7760c364fb9df2892f20695714663f0d605c5873e5",
+    "supabase/migrations/0002_uap_canonical.sql": "f225c25d613d9e0e92b4cbd2e64c496b8a4408bde847c18ad2aa61ead98b7842",
+    "supabase/migrations/0003_uap_grant_epoch.sql": "a698c7540bc3755c212466828915c83f7e897e2dd34ec13143d6f102441d720d"
+  },
+  "hidden_truth_sha256": "d3c1f1bfe7a9a1e58295e23fb87b74db93717e6668539770da069970bcf724cd",
+  "at": 1795259390.505858
+}

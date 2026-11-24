@@ -1,0 +1,14 @@
+{
+  "custody": {
+    "source": {
+      "run_id": "UAP-INC-05#127f8ebfa5a94fba8a6e8cca540d9467",
+      "root": "c99925bccbeb3da9a765f5690607de295df75fc83efd87c266ce0b95be3133b7",
+      "kind": "ORIGINAL_FREEZE"
+    },
+    "upstream": {
+      "run_id": "UAP-INC-04-RESULTS#04da0ea1f63d4b99ae8a14c2eecc7d07",
+      "root": "fa553c64fd5e7db97b19a493b01598294260d4fea7db593b25e31ebacbb9e330"
+    }
+  },
+  "truth_sha256": "9abb654a47c77e1464f6d14d2e7186096c8dbbc648256e0905608178fca80cbe"
+}

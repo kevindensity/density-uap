@@ -1,0 +1,57 @@
+PASS app_durable: T01 valid grant applies  -> OK
+PASS app_durable: T01 receipt written atomically  -> 1
+PASS app_durable: T02 write without grant refused  -> CFP_NO_GRANT
+PASS app_durable: T03 replay refused  -> CFP_REPLAY
+PASS app_durable: T04 wrong audience  -> CFP_WRONG_AUDIENCE
+PASS app_durable: T05 changed prestate refused  -> CFP_PRESTATE_CHANGED
+PASS app_durable: T06 history mismatch refused  -> CFP_HISTORY_MISMATCH
+PASS app_durable: T07 quorum shortfall (one signer)  -> CFP_QUORUM
+PASS app_durable: T08 grant claiming t=1  -> CFP_QUORUM_POLICY
+PASS app_durable: T09 unenrolled rogue signer  -> CFP_QUORUM
+PASS app_durable: T10 forged signature for an enrolled issuer  -> CFP_QUORUM
+PASS app_durable: T11 tampered grant  -> CFP_QUORUM
+PASS app_durable: T12 grant for one row used on another  -> CFP_EFFECT_MISMATCH
+PASS app_durable: T13 update grant used for delete  -> CFP_EFFECT_MISMATCH
+PASS app_durable: T14 second row in one grant refused  -> True  (code CFP_EFFECT_MISMATCH; depends on row order)
+PASS app_durable: T14 neither row changed (statement aborted)  -> (122.0, 75.5)
+PASS app_durable: T15 expired budget  -> CFP_BUDGET_EXPIRED
+PASS app_durable: T16 replica mode cannot bypass the guard  -> CFP_NO_GRANT
+PASS app_durable: T17 rolled-back grant reusable once  -> OK
+PASS app_durable: T17 then consumed  -> CFP_REPLAY
+PASS app_local: T01 valid grant applies  -> OK
+PASS app_local: T01 receipt written atomically  -> 1
+PASS app_local: T02 write without grant refused  -> CFP_NO_GRANT
+PASS app_local: T03 replay refused  -> CFP_REPLAY
+PASS app_local: T04 wrong audience  -> CFP_WRONG_AUDIENCE
+PASS app_local: T05 changed prestate refused  -> CFP_PRESTATE_CHANGED
+PASS app_local: T06 history mismatch refused  -> CFP_HISTORY_MISMATCH
+PASS app_local: T07 quorum shortfall (one signer)  -> CFP_QUORUM
+PASS app_local: T08 grant claiming t=1  -> CFP_QUORUM_POLICY
+PASS app_local: T09 unenrolled rogue signer  -> CFP_QUORUM
+PASS app_local: T10 forged signature for an enrolled issuer  -> CFP_QUORUM
+PASS app_local: T11 tampered grant  -> CFP_QUORUM
+PASS app_local: T12 grant for one row used on another  -> CFP_EFFECT_MISMATCH
+PASS app_local: T13 update grant used for delete  -> CFP_EFFECT_MISMATCH
+PASS app_local: T14 second row in one grant refused  -> True  (code CFP_EFFECT_MISMATCH; depends on row order)
+PASS app_local: T14 neither row changed (statement aborted)  -> (122.0, 75.5)
+PASS app_local: T15 expired budget  -> CFP_BUDGET_EXPIRED
+PASS app_local: T16 replica mode cannot bypass the guard  -> CFP_NO_GRANT
+PASS app_local: T17 rolled-back grant reusable once  -> OK
+PASS app_local: T17 then consumed  -> CFP_REPLAY
+PASS app_durable: T18 effect admitted before revocation commits  -> OK
+PASS app_durable: T18 revocation waits for the in-flight effect  -> True  (revocation waited 1.53 s)
+PASS app_durable: T18 epoch advanced  -> 2
+PASS app_durable: T19 old-epoch grant refused after revocation  -> CFP_STALE_EPOCH
+PASS app_durable: T19 grant from revoked issuer refused at new epoch  -> CFP_QUORUM
+PASS app_durable: T20 issuer cannot revoke itself  -> CFP_SELF_REVOCATION
+PASS app_durable: T21 restore drill, first use  -> OK
+PASS app_durable: T21 replay after restore [durable ledger, grant consumed and issuer revoked]  -> CFP_STALE_EPOCH  (refused: the ledger was not rolled back)
+PASS app_durable: T22 restore drill, first use  -> OK
+PASS app_durable: T22 replay after restore [durable ledger, grant consumed only]  -> CFP_REPLAY  (refused: the ledger was not rolled back)
+PASS app_local: T21 restore drill, first use  -> OK
+PASS app_local: T21 replay after restore [local ledger (negative control), grant consumed and issuer revoked]  -> OK  (negative control: a ledger restored with the application resurrects the consumed grant)
+PASS app_local: T22 restore drill, first use  -> OK
+PASS app_local: T22 replay after restore [local ledger (negative control), grant consumed only]  -> OK  (negative control: a ledger restored with the application resurrects the consumed grant)
+
+54/54 passed
+[{"db": "app_durable", "n": 200, "plain_median_ms": 1.069, "fenced_median_ms": 11.354}, {"db": "app_local", "n": 200, "plain_median_ms": 1.063, "fenced_median_ms": 5.539}]

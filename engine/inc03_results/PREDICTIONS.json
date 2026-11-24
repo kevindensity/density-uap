@@ -1,0 +1,649 @@
+{
+  "seed": 1747470859,
+  "custody": {
+    "vault_run_id": "UAP-INC-03#9132a8d8ce984183a971093a32a6a9a5",
+    "merkle_root": "1baf35292743522669fff392f61227875e9646e35c384175e787f55f4c88e1f4",
+    "entry_hash": "6e6b9d81e8b86c5a3e7a600c911d21bbdcf5c519f1db188831127b0103d6ef65",
+    "kind": "ORIGINAL_FREEZE",
+    "source_files_checked": 10
+  },
+  "legs": {
+    "api": {
+      "leg": "LEGACY-OMS",
+      "run_id": "api-705b3959d65442d089ecabb7a05b9d84",
+      "unauthorized_stage": "ERROR:  STAGE_NOT_AUTHORIZED: LIVE_PROBE has no upstream receipt",
+      "ladder_skip": "ERROR:  LADDER_SKIP: CONNECTED -> QUALIFIED",
+      "system": "819a7dbd-4c2b-40cb-bb43-7bc2aaa90c8d",
+      "port": "cbdecd73-092a-4efe-a571-86a3f88ec435",
+      "epoch": "0f9c9216-9aa2-43da-b6b3-52e6878d7327",
+      "settled": [
+        "dep:ref<-note",
+        "dep:status<-discount_code",
+        "dep:status<-qty",
+        "dep:status<-unit_price",
+        "dep:tax<-discount_code",
+        "dep:tax<-qty",
+        "dep:tax<-region",
+        "dep:tax<-unit_price",
+        "dep:total<-discount_code",
+        "dep:total<-qty",
+        "dep:total<-unit_price"
+      ],
+      "nondeterministic": [
+        "request_id"
+      ],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "echo_like": [
+        "ref<-note"
+      ],
+      "silent_in_passive": [
+        "server",
+        "status"
+      ],
+      "crossings": [
+        {
+          "output": "status",
+          "input": "qty",
+          "factor": 32
+        },
+        {
+          "output": "status",
+          "input": "unit_price",
+          "factor": 32
+        }
+      ],
+      "candidates": [
+        {
+          "output": "status",
+          "input": "discount_code",
+          "score": 0.143,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "tax",
+          "input": "discount_code",
+          "score": 0.786,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "total",
+          "input": "discount_code",
+          "score": 1.0,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "ref",
+          "input": "note",
+          "score": 1.0,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "status",
+          "input": "qty",
+          "score": 0.321,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "tax",
+          "input": "qty",
+          "score": 0.786,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "total",
+          "input": "qty",
+          "score": 1.0,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "tax",
+          "input": "region",
+          "score": 1.0,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "status",
+          "input": "unit_price",
+          "score": 0.357,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "tax",
+          "input": "unit_price",
+          "score": 0.786,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "total",
+          "input": "unit_price",
+          "score": 1.0,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        }
+      ],
+      "n_nulls": 119,
+      "probe_calls": 869,
+      "ladder": "UNDERSTOOD",
+      "delete_permitted": false,
+      "monitor_permitted": true,
+      "projection_ids": [
+        "6d060983-12ea-4270-a474-39119631aa4f",
+        "893a898b-522d-4d9c-8f09-ac68709b99ee",
+        "4a0c8f05-262d-44fb-968a-cf9ba281533e",
+        "46a93875-b536-4fa2-960d-603d5b18f6b1",
+        "bee89793-0795-4e87-9b49-64cf65e6ec76",
+        "0935809f-3f7f-410f-95a3-c735efb9946e",
+        "9af7455e-ea2c-49ce-a099-491494eb2a38",
+        "1e517661-9f3a-4d32-8170-451041509f4d",
+        "ff8be47d-486d-4e7f-a5de-698a659b6b5f",
+        "aa49d67c-06b0-4adc-87af-61aab00f4b14",
+        "a699ab78-15e1-42c4-80d8-1ee3bb975bd6"
+      ],
+      "decisions": {
+        "ref<-channel": "UNRESOLVED:NO_WITNESS",
+        "request_id<-channel": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-channel": "UNRESOLVED:NO_WITNESS",
+        "status<-channel": "UNRESOLVED:NO_WITNESS",
+        "tax<-channel": "UNRESOLVED:NO_WITNESS",
+        "total<-channel": "UNRESOLVED:NO_WITNESS",
+        "ref<-discount_code": "UNRESOLVED:NO_WITNESS",
+        "request_id<-discount_code": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-discount_code": "UNRESOLVED:NO_WITNESS",
+        "status<-discount_code": "CANDIDATE",
+        "tax<-discount_code": "CANDIDATE",
+        "total<-discount_code": "CANDIDATE",
+        "ref<-note": "CANDIDATE",
+        "request_id<-note": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-note": "UNRESOLVED:NO_WITNESS",
+        "status<-note": "UNRESOLVED:NO_WITNESS",
+        "tax<-note": "UNRESOLVED:NO_WITNESS",
+        "total<-note": "UNRESOLVED:NO_WITNESS",
+        "ref<-qty": "UNRESOLVED:NO_WITNESS",
+        "request_id<-qty": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-qty": "UNRESOLVED:NO_WITNESS",
+        "status<-qty": "CANDIDATE",
+        "tax<-qty": "CANDIDATE",
+        "total<-qty": "CANDIDATE",
+        "ref<-region": "UNRESOLVED:NO_WITNESS",
+        "request_id<-region": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-region": "UNRESOLVED:NO_WITNESS",
+        "status<-region": "UNRESOLVED:NO_WITNESS",
+        "tax<-region": "CANDIDATE",
+        "total<-region": "UNRESOLVED:NO_WITNESS",
+        "ref<-ts": "UNRESOLVED:NO_WITNESS",
+        "request_id<-ts": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-ts": "UNRESOLVED:NO_WITNESS",
+        "status<-ts": "UNRESOLVED:NO_WITNESS",
+        "tax<-ts": "UNRESOLVED:NO_WITNESS",
+        "total<-ts": "UNRESOLVED:NO_WITNESS",
+        "ref<-unit_price": "UNRESOLVED:NO_WITNESS",
+        "request_id<-unit_price": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-unit_price": "UNRESOLVED:NO_WITNESS",
+        "status<-unit_price": "CANDIDATE",
+        "tax<-unit_price": "CANDIDATE",
+        "total<-unit_price": "CANDIDATE"
+      }
+    },
+    "db": {
+      "leg": "LEGACY-ERP",
+      "run_id": "db-808cc48a0dbf4732ab916732cdb55e56",
+      "unauthorized_stage": "ERROR:  STAGE_NOT_AUTHORIZED: LIVE_PROBE has no upstream receipt",
+      "ladder_skip": "ERROR:  LADDER_SKIP: CONNECTED -> QUALIFIED",
+      "system": "047286ec-b18c-4bcc-a674-5ad134a0c897",
+      "port": "3b7aaa37-9c01-45b3-8074-3f233b44e633",
+      "epoch": "71bb6ea3-3247-4728-a548-340b30722a1a",
+      "settled": [
+        "dep:line_total<-promo_code",
+        "dep:line_total<-qty",
+        "dep:line_total<-sku",
+        "dep:memo_out<-memo",
+        "dep:needs_approval<-promo_code",
+        "dep:needs_approval<-qty",
+        "dep:needs_approval<-sku",
+        "dep:shipping<-promo_code",
+        "dep:shipping<-qty",
+        "dep:shipping<-sku",
+        "dep:shipping<-warehouse"
+      ],
+      "nondeterministic": [
+        "computed_at"
+      ],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "echo_like": [
+        "memo_out<-memo"
+      ],
+      "silent_in_passive": [
+        "needs_approval"
+      ],
+      "crossings": [
+        {
+          "output": "needs_approval",
+          "input": "qty",
+          "factor": 16
+        }
+      ],
+      "candidates": [
+        {
+          "output": "memo_out",
+          "input": "memo",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "line_total",
+          "input": "promo_code",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "needs_approval",
+          "input": "promo_code",
+          "score": 0.136,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "shipping",
+          "input": "promo_code",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "line_total",
+          "input": "qty",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "needs_approval",
+          "input": "qty",
+          "score": 0.136,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "shipping",
+          "input": "qty",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "line_total",
+          "input": "sku",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "needs_approval",
+          "input": "sku",
+          "score": 0.182,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "shipping",
+          "input": "sku",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "shipping",
+          "input": "warehouse",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        }
+      ],
+      "n_nulls": 66,
+      "probe_calls": 428,
+      "ladder": "UNDERSTOOD",
+      "delete_permitted": false,
+      "monitor_permitted": true,
+      "projection_ids": [
+        "57f4c205-b6a1-4d99-9849-cb1a365cc67b",
+        "a4ded4c6-c5c5-4e44-b47c-23188983bc84",
+        "be4fab14-7acd-4b2a-a53b-7c7af51b795d",
+        "5d985757-11f4-4ae0-bfb5-6b2d3b4f756f",
+        "e71fad2d-f349-40a9-93b2-79b7f399c92a",
+        "bc8c0291-8b70-4f16-b825-300e58b16a11",
+        "17ac2370-5130-4796-b02a-fa5f4e476f93",
+        "5161292d-9c91-4ec6-bf1c-be17aad8a3a9",
+        "ef3ffcf7-8cc8-4539-8339-e290fa98a364",
+        "2fe4b9bb-39ca-45a6-8db6-92aaef298035",
+        "34e541a6-087f-44d2-9826-ae90c8a52f9b"
+      ],
+      "decisions": {
+        "computed_at<-memo": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "line_total<-memo": "UNRESOLVED:NO_WITNESS",
+        "memo_out<-memo": "CANDIDATE",
+        "needs_approval<-memo": "UNRESOLVED:NO_WITNESS",
+        "shipping<-memo": "UNRESOLVED:NO_WITNESS",
+        "computed_at<-operator": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "line_total<-operator": "UNRESOLVED:NO_WITNESS",
+        "memo_out<-operator": "UNRESOLVED:NO_WITNESS",
+        "needs_approval<-operator": "UNRESOLVED:NO_WITNESS",
+        "shipping<-operator": "UNRESOLVED:NO_WITNESS",
+        "computed_at<-promo_code": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "line_total<-promo_code": "CANDIDATE",
+        "memo_out<-promo_code": "UNRESOLVED:NO_WITNESS",
+        "needs_approval<-promo_code": "CANDIDATE",
+        "shipping<-promo_code": "CANDIDATE",
+        "computed_at<-qty": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "line_total<-qty": "CANDIDATE",
+        "memo_out<-qty": "UNRESOLVED:NO_WITNESS",
+        "needs_approval<-qty": "CANDIDATE",
+        "shipping<-qty": "CANDIDATE",
+        "computed_at<-sku": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "line_total<-sku": "CANDIDATE",
+        "memo_out<-sku": "UNRESOLVED:NO_WITNESS",
+        "needs_approval<-sku": "CANDIDATE",
+        "shipping<-sku": "CANDIDATE",
+        "computed_at<-warehouse": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "line_total<-warehouse": "UNRESOLVED:NO_WITNESS",
+        "memo_out<-warehouse": "UNRESOLVED:NO_WITNESS",
+        "needs_approval<-warehouse": "UNRESOLVED:NO_WITNESS",
+        "shipping<-warehouse": "CANDIDATE"
+      }
+    },
+    "cli": {
+      "leg": "RATE-TOOL",
+      "run_id": "cli-e9b29f2617a348dd9f2447880da5a912",
+      "unauthorized_stage": "ERROR:  STAGE_NOT_AUTHORIZED: LIVE_PROBE has no upstream receipt",
+      "ladder_skip": "ERROR:  LADDER_SKIP: CONNECTED -> QUALIFIED",
+      "system": "ee374d96-fafd-413e-beab-0191cb14ab5e",
+      "port": "2909362a-b839-4f25-9c0b-1e7fa70b6966",
+      "epoch": "e629a142-b855-4ee6-b478-2f92e89ba346",
+      "settled": [
+        "dep:eta_days<-express",
+        "dep:eta_days<-zone",
+        "dep:label<-label",
+        "dep:rate<-express",
+        "dep:rate<-weight",
+        "dep:rate<-zone"
+      ],
+      "nondeterministic": [
+        "audit_id"
+      ],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "echo_like": [
+        "label<-label"
+      ],
+      "silent_in_passive": [
+        "exit_code"
+      ],
+      "crossings": [],
+      "candidates": [
+        {
+          "output": "eta_days",
+          "input": "express",
+          "score": 1.0,
+          "p_false": 0.0244,
+          "p_false_db": 0.024390243902439025
+        },
+        {
+          "output": "rate",
+          "input": "express",
+          "score": 1.0,
+          "p_false": 0.0244,
+          "p_false_db": 0.024390243902439025
+        },
+        {
+          "output": "label",
+          "input": "label",
+          "score": 1.0,
+          "p_false": 0.0244,
+          "p_false_db": 0.024390243902439025
+        },
+        {
+          "output": "rate",
+          "input": "weight",
+          "score": 1.0,
+          "p_false": 0.0244,
+          "p_false_db": 0.024390243902439025
+        },
+        {
+          "output": "eta_days",
+          "input": "zone",
+          "score": 1.0,
+          "p_false": 0.0244,
+          "p_false_db": 0.024390243902439025
+        },
+        {
+          "output": "rate",
+          "input": "zone",
+          "score": 1.0,
+          "p_false": 0.0244,
+          "p_false_db": 0.024390243902439025
+        }
+      ],
+      "n_nulls": 40,
+      "probe_calls": 279,
+      "ladder": "UNDERSTOOD",
+      "delete_permitted": false,
+      "monitor_permitted": true,
+      "projection_ids": [
+        "aea4cfcb-a755-4244-ab97-13d97ab66d08",
+        "f8eec0e6-9371-4d6a-a907-8a8de782213e",
+        "5cc5ba5f-7b72-4741-a229-425eee4a9381",
+        "f3447bc3-1253-46da-85ee-fb4239dc5c56",
+        "33b3cb25-e756-4495-af97-64da7b798a99",
+        "f93663dd-0227-4fb2-b062-1dc2be823dd8"
+      ],
+      "decisions": {
+        "audit_id<-account": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "eta_days<-account": "UNRESOLVED:NO_WITNESS",
+        "exit_code<-account": "UNRESOLVED:NO_WITNESS",
+        "label<-account": "UNRESOLVED:NO_WITNESS",
+        "rate<-account": "UNRESOLVED:NO_WITNESS",
+        "audit_id<-express": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "eta_days<-express": "CANDIDATE",
+        "exit_code<-express": "UNRESOLVED:NO_WITNESS",
+        "label<-express": "UNRESOLVED:NO_WITNESS",
+        "rate<-express": "CANDIDATE",
+        "audit_id<-label": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "eta_days<-label": "UNRESOLVED:NO_WITNESS",
+        "exit_code<-label": "UNRESOLVED:NO_WITNESS",
+        "label<-label": "CANDIDATE",
+        "rate<-label": "UNRESOLVED:NO_WITNESS",
+        "audit_id<-weight": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "eta_days<-weight": "UNRESOLVED:NO_WITNESS",
+        "exit_code<-weight": "UNRESOLVED:NO_WITNESS",
+        "label<-weight": "UNRESOLVED:NO_WITNESS",
+        "rate<-weight": "CANDIDATE",
+        "audit_id<-zone": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "eta_days<-zone": "CANDIDATE",
+        "exit_code<-zone": "UNRESOLVED:NO_WITNESS",
+        "label<-zone": "UNRESOLVED:NO_WITNESS",
+        "rate<-zone": "CANDIDATE"
+      }
+    }
+  },
+  "drift": {
+    "old_roots": "134cc249710c781fc137acd7da2f52f306b92546b40196968be2f1a565255c56",
+    "new_roots": "96a8c35ab06e2ec9dcfc501df8c7b972cf88d119de93be96b1bccf3cc2147783",
+    "detected": true,
+    "ladder_after_epoch_change": "CONNECTED",
+    "old_projection_monitor_after_drift": false,
+    "settled_v4_3": [
+      "dep:ref<-note",
+      "dep:status<-channel",
+      "dep:status<-discount_code",
+      "dep:status<-qty",
+      "dep:status<-unit_price",
+      "dep:tax<-channel",
+      "dep:tax<-discount_code",
+      "dep:tax<-qty",
+      "dep:tax<-region",
+      "dep:tax<-unit_price",
+      "dep:total<-channel",
+      "dep:total<-discount_code",
+      "dep:total<-qty",
+      "dep:total<-unit_price"
+    ],
+    "new": [
+      "dep:status<-channel",
+      "dep:tax<-channel",
+      "dep:total<-channel"
+    ],
+    "gone": [],
+    "unchanged": [
+      "dep:ref<-note",
+      "dep:status<-discount_code",
+      "dep:status<-qty",
+      "dep:status<-unit_price",
+      "dep:tax<-discount_code",
+      "dep:tax<-qty",
+      "dep:tax<-region",
+      "dep:tax<-unit_price",
+      "dep:total<-discount_code",
+      "dep:total<-qty",
+      "dep:total<-unit_price"
+    ],
+    "old_credential": "ERROR:  STALE_OWNER: epoch 1 fenced by 2"
+  },
+  "finality": {
+    "api": {
+      "clean": {
+        "ack": "ACK",
+        "world": 1,
+        "expect_world": 1
+      },
+      "ack_lost": {
+        "ack": "NO_ACK",
+        "recovery": "FINAL_COMMITTED_NO_RESEND",
+        "world": 1,
+        "expect_world": 1,
+        "expect_recovery": "FINAL_COMMITTED_NO_RESEND"
+      },
+      "crash_before": {
+        "ack": "NO_ACK",
+        "recovery": "FINAL_ABSENT_RESENT",
+        "world": 1,
+        "expect_world": 1,
+        "expect_recovery": "FINAL_ABSENT_RESENT"
+      },
+      "lookup_down": {
+        "ack": "NO_ACK",
+        "recovery": "UNCERTAIN_WITHHOLD",
+        "world": 1,
+        "expect_world": 1,
+        "expect_recovery": "UNCERTAIN_WITHHOLD"
+      },
+      "naive_control": {
+        "world": 2,
+        "expect_world": 2
+      },
+      "stale_owner": "ERROR:  STALE_OWNER: epoch 1 fenced by 4",
+      "payload_conflict": "ERROR:  PAYLOAD_CONFLICT: action api-acklost-5a852b already bound to another payload",
+      "authorized_without_grant": "ERROR:  LADDER_EVIDENCE: AUTHORIZED needs a live grant",
+      "qualified": true,
+      "verifier_agrees": true,
+      "ladder": "ACTIONABLE"
+    },
+    "db": {
+      "clean": {
+        "ack": "ACK",
+        "world": 1,
+        "expect_world": 1
+      },
+      "ack_lost": {
+        "ack": "NO_ACK",
+        "recovery": "FINAL_COMMITTED_NO_RESEND",
+        "world": 1,
+        "expect_world": 1,
+        "expect_recovery": "FINAL_COMMITTED_NO_RESEND"
+      },
+      "crash_before": {
+        "ack": "NO_ACK",
+        "recovery": "FINAL_ABSENT_RESENT",
+        "world": 1,
+        "expect_world": 1,
+        "expect_recovery": "FINAL_ABSENT_RESENT"
+      },
+      "lookup_down": {
+        "ack": "NO_ACK",
+        "recovery": "UNCERTAIN_WITHHOLD",
+        "world": 1,
+        "expect_world": 1,
+        "expect_recovery": "UNCERTAIN_WITHHOLD"
+      },
+      "naive_control": {
+        "world": 2,
+        "expect_world": 2
+      },
+      "stale_owner": "ERROR:  STALE_OWNER: epoch 1 fenced by 4",
+      "payload_conflict": "ERROR:  PAYLOAD_CONFLICT: action db-acklost-daa653 already bound to another payload",
+      "authorized_without_grant": "ERROR:  LADDER_EVIDENCE: AUTHORIZED needs a live grant",
+      "qualified": true,
+      "verifier_agrees": true,
+      "ladder": "ACTIONABLE"
+    },
+    "cli": {
+      "clean": {
+        "ack": "ACK",
+        "world": 1,
+        "expect_world": 1
+      },
+      "ack_lost": {
+        "ack": "NO_ACK",
+        "recovery": "FINAL_COMMITTED_NO_RESEND",
+        "world": 1,
+        "expect_world": 1,
+        "expect_recovery": "FINAL_COMMITTED_NO_RESEND"
+      },
+      "crash_before": {
+        "ack": "NO_ACK",
+        "recovery": "FINAL_ABSENT_RESENT",
+        "world": 1,
+        "expect_world": 1,
+        "expect_recovery": "FINAL_ABSENT_RESENT"
+      },
+      "lookup_down": {
+        "ack": "NO_ACK",
+        "recovery": "UNCERTAIN_WITHHOLD",
+        "world": 1,
+        "expect_world": 1,
+        "expect_recovery": "UNCERTAIN_WITHHOLD"
+      },
+      "naive_control": {
+        "world": 2,
+        "expect_world": 2
+      },
+      "stale_owner": "ERROR:  STALE_OWNER: epoch 1 fenced by 4",
+      "payload_conflict": "ERROR:  PAYLOAD_CONFLICT: action cli-acklost-6157f0 already bound to another payload",
+      "authorized_without_grant": "ERROR:  LADDER_EVIDENCE: AUTHORIZED needs a live grant",
+      "qualified": true,
+      "verifier_agrees": true,
+      "ladder": "ACTIONABLE"
+    }
+  }
+}

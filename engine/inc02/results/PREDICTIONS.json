@@ -1,0 +1,502 @@
+{
+  "seed": 1308062088,
+  "legs": {
+    "api": {
+      "leg": "LEGACY-OMS",
+      "run_id": "api-63290afb86f34dc084f5e956a6bca532",
+      "unauthorized_stage": "ERROR:  STAGE_NOT_AUTHORIZED: LIVE_PROBE has no upstream receipt",
+      "ladder_skip": "ERROR:  LADDER_SKIP: CONNECTED -> QUALIFIED",
+      "system": "ba0e1765-26e9-4d1a-b813-1db1d57f7427",
+      "port": "5e1382d9-dd67-462b-986a-2920b79aa8ff",
+      "epoch": "6753c77b-7334-465b-9b12-f4d95169b2df",
+      "settled": [
+        "dep:ref<-note",
+        "dep:status<-qty",
+        "dep:status<-unit_price",
+        "dep:tax<-discount_code",
+        "dep:tax<-qty",
+        "dep:tax<-region",
+        "dep:tax<-unit_price",
+        "dep:total<-discount_code",
+        "dep:total<-qty",
+        "dep:total<-unit_price"
+      ],
+      "nondeterministic": [
+        "request_id"
+      ],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "echo_like": [
+        "ref<-note"
+      ],
+      "silent_in_passive": [
+        "server",
+        "status"
+      ],
+      "crossings": [
+        {
+          "output": "status",
+          "input": "qty",
+          "factor": 16
+        },
+        {
+          "output": "status",
+          "input": "unit_price",
+          "factor": 16
+        }
+      ],
+      "candidates": [
+        {
+          "output": "tax",
+          "input": "discount_code",
+          "score": 1.0,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "total",
+          "input": "discount_code",
+          "score": 1.0,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "ref",
+          "input": "note",
+          "score": 1.0,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "status",
+          "input": "qty",
+          "score": 0.35,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "tax",
+          "input": "qty",
+          "score": 1.0,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "total",
+          "input": "qty",
+          "score": 1.0,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "tax",
+          "input": "region",
+          "score": 1.0,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "status",
+          "input": "unit_price",
+          "score": 0.25,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "tax",
+          "input": "unit_price",
+          "score": 1.0,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        },
+        {
+          "output": "total",
+          "input": "unit_price",
+          "score": 1.0,
+          "p_false": 0.0083,
+          "p_false_db": 0.008333333333333333
+        }
+      ],
+      "n_nulls": 119,
+      "probe_calls": 552,
+      "ladder": "UNDERSTOOD",
+      "delete_permitted": false,
+      "monitor_permitted": true,
+      "projection_ids": [
+        "04a58a07-c8f8-4e84-ba0c-49fc2d9162e5",
+        "8e10b7f4-31be-42ed-8c3e-ee7683d55f14",
+        "3f7f9e38-c5fa-48e1-bce4-b7f1845857d6",
+        "2e25d3b7-256d-4902-8335-d37374bc2426",
+        "279358b4-333c-4967-9965-0ca69f3d487b",
+        "80ec06a7-cf83-45cc-8dfb-f6667054f12f",
+        "726bd210-6628-4266-8e6a-7eded035a3d2",
+        "0ba054f5-384e-461f-a26d-519724f2111b",
+        "a7205bbd-18b1-4ed7-aab5-ac0d5a1dff71",
+        "5cbf6bfe-4b36-4a1e-9a3d-f775fc496b27"
+      ],
+      "decisions": {
+        "ref<-channel": "UNRESOLVED:NO_WITNESS",
+        "request_id<-channel": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-channel": "UNRESOLVED:NO_WITNESS",
+        "status<-channel": "UNRESOLVED:NO_WITNESS",
+        "tax<-channel": "UNRESOLVED:NO_WITNESS",
+        "total<-channel": "UNRESOLVED:NO_WITNESS",
+        "ref<-discount_code": "UNRESOLVED:NO_WITNESS",
+        "request_id<-discount_code": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-discount_code": "UNRESOLVED:NO_WITNESS",
+        "status<-discount_code": "UNRESOLVED:NO_WITNESS",
+        "tax<-discount_code": "CANDIDATE",
+        "total<-discount_code": "CANDIDATE",
+        "ref<-note": "CANDIDATE",
+        "request_id<-note": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-note": "UNRESOLVED:NO_WITNESS",
+        "status<-note": "UNRESOLVED:NO_WITNESS",
+        "tax<-note": "UNRESOLVED:NO_WITNESS",
+        "total<-note": "UNRESOLVED:NO_WITNESS",
+        "ref<-qty": "UNRESOLVED:NO_WITNESS",
+        "request_id<-qty": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-qty": "UNRESOLVED:NO_WITNESS",
+        "status<-qty": "CANDIDATE",
+        "tax<-qty": "CANDIDATE",
+        "total<-qty": "CANDIDATE",
+        "ref<-region": "UNRESOLVED:NO_WITNESS",
+        "request_id<-region": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-region": "UNRESOLVED:NO_WITNESS",
+        "status<-region": "UNRESOLVED:NO_WITNESS",
+        "tax<-region": "CANDIDATE",
+        "total<-region": "UNRESOLVED:NO_WITNESS",
+        "ref<-ts": "UNRESOLVED:NO_WITNESS",
+        "request_id<-ts": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-ts": "UNRESOLVED:NO_WITNESS",
+        "status<-ts": "UNRESOLVED:NO_WITNESS",
+        "tax<-ts": "UNRESOLVED:NO_WITNESS",
+        "total<-ts": "UNRESOLVED:NO_WITNESS",
+        "ref<-unit_price": "UNRESOLVED:NO_WITNESS",
+        "request_id<-unit_price": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "server<-unit_price": "UNRESOLVED:NO_WITNESS",
+        "status<-unit_price": "CANDIDATE",
+        "tax<-unit_price": "CANDIDATE",
+        "total<-unit_price": "CANDIDATE"
+      }
+    },
+    "db": {
+      "leg": "LEGACY-ERP",
+      "run_id": "db-dcc1c97c504242f38680aa33de71f70b",
+      "unauthorized_stage": "ERROR:  STAGE_NOT_AUTHORIZED: LIVE_PROBE has no upstream receipt",
+      "ladder_skip": "ERROR:  LADDER_SKIP: CONNECTED -> QUALIFIED",
+      "system": "22b10de4-009e-49e0-b7cf-335bd4706a13",
+      "port": "ada6cb48-c328-4dd1-b08c-1e3585374da3",
+      "epoch": "fa542da1-6518-46f8-9dcb-9d8689976c72",
+      "settled": [
+        "dep:line_total<-promo_code",
+        "dep:line_total<-qty",
+        "dep:line_total<-sku",
+        "dep:memo_out<-memo",
+        "dep:needs_approval<-qty",
+        "dep:shipping<-promo_code",
+        "dep:shipping<-qty",
+        "dep:shipping<-sku",
+        "dep:shipping<-warehouse"
+      ],
+      "nondeterministic": [
+        "computed_at"
+      ],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "echo_like": [
+        "memo_out<-memo"
+      ],
+      "silent_in_passive": [
+        "needs_approval"
+      ],
+      "crossings": [
+        {
+          "output": "needs_approval",
+          "input": "qty",
+          "factor": 32
+        }
+      ],
+      "candidates": [
+        {
+          "output": "memo_out",
+          "input": "memo",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "line_total",
+          "input": "promo_code",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "needs_approval",
+          "input": "promo_code",
+          "score": 0.056,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "shipping",
+          "input": "promo_code",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "line_total",
+          "input": "qty",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "needs_approval",
+          "input": "qty",
+          "score": 0.222,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "shipping",
+          "input": "qty",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "line_total",
+          "input": "sku",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "shipping",
+          "input": "sku",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        },
+        {
+          "output": "shipping",
+          "input": "warehouse",
+          "score": 1.0,
+          "p_false": 0.0149,
+          "p_false_db": 0.014925373134328358
+        }
+      ],
+      "n_nulls": 66,
+      "probe_calls": 252,
+      "ladder": "UNDERSTOOD",
+      "delete_permitted": false,
+      "monitor_permitted": true,
+      "projection_ids": [
+        "5dde5200-d6ea-4265-b9df-10f50c5cd4ca",
+        "4ccd6cdc-ab79-4bf8-bd3a-f1648184edcb",
+        "ce443489-c7d3-4116-ac14-7d8b94fb74c5",
+        "d5464b20-688d-4be9-9bd4-b6eac8170d4b",
+        "ec4237f1-4ef2-4202-9d08-a9cf154e3fc0",
+        "4a881912-d256-472a-a7f3-d859ac17e5d7",
+        "dd2dd455-fa83-43a3-854b-26304a873e7a",
+        "877590fd-f42c-4f7e-b1ff-e23adf3c9823",
+        "38781069-7a01-4ba8-b129-9ee75996f4f9"
+      ],
+      "decisions": {
+        "computed_at<-memo": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "line_total<-memo": "UNRESOLVED:NO_WITNESS",
+        "memo_out<-memo": "CANDIDATE",
+        "needs_approval<-memo": "UNRESOLVED:NO_WITNESS",
+        "shipping<-memo": "UNRESOLVED:NO_WITNESS",
+        "computed_at<-operator": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "line_total<-operator": "UNRESOLVED:NO_WITNESS",
+        "memo_out<-operator": "UNRESOLVED:NO_WITNESS",
+        "needs_approval<-operator": "UNRESOLVED:NO_WITNESS",
+        "shipping<-operator": "UNRESOLVED:NO_WITNESS",
+        "computed_at<-promo_code": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "line_total<-promo_code": "CANDIDATE",
+        "memo_out<-promo_code": "UNRESOLVED:NO_WITNESS",
+        "needs_approval<-promo_code": "CANDIDATE",
+        "shipping<-promo_code": "CANDIDATE",
+        "computed_at<-qty": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "line_total<-qty": "CANDIDATE",
+        "memo_out<-qty": "UNRESOLVED:NO_WITNESS",
+        "needs_approval<-qty": "CANDIDATE",
+        "shipping<-qty": "CANDIDATE",
+        "computed_at<-sku": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "line_total<-sku": "CANDIDATE",
+        "memo_out<-sku": "UNRESOLVED:NO_WITNESS",
+        "needs_approval<-sku": "UNRESOLVED:NO_WITNESS",
+        "shipping<-sku": "CANDIDATE",
+        "computed_at<-warehouse": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "line_total<-warehouse": "UNRESOLVED:NO_WITNESS",
+        "memo_out<-warehouse": "UNRESOLVED:NO_WITNESS",
+        "needs_approval<-warehouse": "UNRESOLVED:NO_WITNESS",
+        "shipping<-warehouse": "CANDIDATE"
+      }
+    },
+    "cli": {
+      "leg": "RATE-TOOL",
+      "run_id": "cli-12285c067bc04bfcaa1454f5b661b1d2",
+      "unauthorized_stage": "ERROR:  STAGE_NOT_AUTHORIZED: LIVE_PROBE has no upstream receipt",
+      "ladder_skip": "ERROR:  LADDER_SKIP: CONNECTED -> QUALIFIED",
+      "system": "e80f4ba6-13c1-4a4b-bf19-b4a06866ebc2",
+      "port": "6b7a7518-22ce-48ca-8d60-f135a25256bd",
+      "epoch": "8aea7775-8b90-485c-9afc-39ab58f50f84",
+      "settled": [
+        "dep:eta_days<-express",
+        "dep:eta_days<-zone",
+        "dep:label<-label",
+        "dep:rate<-express",
+        "dep:rate<-weight",
+        "dep:rate<-zone"
+      ],
+      "nondeterministic": [
+        "audit_id"
+      ],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "echo_like": [
+        "label<-label"
+      ],
+      "silent_in_passive": [
+        "exit_code"
+      ],
+      "crossings": [],
+      "candidates": [
+        {
+          "output": "eta_days",
+          "input": "express",
+          "score": 1.0,
+          "p_false": 0.0244,
+          "p_false_db": 0.024390243902439025
+        },
+        {
+          "output": "rate",
+          "input": "express",
+          "score": 1.0,
+          "p_false": 0.0244,
+          "p_false_db": 0.024390243902439025
+        },
+        {
+          "output": "label",
+          "input": "label",
+          "score": 1.0,
+          "p_false": 0.0244,
+          "p_false_db": 0.024390243902439025
+        },
+        {
+          "output": "rate",
+          "input": "weight",
+          "score": 1.0,
+          "p_false": 0.0244,
+          "p_false_db": 0.024390243902439025
+        },
+        {
+          "output": "eta_days",
+          "input": "zone",
+          "score": 1.0,
+          "p_false": 0.0244,
+          "p_false_db": 0.024390243902439025
+        },
+        {
+          "output": "rate",
+          "input": "zone",
+          "score": 1.0,
+          "p_false": 0.0244,
+          "p_false_db": 0.024390243902439025
+        }
+      ],
+      "n_nulls": 40,
+      "probe_calls": 246,
+      "ladder": "UNDERSTOOD",
+      "delete_permitted": false,
+      "monitor_permitted": true,
+      "projection_ids": [
+        "ce151294-faea-4c89-9952-9f64eb8dc1d4",
+        "4ca21ab3-8ab7-4f78-879d-7b4a410f5ab5",
+        "661586c5-37b7-42cf-8a9f-ca723fa582fa",
+        "72bb7d88-c260-4dc0-85b1-1fcd00c0dae8",
+        "6847f1eb-d8cc-4e5f-8d76-69185fb68a69",
+        "06ad2957-d987-4f2a-97df-c5cdffdcc68e"
+      ],
+      "decisions": {
+        "audit_id<-account": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "eta_days<-account": "UNRESOLVED:NO_WITNESS",
+        "exit_code<-account": "UNRESOLVED:NO_WITNESS",
+        "label<-account": "UNRESOLVED:NO_WITNESS",
+        "rate<-account": "UNRESOLVED:NO_WITNESS",
+        "audit_id<-express": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "eta_days<-express": "CANDIDATE",
+        "exit_code<-express": "UNRESOLVED:NO_WITNESS",
+        "label<-express": "UNRESOLVED:NO_WITNESS",
+        "rate<-express": "CANDIDATE",
+        "audit_id<-label": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "eta_days<-label": "UNRESOLVED:NO_WITNESS",
+        "exit_code<-label": "UNRESOLVED:NO_WITNESS",
+        "label<-label": "CANDIDATE",
+        "rate<-label": "UNRESOLVED:NO_WITNESS",
+        "audit_id<-weight": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "eta_days<-weight": "UNRESOLVED:NO_WITNESS",
+        "exit_code<-weight": "UNRESOLVED:NO_WITNESS",
+        "label<-weight": "UNRESOLVED:NO_WITNESS",
+        "rate<-weight": "CANDIDATE",
+        "audit_id<-zone": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "eta_days<-zone": "CANDIDATE",
+        "exit_code<-zone": "UNRESOLVED:NO_WITNESS",
+        "label<-zone": "UNRESOLVED:NO_WITNESS",
+        "rate<-zone": "CANDIDATE"
+      }
+    }
+  },
+  "drift": {
+    "old_roots": "134cc249710c781fc137acd7da2f52f306b92546b40196968be2f1a565255c56",
+    "new_roots": "96a8c35ab06e2ec9dcfc501df8c7b972cf88d119de93be96b1bccf3cc2147783",
+    "detected": true,
+    "ladder_after_epoch_change": "CONNECTED",
+    "old_projection_monitor_after_drift": false,
+    "settled_v4_3": [
+      "dep:ref<-note",
+      "dep:status<-qty",
+      "dep:status<-unit_price",
+      "dep:tax<-channel",
+      "dep:tax<-discount_code",
+      "dep:tax<-qty",
+      "dep:tax<-region",
+      "dep:tax<-unit_price",
+      "dep:total<-channel",
+      "dep:total<-discount_code",
+      "dep:total<-qty",
+      "dep:total<-unit_price"
+    ],
+    "new": [
+      "dep:tax<-channel",
+      "dep:total<-channel"
+    ],
+    "gone": [],
+    "unchanged": [
+      "dep:ref<-note",
+      "dep:status<-qty",
+      "dep:status<-unit_price",
+      "dep:tax<-discount_code",
+      "dep:tax<-qty",
+      "dep:tax<-region",
+      "dep:tax<-unit_price",
+      "dep:total<-discount_code",
+      "dep:total<-qty",
+      "dep:total<-unit_price"
+    ],
+    "old_credential": "ERROR:  STALE_OWNER: epoch 1 fenced by 2"
+  }
+}

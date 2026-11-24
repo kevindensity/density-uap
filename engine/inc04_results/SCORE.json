@@ -1,0 +1,135 @@
+{
+  "predictions_sha256": "0374dceeff288e8217f7d2172165bda0e2f483f04a733861483746907ce64ad1",
+  "custody": {
+    "vault_run_id": "UAP-INC-04#392b8bfd90d94db1ace134fea4f569cb",
+    "merkle_root": "8835af847a75693846e80243b13c16e1cffcc216c091f78f12a456bf3680cac2",
+    "kind": "ORIGINAL_FREEZE"
+  },
+  "legs": {
+    "api": {
+      "gates": {
+        "zero_false_joint_dependencies": true,
+        "additive_pairs_not_claimed": true,
+        "magnitude_relations_correct": true,
+        "no_spurious_magnitude_relation": true,
+        "expected_partitions_certified": true,
+        "certified_partitions_exact_on_decided_points": true
+      },
+      "passed": 6,
+      "total": 6,
+      "joint_recall": 0.833,
+      "joint_missed": [
+        "status<-discount_code*qty",
+        "status<-discount_code*unit_price"
+      ],
+      "joint_false": [],
+      "magnitude": [
+        {
+          "output": "status",
+          "on": "total",
+          "cut_after": 999.96,
+          "cut_upto": 1000.78,
+          "above": "HOLD"
+        }
+      ],
+      "refuted_magnitude_candidates": [],
+      "partitions": {
+        "status": {
+          "language": "L1",
+          "kind": "threshold",
+          "certified": true,
+          "scorer_grid_accuracy": {
+            "accuracy_on_decided": 1.0,
+            "abstained": 0
+          },
+          "trace": [
+            "INSUF:L0",
+            "NO_CO:L1"
+          ]
+        }
+      },
+      "grid_points": 480,
+      "probe_calls": 640
+    },
+    "db": {
+      "gates": {
+        "zero_false_joint_dependencies": true,
+        "additive_pairs_not_claimed": true,
+        "magnitude_relations_correct": true,
+        "no_spurious_magnitude_relation": true,
+        "expected_partitions_certified": true,
+        "certified_partitions_exact_on_decided_points": true
+      },
+      "passed": 6,
+      "total": 6,
+      "joint_recall": 1.0,
+      "joint_missed": [],
+      "joint_false": [],
+      "magnitude": [
+        {
+          "output": "needs_approval",
+          "on": "line_total",
+          "cut_after": 1995.0,
+          "cut_upto": 2002.5,
+          "above": true
+        }
+      ],
+      "refuted_magnitude_candidates": [],
+      "partitions": {
+        "needs_approval": {
+          "language": "L1",
+          "kind": "threshold",
+          "certified": true,
+          "scorer_grid_accuracy": {
+            "accuracy_on_decided": 1.0,
+            "abstained": 0
+          },
+          "trace": [
+            "INSUF:L0",
+            "NO_CO:L1"
+          ]
+        }
+      },
+      "grid_points": 240,
+      "probe_calls": 1192
+    },
+    "cli": {
+      "gates": {
+        "zero_false_joint_dependencies": true,
+        "additive_pairs_not_claimed": true,
+        "magnitude_relations_correct": true,
+        "no_spurious_magnitude_relation": true,
+        "expected_partitions_certified": true,
+        "certified_partitions_exact_on_decided_points": true
+      },
+      "passed": 6,
+      "total": 6,
+      "joint_recall": 1.0,
+      "joint_missed": [],
+      "joint_false": [],
+      "magnitude": [],
+      "refuted_magnitude_candidates": [],
+      "partitions": {
+        "eta_days": {
+          "language": "L1",
+          "kind": "lookup",
+          "certified": true,
+          "scorer_grid_accuracy": {
+            "accuracy_on_decided": 1.0,
+            "abstained": 0
+          },
+          "trace": [
+            "INSUF:L0",
+            "NO_CO:L1"
+          ]
+        }
+      },
+      "grid_points": 240,
+      "probe_calls": 417
+    }
+  },
+  "totals": {
+    "passed": 18,
+    "total": 18
+  }
+}

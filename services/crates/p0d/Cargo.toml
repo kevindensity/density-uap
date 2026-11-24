@@ -1,0 +1,20 @@
+[package]
+name = "p0d"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+p0-core = { path = "../p0-core" }
+tokio = { workspace = true }
+axum = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+tokio-postgres = { workspace = true }
+anyhow = { workspace = true }
+postgres-protocol = "=0.6.7"
+postgres-types = "=0.2.8"
+tokio-postgres-rustls = "0.12"
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+rustls-pemfile = "2"
+webpki-roots = "0.26"

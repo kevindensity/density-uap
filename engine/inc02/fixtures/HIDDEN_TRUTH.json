@@ -1,0 +1,10 @@
+{
+  "api_v4_2": {"total": ["qty","unit_price","discount_code"], "tax": ["qty","unit_price","discount_code","region"],
+               "status": ["qty","unit_price","discount_code"], "ref": ["note"], "_nondeterministic": ["request_id"], "_echo": ["ref<-note"]},
+  "api_v4_3": {"total": ["qty","unit_price","discount_code","channel"], "tax": ["qty","unit_price","discount_code","region","channel"],
+               "status": ["qty","unit_price","discount_code","channel"], "ref": ["note"], "_nondeterministic": ["request_id"]},
+  "db": {"line_total": ["sku","qty","promo_code"], "shipping": ["sku","qty","promo_code","warehouse"],
+         "needs_approval": ["sku","qty","promo_code"], "memo_out": ["memo"], "_nondeterministic": ["computed_at"], "_echo": ["memo_out<-memo"]},
+  "cli": {"rate": ["weight","zone","express"], "eta_days": ["zone","express"], "label": ["label"], "exit_code": [],
+          "_nondeterministic": ["audit_id"], "_echo": ["label<-label"]}
+}

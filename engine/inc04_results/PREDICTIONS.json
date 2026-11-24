@@ -1,0 +1,887 @@
+{
+  "seed": 1660401588,
+  "custody": {
+    "vault_run_id": "UAP-INC-04#392b8bfd90d94db1ace134fea4f569cb",
+    "merkle_root": "8835af847a75693846e80243b13c16e1cffcc216c091f78f12a456bf3680cac2",
+    "kind": "ORIGINAL_FREEZE"
+  },
+  "legs": {
+    "api": {
+      "settled_single": [
+        "dep:ref<-note",
+        "dep:status<-qty",
+        "dep:status<-unit_price",
+        "dep:tax<-discount_code",
+        "dep:tax<-qty",
+        "dep:tax<-region",
+        "dep:tax<-unit_price",
+        "dep:total<-discount_code",
+        "dep:total<-qty",
+        "dep:total<-unit_price"
+      ],
+      "joint_tested": [
+        "tax<-discount_code*qty",
+        "tax<-discount_code*region",
+        "tax<-discount_code*unit_price",
+        "tax<-qty*region",
+        "tax<-qty*unit_price",
+        "tax<-region*unit_price",
+        "total<-discount_code*qty",
+        "total<-discount_code*unit_price",
+        "total<-qty*unit_price",
+        "status<-qty*unit_price"
+      ],
+      "joint": [
+        {
+          "output": "tax",
+          "pair": [
+            "discount_code",
+            "qty"
+          ],
+          "witness": {
+            "base": {
+              "qty": 5,
+              "unit_price": 19.99,
+              "discount_code": "NONE",
+              "region": "TX",
+              "note": "c",
+              "ts": 1700000004
+            },
+            "vi": "PROMO5",
+            "vj": 192,
+            "values": [
+              6.25,
+              5.93,
+              239.88,
+              227.89
+            ]
+          }
+        },
+        {
+          "output": "tax",
+          "pair": [
+            "discount_code",
+            "region"
+          ],
+          "witness": {
+            "base": {
+              "qty": 5,
+              "unit_price": 19.99,
+              "discount_code": "NONE",
+              "region": "TX",
+              "note": "c",
+              "ts": 1700000004
+            },
+            "vi": "VIP",
+            "vj": "CA",
+            "values": [
+              6.25,
+              5.31,
+              7.25,
+              6.16
+            ]
+          }
+        },
+        {
+          "output": "tax",
+          "pair": [
+            "discount_code",
+            "unit_price"
+          ],
+          "witness": {
+            "base": {
+              "qty": 5,
+              "unit_price": 19.99,
+              "discount_code": "NONE",
+              "region": "TX",
+              "note": "c",
+              "ts": 1700000004
+            },
+            "vi": "STAFF",
+            "vj": 12.5,
+            "values": [
+              6.25,
+              4.37,
+              3.91,
+              2.73
+            ]
+          }
+        },
+        {
+          "output": "tax",
+          "pair": [
+            "qty",
+            "region"
+          ],
+          "witness": {
+            "base": {
+              "qty": 5,
+              "unit_price": 19.99,
+              "discount_code": "NONE",
+              "region": "TX",
+              "note": "c",
+              "ts": 1700000004
+            },
+            "vi": 192,
+            "vj": "CA",
+            "values": [
+              6.25,
+              239.88,
+              7.25,
+              278.26
+            ]
+          }
+        },
+        {
+          "output": "tax",
+          "pair": [
+            "qty",
+            "unit_price"
+          ],
+          "witness": {
+            "base": {
+              "qty": 5,
+              "unit_price": 19.99,
+              "discount_code": "NONE",
+              "region": "TX",
+              "note": "c",
+              "ts": 1700000004
+            },
+            "vi": 1,
+            "vj": 40.0,
+            "values": [
+              6.25,
+              1.25,
+              12.5,
+              2.5
+            ]
+          }
+        },
+        {
+          "output": "tax",
+          "pair": [
+            "region",
+            "unit_price"
+          ],
+          "witness": {
+            "base": {
+              "qty": 5,
+              "unit_price": 19.99,
+              "discount_code": "NONE",
+              "region": "TX",
+              "note": "c",
+              "ts": 1700000004
+            },
+            "vi": "CA",
+            "vj": 5.0,
+            "values": [
+              6.25,
+              7.25,
+              1.56,
+              1.81
+            ]
+          }
+        },
+        {
+          "output": "total",
+          "pair": [
+            "discount_code",
+            "qty"
+          ],
+          "witness": {
+            "base": {
+              "qty": 5,
+              "unit_price": 19.99,
+              "discount_code": "NONE",
+              "region": "TX",
+              "note": "c",
+              "ts": 1700000004
+            },
+            "vi": "VIP",
+            "vj": 192,
+            "values": [
+              99.95,
+              84.96,
+              3838.08,
+              3262.37
+            ]
+          }
+        },
+        {
+          "output": "total",
+          "pair": [
+            "discount_code",
+            "unit_price"
+          ],
+          "witness": {
+            "base": {
+              "qty": 5,
+              "unit_price": 19.99,
+              "discount_code": "NONE",
+              "region": "TX",
+              "note": "c",
+              "ts": 1700000004
+            },
+            "vi": "VIP",
+            "vj": 800.0,
+            "values": [
+              99.95,
+              84.96,
+              4000.0,
+              3400.0
+            ]
+          }
+        },
+        {
+          "output": "total",
+          "pair": [
+            "qty",
+            "unit_price"
+          ],
+          "witness": {
+            "base": {
+              "qty": 5,
+              "unit_price": 19.99,
+              "discount_code": "NONE",
+              "region": "TX",
+              "note": "c",
+              "ts": 1700000004
+            },
+            "vi": 192,
+            "vj": 800.0,
+            "values": [
+              99.95,
+              3838.08,
+              4000.0,
+              153600.0
+            ]
+          }
+        },
+        {
+          "output": "status",
+          "pair": [
+            "qty",
+            "unit_price"
+          ],
+          "witness": {
+            "base": {
+              "qty": 5,
+              "unit_price": 19.99,
+              "discount_code": "NONE",
+              "region": "TX",
+              "note": "c",
+              "ts": 1700000004
+            },
+            "vi": 192,
+            "vj": 5.0,
+            "values": [
+              "OK",
+              "HOLD",
+              "OK",
+              "OK"
+            ]
+          }
+        }
+      ],
+      "magnitude_candidates": [
+        {
+          "output": "status",
+          "on": "total",
+          "cut_after": 999.96,
+          "cut_upto": 1000.78,
+          "below": "OK",
+          "above": "HOLD"
+        }
+      ],
+      "magnitude": [
+        {
+          "output": "status",
+          "on": "total",
+          "cut_after": 999.96,
+          "cut_upto": 1000.78,
+          "below": "OK",
+          "above": "HOLD"
+        }
+      ],
+      "partitions": {
+        "status": {
+          "language": "L1",
+          "trace": [
+            {
+              "language": "L0",
+              "result": "INSUFFICIENT"
+            },
+            {
+              "language": "L1",
+              "result": "NO_COUNTEREXAMPLE"
+            }
+          ],
+          "program": {
+            "kind": "threshold",
+            "on": "total",
+            "cut_after": 999.96,
+            "cut_upto": 1000.78,
+            "below": "OK",
+            "above": "HOLD"
+          },
+          "certified": true
+        }
+      },
+      "probe_calls": 640,
+      "domains": {
+        "discount_code": [
+          "NONE",
+          "PROMO5",
+          "STAFF",
+          "VIP"
+        ],
+        "note": [
+          "a",
+          "b",
+          "c"
+        ],
+        "qty": [
+          1,
+          2,
+          3,
+          5,
+          8,
+          192
+        ],
+        "region": [
+          "CA",
+          "NY",
+          "OR",
+          "TX"
+        ],
+        "ts": [
+          1700000000,
+          1700000001,
+          1700000002,
+          1700000003,
+          1700000004
+        ],
+        "unit_price": [
+          12.5,
+          19.99,
+          40.0,
+          5.0,
+          800.0
+        ]
+      },
+      "nondeterministic": [
+        "request_id"
+      ],
+      "echo": [
+        "ref<-note"
+      ]
+    },
+    "db": {
+      "settled_single": [
+        "dep:line_total<-promo_code",
+        "dep:line_total<-qty",
+        "dep:line_total<-sku",
+        "dep:memo_out<-memo",
+        "dep:needs_approval<-promo_code",
+        "dep:needs_approval<-qty",
+        "dep:needs_approval<-sku",
+        "dep:shipping<-promo_code",
+        "dep:shipping<-qty",
+        "dep:shipping<-sku",
+        "dep:shipping<-warehouse"
+      ],
+      "joint_tested": [
+        "line_total<-promo_code*qty",
+        "line_total<-promo_code*sku",
+        "line_total<-qty*sku",
+        "needs_approval<-promo_code*qty",
+        "needs_approval<-promo_code*sku",
+        "needs_approval<-qty*sku",
+        "shipping<-promo_code*qty",
+        "shipping<-promo_code*sku",
+        "shipping<-promo_code*warehouse",
+        "shipping<-qty*sku",
+        "shipping<-qty*warehouse",
+        "shipping<-sku*warehouse"
+      ],
+      "joint": [
+        {
+          "output": "line_total",
+          "pair": [
+            "promo_code",
+            "qty"
+          ],
+          "witness": {
+            "base": {
+              "sku": "D400",
+              "qty": 7,
+              "promo_code": "NONE",
+              "warehouse": "W1",
+              "memo": "rush",
+              "operator": "di"
+            },
+            "vi": "CLEAR",
+            "vj": 8,
+            "values": [
+              693.0,
+              415.8,
+              792.0,
+              475.2
+            ]
+          }
+        },
+        {
+          "output": "line_total",
+          "pair": [
+            "promo_code",
+            "sku"
+          ],
+          "witness": {
+            "base": {
+              "sku": "D400",
+              "qty": 7,
+              "promo_code": "NONE",
+              "warehouse": "W1",
+              "memo": "rush",
+              "operator": "di"
+            },
+            "vi": "SPRING",
+            "vj": "A100",
+            "values": [
+              693.0,
+              623.7,
+              87.5,
+              78.75
+            ]
+          }
+        },
+        {
+          "output": "line_total",
+          "pair": [
+            "qty",
+            "sku"
+          ],
+          "witness": {
+            "base": {
+              "sku": "D400",
+              "qty": 7,
+              "promo_code": "NONE",
+              "warehouse": "W1",
+              "memo": "rush",
+              "operator": "di"
+            },
+            "vi": 3,
+            "vj": "B200",
+            "values": [
+              693.0,
+              297.0,
+              280.0,
+              120.0
+            ]
+          }
+        },
+        {
+          "output": "needs_approval",
+          "pair": [
+            "promo_code",
+            "qty"
+          ],
+          "witness": {
+            "base": {
+              "sku": "C300",
+              "qty": 9,
+              "promo_code": "CLEAR",
+              "warehouse": "W2",
+              "memo": "gift",
+              "operator": "cy"
+            },
+            "vi": "SPRING",
+            "vj": 384,
+            "values": [
+              false,
+              false,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "output": "needs_approval",
+          "pair": [
+            "promo_code",
+            "sku"
+          ],
+          "witness": {
+            "base": {
+              "sku": "A100",
+              "qty": 266,
+              "promo_code": "CLEAR",
+              "warehouse": "W2",
+              "memo": "gift",
+              "operator": "ann"
+            },
+            "vi": "SPRING",
+            "vj": "D400",
+            "values": [
+              false,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "output": "needs_approval",
+          "pair": [
+            "qty",
+            "sku"
+          ],
+          "witness": {
+            "base": {
+              "sku": "A100",
+              "qty": 266,
+              "promo_code": "CLEAR",
+              "warehouse": "W2",
+              "memo": "gift",
+              "operator": "ann"
+            },
+            "vi": 3,
+            "vj": "D400",
+            "values": [
+              false,
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "output": "shipping",
+          "pair": [
+            "promo_code",
+            "qty"
+          ],
+          "witness": {
+            "base": {
+              "sku": "D400",
+              "qty": 7,
+              "promo_code": "NONE",
+              "warehouse": "W1",
+              "memo": "rush",
+              "operator": "di"
+            },
+            "vi": "CLEAR",
+            "vj": 1,
+            "values": [
+              11.93,
+              9.16,
+              5.99,
+              5.59
+            ]
+          }
+        },
+        {
+          "output": "shipping",
+          "pair": [
+            "promo_code",
+            "sku"
+          ],
+          "witness": {
+            "base": {
+              "sku": "D400",
+              "qty": 7,
+              "promo_code": "NONE",
+              "warehouse": "W1",
+              "memo": "rush",
+              "operator": "di"
+            },
+            "vi": "CLEAR",
+            "vj": "A100",
+            "values": [
+              11.93,
+              9.16,
+              5.88,
+              5.53
+            ]
+          }
+        },
+        {
+          "output": "shipping",
+          "pair": [
+            "qty",
+            "sku"
+          ],
+          "witness": {
+            "base": {
+              "sku": "D400",
+              "qty": 7,
+              "promo_code": "NONE",
+              "warehouse": "W1",
+              "memo": "rush",
+              "operator": "di"
+            },
+            "vi": 5,
+            "vj": "A100",
+            "values": [
+              11.93,
+              9.95,
+              5.88,
+              5.63
+            ]
+          }
+        }
+      ],
+      "magnitude_candidates": [
+        {
+          "output": "needs_approval",
+          "on": "line_total",
+          "cut_after": 1995.0,
+          "cut_upto": 2002.5,
+          "below": false,
+          "above": true
+        }
+      ],
+      "magnitude": [
+        {
+          "output": "needs_approval",
+          "on": "line_total",
+          "cut_after": 1995.0,
+          "cut_upto": 2002.5,
+          "below": false,
+          "above": true
+        }
+      ],
+      "partitions": {
+        "needs_approval": {
+          "language": "L1",
+          "trace": [
+            {
+              "language": "L0",
+              "result": "INSUFFICIENT"
+            },
+            {
+              "language": "L1",
+              "result": "NO_COUNTEREXAMPLE"
+            }
+          ],
+          "program": {
+            "kind": "threshold",
+            "on": "line_total",
+            "cut_after": 1995.0,
+            "cut_upto": 2002.5,
+            "below": false,
+            "above": true
+          },
+          "certified": true
+        }
+      },
+      "probe_calls": 1192,
+      "domains": {
+        "memo": [
+          "gift",
+          "rush",
+          "std"
+        ],
+        "operator": [
+          "ann",
+          "bo",
+          "cy",
+          "di"
+        ],
+        "promo_code": [
+          "CLEAR",
+          "NONE",
+          "SPRING"
+        ],
+        "qty": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          384
+        ],
+        "sku": [
+          "A100",
+          "B200",
+          "C300",
+          "D400"
+        ],
+        "warehouse": [
+          "W1",
+          "W2",
+          "W3"
+        ]
+      },
+      "nondeterministic": [
+        "computed_at"
+      ],
+      "echo": [
+        "memo_out<-memo"
+      ]
+    },
+    "cli": {
+      "settled_single": [
+        "dep:eta_days<-express",
+        "dep:eta_days<-zone",
+        "dep:label<-label",
+        "dep:rate<-express",
+        "dep:rate<-weight",
+        "dep:rate<-zone"
+      ],
+      "joint_tested": [
+        "eta_days<-express*zone",
+        "rate<-express*weight",
+        "rate<-express*zone",
+        "rate<-weight*zone"
+      ],
+      "joint": [
+        {
+          "output": "rate",
+          "pair": [
+            "express",
+            "weight"
+          ],
+          "witness": {
+            "base": {
+              "weight": 1.5,
+              "zone": "Z3",
+              "account": "ACME",
+              "label": "crate",
+              "express": true
+            },
+            "vi": false,
+            "vj": 4.5,
+            "values": [
+              5.4,
+              3.6,
+              16.2,
+              10.8
+            ]
+          }
+        },
+        {
+          "output": "rate",
+          "pair": [
+            "express",
+            "zone"
+          ],
+          "witness": {
+            "base": {
+              "weight": 1.5,
+              "zone": "Z3",
+              "account": "ACME",
+              "label": "crate",
+              "express": true
+            },
+            "vi": false,
+            "vj": "Z1",
+            "values": [
+              5.4,
+              3.6,
+              2.48,
+              1.65
+            ]
+          }
+        },
+        {
+          "output": "rate",
+          "pair": [
+            "weight",
+            "zone"
+          ],
+          "witness": {
+            "base": {
+              "weight": 1.5,
+              "zone": "Z3",
+              "account": "ACME",
+              "label": "crate",
+              "express": true
+            },
+            "vi": 20.0,
+            "vj": "Z2",
+            "values": [
+              5.4,
+              72.0,
+              3.94,
+              52.5
+            ]
+          }
+        }
+      ],
+      "magnitude_candidates": [],
+      "magnitude": [],
+      "partitions": {
+        "eta_days": {
+          "language": "L1",
+          "trace": [
+            {
+              "language": "L0",
+              "result": "INSUFFICIENT"
+            },
+            {
+              "language": "L1",
+              "result": "NO_COUNTEREXAMPLE"
+            }
+          ],
+          "program": {
+            "kind": "lookup",
+            "inputs": [
+              "express",
+              "zone"
+            ],
+            "table": {
+              "[true, \"Z1\"]": 1,
+              "[true, \"Z3\"]": 5,
+              "[false, \"Z1\"]": 2,
+              "[false, \"Z3\"]": 6,
+              "[true, \"Z2\"]": 3,
+              "[false, \"Z2\"]": 4
+            }
+          },
+          "certified": true
+        }
+      },
+      "probe_calls": 417,
+      "domains": {
+        "account": [
+          "ACME",
+          "GLOBEX",
+          "INITECH"
+        ],
+        "express": [
+          false,
+          true
+        ],
+        "label": [
+          "box",
+          "crate",
+          "tube"
+        ],
+        "weight": [
+          1.5,
+          12.0,
+          20.0,
+          3.0,
+          4.5,
+          8.0
+        ],
+        "zone": [
+          "Z1",
+          "Z2",
+          "Z3"
+        ]
+      },
+      "nondeterministic": [
+        "audit_id"
+      ],
+      "echo": [
+        "label<-label"
+      ]
+    }
+  }
+}

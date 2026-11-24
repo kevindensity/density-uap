@@ -1,0 +1,10 @@
+FROM rust:1.80-slim AS build
+WORKDIR /src
+COPY . .
+RUN cargo build --release -p owner-issuer
+FROM debian:bookworm-slim
+RUN useradd --system --uid 10002 issuer
+COPY --from=build /src/target/release/owner-issuer /usr/local/bin/owner-issuer
+USER issuer
+EXPOSE 8081
+ENTRYPOINT ["/usr/local/bin/owner-issuer"]

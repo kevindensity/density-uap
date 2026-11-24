@@ -1,0 +1,368 @@
+{
+  "seed": 3476050855,
+  "legs": {
+    "file": {
+      "leg": "IBS-7 batch invoicing",
+      "descent_level": 4,
+      "carrier_class": "file",
+      "inputs": [
+        "customer_ref",
+        "disc",
+        "qty",
+        "unit_price",
+        "warehouse"
+      ],
+      "outputs": [
+        "batch_no",
+        "invoice_total",
+        "ref_out",
+        "review"
+      ],
+      "settled": [],
+      "nondeterministic": [
+        "batch_no"
+      ],
+      "echo_like": [],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "silent_in_passive": [
+        "review"
+      ],
+      "crossings": [
+        {
+          "output": "review",
+          "input": "qty",
+          "factor": 32
+        },
+        {
+          "output": "review",
+          "input": "unit_price",
+          "factor": 32
+        }
+      ],
+      "thresholds": [
+        {
+          "output": "review",
+          "input": "qty",
+          "below": 137,
+          "above": 138
+        },
+        {
+          "output": "review",
+          "input": "unit_price",
+          "below": 694.375,
+          "above": 695.0
+        }
+      ],
+      "candidates": [],
+      "n_nulls": 15,
+      "probe_calls": 213,
+      "seconds": 2.3,
+      "negative_reference_candidates": 0,
+      "decisions": {
+        "batch_no<-customer_ref": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "invoice_total<-customer_ref": "UNRESOLVED:NO_WITNESS",
+        "ref_out<-customer_ref": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "review<-customer_ref": "UNRESOLVED:NO_WITNESS",
+        "batch_no<-disc": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "invoice_total<-disc": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "ref_out<-disc": "UNRESOLVED:NO_WITNESS",
+        "review<-disc": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "batch_no<-qty": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "invoice_total<-qty": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "ref_out<-qty": "UNRESOLVED:NO_WITNESS",
+        "review<-qty": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "batch_no<-unit_price": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "invoice_total<-unit_price": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "ref_out<-unit_price": "UNRESOLVED:NO_WITNESS",
+        "review<-unit_price": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "batch_no<-warehouse": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "invoice_total<-warehouse": "UNRESOLVED:NO_WITNESS",
+        "ref_out<-warehouse": "UNRESOLVED:NO_WITNESS",
+        "review<-warehouse": "UNRESOLVED:NO_WITNESS"
+      },
+      "archive_pairs": 40,
+      "ledger_unchanged_by_probing": true
+    },
+    "protocol": {
+      "leg": "pricing server (binary, undocumented)",
+      "descent_level": 5,
+      "carrier_class": "protocol",
+      "inputs": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5"
+      ],
+      "outputs": [
+        "r17",
+        "r18",
+        "r19",
+        "r20"
+      ],
+      "settled": [],
+      "nondeterministic": [
+        "r19"
+      ],
+      "echo_like": [],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "silent_in_passive": [
+        "r18"
+      ],
+      "crossings": [
+        {
+          "output": "r18",
+          "input": "t1",
+          "factor": 64
+        },
+        {
+          "output": "r18",
+          "input": "t2",
+          "factor": 64
+        }
+      ],
+      "thresholds": [
+        {
+          "output": "r18",
+          "input": "t1",
+          "below": 888,
+          "above": 889
+        },
+        {
+          "output": "r18",
+          "input": "t2",
+          "below": 55547,
+          "above": 55548
+        }
+      ],
+      "candidates": [],
+      "n_nulls": 20,
+      "probe_calls": 275,
+      "seconds": 0.1,
+      "negative_reference_candidates": 0,
+      "decisions": {
+        "r17<-t1": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "r18<-t1": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "r19<-t1": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "r20<-t1": "UNRESOLVED:NO_WITNESS",
+        "r17<-t2": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "r18<-t2": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "r19<-t2": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "r20<-t2": "UNRESOLVED:NO_WITNESS",
+        "r17<-t3": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "r18<-t3": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "r19<-t3": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "r20<-t3": "UNRESOLVED:NO_WITNESS",
+        "r17<-t4": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "r18<-t4": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "r19<-t4": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "r20<-t4": "UNRESOLVED:NO_WITNESS",
+        "r17<-t5": "UNRESOLVED:NO_WITNESS",
+        "r18<-t5": "UNRESOLVED:NO_WITNESS",
+        "r19<-t5": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "r20<-t5": "UNRESOLVED:BELOW_NEGATIVE_BANK"
+      },
+      "grammar": {
+        "request_header": "d701",
+        "request_len_width": 1,
+        "request_fields": {
+          "t1": "u32be",
+          "t2": "u32be",
+          "t3": "text",
+          "t4": "text",
+          "t5": "text"
+        },
+        "response_header": "d781",
+        "response_fields": {
+          "r17": "u32be",
+          "r18": "u8be",
+          "r19": "u32be",
+          "r20": "text"
+        },
+        "request_grammars_rejected": 9,
+        "response_grammars_rejected": 9
+      },
+      "roundtrip_exact": true
+    },
+    "ui": {
+      "leg": "CT-400 claims triage (green screen)",
+      "descent_level": 6,
+      "carrier_class": "ui",
+      "inputs": [
+        "ADJUSTER NOTE",
+        "BRANCH",
+        "CLAIM AMOUNT",
+        "DAYS SINCE LOSS",
+        "POLICY TYPE"
+      ],
+      "outputs": [
+        "NOTE ECHO",
+        "RESERVE",
+        "ROUTE",
+        "SESSION"
+      ],
+      "settled": [],
+      "nondeterministic": [
+        "SESSION"
+      ],
+      "echo_like": [],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "silent_in_passive": [
+        "ROUTE"
+      ],
+      "crossings": [
+        {
+          "output": "ROUTE",
+          "input": "CLAIM AMOUNT",
+          "factor": 4
+        },
+        {
+          "output": "ROUTE",
+          "input": "DAYS SINCE LOSS",
+          "factor": 8
+        }
+      ],
+      "thresholds": [
+        {
+          "output": "ROUTE",
+          "input": "CLAIM AMOUNT",
+          "below": 2498.4375,
+          "above": 2500.0
+        },
+        {
+          "output": "ROUTE",
+          "input": "DAYS SINCE LOSS",
+          "below": 29,
+          "above": 30
+        }
+      ],
+      "candidates": [],
+      "n_nulls": 20,
+      "probe_calls": 206,
+      "seconds": 12.4,
+      "negative_reference_candidates": 0,
+      "decisions": {
+        "NOTE ECHO<-ADJUSTER NOTE": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "RESERVE<-ADJUSTER NOTE": "UNRESOLVED:NO_WITNESS",
+        "ROUTE<-ADJUSTER NOTE": "UNRESOLVED:NO_WITNESS",
+        "SESSION<-ADJUSTER NOTE": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "NOTE ECHO<-BRANCH": "UNRESOLVED:NO_WITNESS",
+        "RESERVE<-BRANCH": "UNRESOLVED:NO_WITNESS",
+        "ROUTE<-BRANCH": "UNRESOLVED:NO_WITNESS",
+        "SESSION<-BRANCH": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "NOTE ECHO<-CLAIM AMOUNT": "UNRESOLVED:NO_WITNESS",
+        "RESERVE<-CLAIM AMOUNT": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "ROUTE<-CLAIM AMOUNT": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "SESSION<-CLAIM AMOUNT": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "NOTE ECHO<-DAYS SINCE LOSS": "UNRESOLVED:NO_WITNESS",
+        "RESERVE<-DAYS SINCE LOSS": "UNRESOLVED:NO_WITNESS",
+        "ROUTE<-DAYS SINCE LOSS": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "SESSION<-DAYS SINCE LOSS": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "NOTE ECHO<-POLICY TYPE": "UNRESOLVED:NO_WITNESS",
+        "RESERVE<-POLICY TYPE": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "ROUTE<-POLICY TYPE": "UNRESOLVED:NO_WITNESS",
+        "SESSION<-POLICY TYPE": "NOT_APPLICABLE:NONDETERMINISTIC"
+      },
+      "form_fields": [
+        "CLAIM AMOUNT",
+        "POLICY TYPE",
+        "DAYS SINCE LOSS",
+        "BRANCH",
+        "ADJUSTER NOTE"
+      ]
+    },
+    "behavior": {
+      "leg": "acceptance service (behaviour only)",
+      "descent_level": 7,
+      "carrier_class": "behavior",
+      "inputs": [
+        "note",
+        "priority",
+        "qty",
+        "unit_price"
+      ],
+      "outputs": [
+        "accepted",
+        "latency_level",
+        "raw_latency_ms"
+      ],
+      "settled": [],
+      "nondeterministic": [
+        "raw_latency_ms"
+      ],
+      "echo_like": [],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "silent_in_passive": [
+        "accepted"
+      ],
+      "crossings": [
+        {
+          "output": "accepted",
+          "input": "qty",
+          "factor": 4
+        },
+        {
+          "output": "accepted",
+          "input": "unit_price",
+          "factor": 4
+        }
+      ],
+      "thresholds": [
+        {
+          "output": "accepted",
+          "input": "qty",
+          "below": 333,
+          "above": 334
+        },
+        {
+          "output": "accepted",
+          "input": "unit_price",
+          "below": 166.640625,
+          "above": 166.7578125
+        }
+      ],
+      "candidates": [],
+      "n_nulls": 12,
+      "probe_calls": 166,
+      "seconds": 7.1,
+      "negative_reference_candidates": 0,
+      "decisions": {
+        "accepted<-note": "UNRESOLVED:NO_WITNESS",
+        "latency_level<-note": "UNRESOLVED:NO_WITNESS",
+        "raw_latency_ms<-note": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "accepted<-priority": "UNRESOLVED:NO_WITNESS",
+        "latency_level<-priority": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "raw_latency_ms<-priority": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "accepted<-qty": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "latency_level<-qty": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "raw_latency_ms<-qty": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "accepted<-unit_price": "UNRESOLVED:BELOW_NEGATIVE_BANK",
+        "latency_level<-unit_price": "UNRESOLVED:NO_WITNESS",
+        "raw_latency_ms<-unit_price": "NOT_APPLICABLE:NONDETERMINISTIC"
+      },
+      "latency_levels_ms": [
+        3.21,
+        5.29,
+        9.3,
+        11.3
+      ],
+      "epistemic": "INFERRED_FROM_BEHAVIOUR"
+    }
+  }
+}

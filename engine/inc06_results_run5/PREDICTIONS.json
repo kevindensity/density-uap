@@ -1,0 +1,635 @@
+{
+  "seed": 1689680494,
+  "legs": {
+    "file": {
+      "leg": "IBS-7 batch invoicing",
+      "descent_level": 4,
+      "carrier_class": "file",
+      "inputs": [
+        "customer_ref",
+        "disc",
+        "qty",
+        "unit_price",
+        "warehouse"
+      ],
+      "outputs": [
+        "batch_no",
+        "invoice_total",
+        "ref_out",
+        "review"
+      ],
+      "settled": [
+        "dep:invoice_total<-disc",
+        "dep:invoice_total<-qty",
+        "dep:invoice_total<-unit_price",
+        "dep:ref_out<-customer_ref",
+        "dep:review<-qty",
+        "dep:review<-unit_price"
+      ],
+      "nondeterministic": [
+        "batch_no"
+      ],
+      "echo_like": [
+        "ref_out<-customer_ref"
+      ],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "silent_in_passive": [
+        "review"
+      ],
+      "crossings": [
+        {
+          "output": "review",
+          "input": "qty",
+          "factor": 64
+        },
+        {
+          "output": "review",
+          "input": "unit_price",
+          "factor": 64
+        }
+      ],
+      "thresholds": [
+        {
+          "output": "review",
+          "input": "qty",
+          "below": 154,
+          "above": 155
+        },
+        {
+          "output": "review",
+          "input": "unit_price",
+          "below": 1562.5,
+          "above": 1563.75
+        },
+        {
+          "output": "review",
+          "input": "unit_price",
+          "below": 39.8828125,
+          "above": 39.921875
+        },
+        {
+          "output": "review",
+          "input": "qty",
+          "below": 3,
+          "above": 4
+        }
+      ],
+      "candidates": [
+        {
+          "output": "ref_out",
+          "input": "customer_ref",
+          "score": 1.0,
+          "p_false": 0.0278
+        },
+        {
+          "output": "invoice_total",
+          "input": "disc",
+          "score": 1.0,
+          "p_false": 0.0278
+        },
+        {
+          "output": "review",
+          "input": "disc",
+          "score": 0.375,
+          "p_false": 0.0278
+        },
+        {
+          "output": "invoice_total",
+          "input": "qty",
+          "score": 1.0,
+          "p_false": 0.0278
+        },
+        {
+          "output": "review",
+          "input": "qty",
+          "score": 0.444,
+          "p_false": 0.0278
+        },
+        {
+          "output": "invoice_total",
+          "input": "unit_price",
+          "score": 1.0,
+          "p_false": 0.0278
+        },
+        {
+          "output": "review",
+          "input": "unit_price",
+          "score": 0.361,
+          "p_false": 0.0278
+        }
+      ],
+      "n_nulls": 35,
+      "probe_calls": 625,
+      "seconds": 3.7,
+      "negative_reference_candidates": 0,
+      "negative_filtered_outputs": {
+        "CONSTANT": [],
+        "ECHO": []
+      },
+      "decisions": {
+        "batch_no<-customer_ref": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "invoice_total<-customer_ref": "UNRESOLVED:NO_WITNESS",
+        "ref_out<-customer_ref": "CANDIDATE",
+        "review<-customer_ref": "UNRESOLVED:NO_WITNESS",
+        "batch_no<-disc": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "invoice_total<-disc": "CANDIDATE",
+        "ref_out<-disc": "UNRESOLVED:NO_WITNESS",
+        "review<-disc": "CANDIDATE",
+        "batch_no<-qty": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "invoice_total<-qty": "CANDIDATE",
+        "ref_out<-qty": "UNRESOLVED:NO_WITNESS",
+        "review<-qty": "CANDIDATE",
+        "batch_no<-unit_price": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "invoice_total<-unit_price": "CANDIDATE",
+        "ref_out<-unit_price": "UNRESOLVED:NO_WITNESS",
+        "review<-unit_price": "CANDIDATE",
+        "batch_no<-warehouse": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "invoice_total<-warehouse": "UNRESOLVED:NO_WITNESS",
+        "ref_out<-warehouse": "UNRESOLVED:NO_WITNESS",
+        "review<-warehouse": "UNRESOLVED:NO_WITNESS"
+      },
+      "archive_pairs": 40,
+      "ledger_unchanged_by_probing": true
+    },
+    "protocol": {
+      "leg": "pricing server (binary, undocumented)",
+      "descent_level": 5,
+      "carrier_class": "protocol",
+      "inputs": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5"
+      ],
+      "outputs": [
+        "r17",
+        "r18",
+        "r19",
+        "r20"
+      ],
+      "settled": [
+        "dep:r17<-t1",
+        "dep:r17<-t2",
+        "dep:r17<-t3",
+        "dep:r17<-t4",
+        "dep:r18<-t1",
+        "dep:r18<-t2",
+        "dep:r18<-t4",
+        "dep:r20<-t5"
+      ],
+      "nondeterministic": [
+        "r19"
+      ],
+      "echo_like": [
+        "r20<-t5"
+      ],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "silent_in_passive": [
+        "r18"
+      ],
+      "crossings": [
+        {
+          "output": "r18",
+          "input": "t1",
+          "factor": 64
+        },
+        {
+          "output": "r18",
+          "input": "t2",
+          "factor": 64
+        }
+      ],
+      "thresholds": [
+        {
+          "output": "r18",
+          "input": "t1",
+          "below": 249,
+          "above": 250
+        },
+        {
+          "output": "r18",
+          "input": "t2",
+          "below": 199939,
+          "above": 199940
+        },
+        {
+          "output": "r18",
+          "input": "t2",
+          "below": 3998,
+          "above": 3999
+        },
+        {
+          "output": "r18",
+          "input": "t1",
+          "below": 4,
+          "above": 5
+        }
+      ],
+      "candidates": [
+        {
+          "output": "r17",
+          "input": "t1",
+          "score": 1.0,
+          "p_false": 0.0323
+        },
+        {
+          "output": "r18",
+          "input": "t1",
+          "score": 0.389,
+          "p_false": 0.0323
+        },
+        {
+          "output": "r17",
+          "input": "t2",
+          "score": 1.0,
+          "p_false": 0.0323
+        },
+        {
+          "output": "r18",
+          "input": "t2",
+          "score": 0.417,
+          "p_false": 0.0323
+        },
+        {
+          "output": "r17",
+          "input": "t3",
+          "score": 1.0,
+          "p_false": 0.0323
+        },
+        {
+          "output": "r18",
+          "input": "t3",
+          "score": 0.375,
+          "p_false": 0.0323
+        },
+        {
+          "output": "r17",
+          "input": "t4",
+          "score": 1.0,
+          "p_false": 0.0323
+        },
+        {
+          "output": "r18",
+          "input": "t4",
+          "score": 0.5,
+          "p_false": 0.0323
+        },
+        {
+          "output": "r20",
+          "input": "t5",
+          "score": 1.0,
+          "p_false": 0.0323
+        }
+      ],
+      "n_nulls": 30,
+      "probe_calls": 817,
+      "seconds": 0.2,
+      "negative_reference_candidates": 0,
+      "negative_filtered_outputs": {
+        "CONSTANT": [
+          "r19"
+        ],
+        "CONSTANT_B": [
+          "r19"
+        ]
+      },
+      "decisions": {
+        "r17<-t1": "CANDIDATE",
+        "r18<-t1": "CANDIDATE",
+        "r19<-t1": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "r20<-t1": "UNRESOLVED:NO_WITNESS",
+        "r17<-t2": "CANDIDATE",
+        "r18<-t2": "CANDIDATE",
+        "r19<-t2": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "r20<-t2": "UNRESOLVED:NO_WITNESS",
+        "r17<-t3": "CANDIDATE",
+        "r18<-t3": "CANDIDATE",
+        "r19<-t3": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "r20<-t3": "UNRESOLVED:NO_WITNESS",
+        "r17<-t4": "CANDIDATE",
+        "r18<-t4": "CANDIDATE",
+        "r19<-t4": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "r20<-t4": "UNRESOLVED:NO_WITNESS",
+        "r17<-t5": "UNRESOLVED:NO_WITNESS",
+        "r18<-t5": "UNRESOLVED:NO_WITNESS",
+        "r19<-t5": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "r20<-t5": "CANDIDATE"
+      },
+      "grammar": {
+        "request_header": "d701",
+        "request_len_width": 1,
+        "request_fields": {
+          "t1": "u32be",
+          "t2": "u32be",
+          "t3": "text",
+          "t4": "text",
+          "t5": "text"
+        },
+        "response_header": "d781",
+        "response_fields": {
+          "r17": "u32be",
+          "r18": "u8be",
+          "r19": "u32be",
+          "r20": "text"
+        },
+        "request_grammars_rejected": 9,
+        "response_grammars_rejected": 9
+      },
+      "roundtrip_exact": true
+    },
+    "ui": {
+      "leg": "CT-400 claims triage (green screen)",
+      "descent_level": 6,
+      "carrier_class": "ui",
+      "inputs": [
+        "ADJUSTER NOTE",
+        "BRANCH",
+        "CLAIM AMOUNT",
+        "DAYS SINCE LOSS",
+        "POLICY TYPE"
+      ],
+      "outputs": [
+        "NOTE ECHO",
+        "RESERVE",
+        "ROUTE",
+        "SESSION"
+      ],
+      "settled": [
+        "dep:NOTE ECHO<-ADJUSTER NOTE",
+        "dep:RESERVE<-CLAIM AMOUNT",
+        "dep:RESERVE<-POLICY TYPE",
+        "dep:ROUTE<-CLAIM AMOUNT",
+        "dep:ROUTE<-DAYS SINCE LOSS"
+      ],
+      "nondeterministic": [
+        "SESSION"
+      ],
+      "echo_like": [
+        "NOTE ECHO<-ADJUSTER NOTE"
+      ],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "silent_in_passive": [
+        "ROUTE"
+      ],
+      "crossings": [
+        {
+          "output": "ROUTE",
+          "input": "CLAIM AMOUNT",
+          "factor": 2
+        },
+        {
+          "output": "ROUTE",
+          "input": "DAYS SINCE LOSS",
+          "factor": 8
+        }
+      ],
+      "thresholds": [
+        {
+          "output": "ROUTE",
+          "input": "CLAIM AMOUNT",
+          "below": 2499.609375,
+          "above": 2501.3671875
+        },
+        {
+          "output": "ROUTE",
+          "input": "DAYS SINCE LOSS",
+          "below": 29,
+          "above": 30
+        }
+      ],
+      "candidates": [
+        {
+          "output": "NOTE ECHO",
+          "input": "ADJUSTER NOTE",
+          "score": 1.0,
+          "p_false": 0.0323
+        },
+        {
+          "output": "RESERVE",
+          "input": "CLAIM AMOUNT",
+          "score": 1.0,
+          "p_false": 0.0323
+        },
+        {
+          "output": "ROUTE",
+          "input": "CLAIM AMOUNT",
+          "score": 0.25,
+          "p_false": 0.0323
+        },
+        {
+          "output": "ROUTE",
+          "input": "DAYS SINCE LOSS",
+          "score": 0.393,
+          "p_false": 0.0323
+        },
+        {
+          "output": "RESERVE",
+          "input": "POLICY TYPE",
+          "score": 1.0,
+          "p_false": 0.0323
+        }
+      ],
+      "n_nulls": 30,
+      "probe_calls": 450,
+      "seconds": 17.7,
+      "negative_reference_candidates": 0,
+      "negative_filtered_outputs": {
+        "CONSTANT": [
+          "SESSION"
+        ],
+        "CONSTANT_B": [
+          "SESSION"
+        ]
+      },
+      "decisions": {
+        "NOTE ECHO<-ADJUSTER NOTE": "CANDIDATE",
+        "RESERVE<-ADJUSTER NOTE": "UNRESOLVED:NO_WITNESS",
+        "ROUTE<-ADJUSTER NOTE": "UNRESOLVED:NO_WITNESS",
+        "SESSION<-ADJUSTER NOTE": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "NOTE ECHO<-BRANCH": "UNRESOLVED:NO_WITNESS",
+        "RESERVE<-BRANCH": "UNRESOLVED:NO_WITNESS",
+        "ROUTE<-BRANCH": "UNRESOLVED:NO_WITNESS",
+        "SESSION<-BRANCH": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "NOTE ECHO<-CLAIM AMOUNT": "UNRESOLVED:NO_WITNESS",
+        "RESERVE<-CLAIM AMOUNT": "CANDIDATE",
+        "ROUTE<-CLAIM AMOUNT": "CANDIDATE",
+        "SESSION<-CLAIM AMOUNT": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "NOTE ECHO<-DAYS SINCE LOSS": "UNRESOLVED:NO_WITNESS",
+        "RESERVE<-DAYS SINCE LOSS": "UNRESOLVED:NO_WITNESS",
+        "ROUTE<-DAYS SINCE LOSS": "CANDIDATE",
+        "SESSION<-DAYS SINCE LOSS": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "NOTE ECHO<-POLICY TYPE": "UNRESOLVED:NO_WITNESS",
+        "RESERVE<-POLICY TYPE": "CANDIDATE",
+        "ROUTE<-POLICY TYPE": "UNRESOLVED:NO_WITNESS",
+        "SESSION<-POLICY TYPE": "NOT_APPLICABLE:NONDETERMINISTIC"
+      },
+      "form_fields": [
+        "CLAIM AMOUNT",
+        "POLICY TYPE",
+        "DAYS SINCE LOSS",
+        "BRANCH",
+        "ADJUSTER NOTE"
+      ]
+    },
+    "behavior": {
+      "leg": "acceptance service (behaviour only)",
+      "descent_level": 7,
+      "carrier_class": "behavior",
+      "inputs": [
+        "note",
+        "priority",
+        "qty",
+        "unit_price"
+      ],
+      "outputs": [
+        "accepted",
+        "latency_level",
+        "raw_latency_ms"
+      ],
+      "settled": [
+        "dep:accepted<-qty",
+        "dep:accepted<-unit_price",
+        "dep:latency_level<-priority",
+        "dep:latency_level<-qty"
+      ],
+      "nondeterministic": [
+        "raw_latency_ms"
+      ],
+      "echo_like": [],
+      "twin": {
+        "replays": 29,
+        "upper_bound_change_rate": 0.0981,
+        "certified": true
+      },
+      "silent_in_passive": [
+        "accepted"
+      ],
+      "crossings": [
+        {
+          "output": "accepted",
+          "input": "qty",
+          "factor": 32
+        },
+        {
+          "output": "accepted",
+          "input": "unit_price",
+          "factor": 32
+        }
+      ],
+      "thresholds": [
+        {
+          "output": "accepted",
+          "input": "qty",
+          "below": 800,
+          "above": 801
+        },
+        {
+          "output": "accepted",
+          "input": "unit_price",
+          "below": 500.0,
+          "above": 500.390625
+        },
+        {
+          "output": "accepted",
+          "input": "unit_price",
+          "below": 24.951171875,
+          "above": 24.9755859375
+        },
+        {
+          "output": "accepted",
+          "input": "qty",
+          "below": 39,
+          "above": 40
+        }
+      ],
+      "candidates": [
+        {
+          "output": "latency_level",
+          "input": "note",
+          "score": 0.056,
+          "p_false": 0.04
+        },
+        {
+          "output": "latency_level",
+          "input": "priority",
+          "score": 1.0,
+          "p_false": 0.04
+        },
+        {
+          "output": "accepted",
+          "input": "qty",
+          "score": 0.444,
+          "p_false": 0.04
+        },
+        {
+          "output": "latency_level",
+          "input": "qty",
+          "score": 0.528,
+          "p_false": 0.04
+        },
+        {
+          "output": "accepted",
+          "input": "unit_price",
+          "score": 0.333,
+          "p_false": 0.04
+        },
+        {
+          "output": "latency_level",
+          "input": "unit_price",
+          "score": 0.056,
+          "p_false": 0.04
+        }
+      ],
+      "n_nulls": 24,
+      "probe_calls": 593,
+      "seconds": 18.2,
+      "negative_reference_candidates": 1,
+      "negative_filtered_outputs": {
+        "CONSTANT": [
+          "raw_latency_ms"
+        ],
+        "CONSTANT_B": [
+          "raw_latency_ms"
+        ],
+        "CONSTANT_C": [
+          "raw_latency_ms"
+        ]
+      },
+      "decisions": {
+        "accepted<-note": "UNRESOLVED:NO_WITNESS",
+        "latency_level<-note": "CANDIDATE",
+        "raw_latency_ms<-note": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "accepted<-priority": "UNRESOLVED:NO_WITNESS",
+        "latency_level<-priority": "CANDIDATE",
+        "raw_latency_ms<-priority": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "accepted<-qty": "CANDIDATE",
+        "latency_level<-qty": "CANDIDATE",
+        "raw_latency_ms<-qty": "NOT_APPLICABLE:NONDETERMINISTIC",
+        "accepted<-unit_price": "CANDIDATE",
+        "latency_level<-unit_price": "CANDIDATE",
+        "raw_latency_ms<-unit_price": "NOT_APPLICABLE:NONDETERMINISTIC"
+      },
+      "latency_levels_ms": [
+        3.35,
+        5.23,
+        9.28,
+        11.36,
+        16.06
+      ],
+      "epistemic": "INFERRED_FROM_BEHAVIOUR"
+    }
+  }
+}

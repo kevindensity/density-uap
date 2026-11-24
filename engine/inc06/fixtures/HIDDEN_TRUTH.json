@@ -1,0 +1,10 @@
+{
+  "file": {"invoice_total": ["qty", "unit_price", "disc"], "review": ["qty", "unit_price", "disc"], "ref_out": ["customer_ref"],
+           "_nondeterministic": ["batch_no"], "_echo": ["ref_out<-customer_ref"]},
+  "protocol": {"r17": ["t1", "t2", "t3", "t4"], "r18": ["t1", "t2", "t3", "t4"], "r20": ["t5"], "_nondeterministic": ["r19"], "_echo": ["r20<-t5"],
+               "_grammar": {"request_header": "d701", "response_header": "d781"}},
+  "ui": {"RESERVE": ["CLAIM AMOUNT", "POLICY TYPE"], "ROUTE": ["CLAIM AMOUNT", "DAYS SINCE LOSS"], "NOTE ECHO": ["ADJUSTER NOTE"],
+         "_nondeterministic": ["SESSION"], "_echo": ["NOTE ECHO<-ADJUSTER NOTE"],
+         "_fields": ["CLAIM AMOUNT", "POLICY TYPE", "DAYS SINCE LOSS", "BRANCH", "ADJUSTER NOTE"]},
+  "behavior": {"latency_level": ["qty", "priority"], "accepted": ["qty", "unit_price"], "_nondeterministic": ["raw_latency_ms"]}
+}

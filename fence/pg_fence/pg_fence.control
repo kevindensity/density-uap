@@ -1,0 +1,5 @@
+comment = 'Consequence Fence Protocol: resource-side verification of quorum-signed, prestate- and history-bound, single-use write grants'
+default_version = '0.1'
+module_pathname = '$libdir/pg_fence'
+relocatable = false
+schema = fence

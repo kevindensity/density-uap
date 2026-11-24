@@ -1,0 +1,34 @@
+{
+  "predictions_sha256": "0dfb43a9ffcde87c91cae0c06c93e37f72aca4de3b8abe99a86b5a721cf9f19f",
+  "gates": {
+    "G1_ZERO_UNSUPPORTED_SEMANTIC_PROMOTIONS": true,
+    "G2_NONDETERMINISTIC_FIELD_NEVER_SETTLED": true,
+    "G3_FALSE_DOC_CLAIM_NOT_PROMOTED": true,
+    "G4_TRUE_DEPENDENCY_DOC_DENIED_RECOVERED": true,
+    "G5_SELF_SETTLEMENT_REFUSED": true,
+    "G6_GUARDED_EFFECT_EXACTLY_ONCE": true,
+    "G7_NAIVE_NEGATIVE_CONTROL_DUPLICATES": true,
+    "G8_NUISANCE_INPUT_TS_NEVER_SETTLED": true,
+    "G9_ECHO_FIELD_FLAGGED": true
+  },
+  "passed": 9,
+  "total": 9,
+  "false_promotions": [],
+  "recovered": [
+    "dep:ref<-note",
+    "dep:tax<-discount_code",
+    "dep:tax<-qty",
+    "dep:tax<-region",
+    "dep:tax<-unit_price",
+    "dep:total<-discount_code",
+    "dep:total<-qty",
+    "dep:total<-unit_price"
+  ],
+  "missed_true_dependencies": [
+    "dep:status<-discount_code",
+    "dep:status<-qty",
+    "dep:status<-unit_price"
+  ],
+  "recall": 0.727,
+  "n_negative_nulls": 84
+}

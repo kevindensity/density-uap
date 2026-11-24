@@ -1,0 +1,16 @@
+{
+  "campaign": "UAP-INC-R3", "target": {"supabase_project": "rqryzvuulxfnluyuzedq", "name": "Density AB1 Production", "carrier_class": "db", "descent_level": 2},
+  "mode": "READ_ONLY_PASSIVE: SELECT statements only; no role created, no writes to the target",
+  "snapshot_cutoff_utc": "2026-11-21T13:07:17Z", "time_column": "observed_at",
+  "tables": ["authority_ops.observations", "authority_ops.federation_observations", "authority_ops.amendment_observations"],
+  "excluded_columns": ["detail", "observation_hash"],
+  "hash_columns_policy": "hash values never leave the target; only equality between expected and observed hashes, and distinct counts, are computed server-side",
+  "miners": {
+    "M0": "distinct/null counts per column",
+    "M1": "functional dependencies among categorical columns (comparison, statuses) and the derived predicate expected_hash = observed_hash",
+    "M5": "does comparison equal a function of hash equality? (derived-field rule)",
+    "M6": "cadence: inter-arrival seconds between consecutive observations (min, median, p99, max) and gaps over 10x median"
+  },
+  "settlement_rule": "zero violations, >= 30 rows, and an independent verifier formulation with zero counterexamples; otherwise reported unresolved",
+  "privacy": "only column names, category labels, counts, timing statistics and rule statements leave the target"
+}

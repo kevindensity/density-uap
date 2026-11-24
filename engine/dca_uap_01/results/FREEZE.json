@@ -1,0 +1,11 @@
+{
+  "source_freeze": {
+    "port/pipeline.py": "850b1d0812ada6653369f50b13692645a9bf732f6a6e006607500e0aeb97e19f",
+    "verifier/verifier.py": "61787268d93abf3ab64813334b870a7ab3479b4cac6b0dbad6e88a5c279b8110",
+    "fixture/target_server.py": "5d16be9cc81d43e4d2a6e68c966241f8a144e8d3a685cdf289fe0224236a0a80",
+    "run_dca_uap_01.py": "c7cb0ed3901f34bcc09ea31f835415baefad844f321aef4e7264c9a86edf3655",
+    "../supabase/migrations/0001_uap_safety_spine.sql": "1e530dc0c82037a23d213b7760c364fb9df2892f20695714663f0d605c5873e5"
+  },
+  "hidden_truth_sha256": "0e89ddcbae678e76596ad0a4bed3a2d32590e5ffe8aceea05cbb7328a1e8c19b",
+  "frozen_at": 1795257947.4172497
+}

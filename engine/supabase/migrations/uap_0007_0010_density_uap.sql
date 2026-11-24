@@ -1,0 +1,2 @@
+-- Applied to Density UAP (rtkslhpxdcjoeqhucebp) as migrations uap_0007_operator_anchors, uap_0008_enable_dblink_cron,
+-- uap_0009_continuous_recheck, uap_0010_acquisition_requests. Credential values are not reproduced here.

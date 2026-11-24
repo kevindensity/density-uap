@@ -1,0 +1,11 @@
+[package]
+name = "owner-issuer"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+p0-core = { path = "../p0-core" }
+tokio = { workspace = true }
+axum = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+anyhow = { workspace = true }

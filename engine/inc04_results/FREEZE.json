@@ -1,0 +1,8 @@
+{
+  "custody": {
+    "vault_run_id": "UAP-INC-04#392b8bfd90d94db1ace134fea4f569cb",
+    "merkle_root": "8835af847a75693846e80243b13c16e1cffcc216c091f78f12a456bf3680cac2",
+    "kind": "ORIGINAL_FREEZE"
+  },
+  "truth_sha256": "2f9630e395cf7e05d053b0e899c8c5a353a27d78513913d4c800ab6a107b5e98"
+}

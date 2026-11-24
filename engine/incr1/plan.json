@@ -1,0 +1,35 @@
+{
+  "campaign": "UAP-INC-R1",
+  "target": {"supabase_project": "dbhuqgoknhltcyjaajgs", "name": "Density Intelligence Workspace", "carrier_class": "db", "descent_level": 2},
+  "mode": "READ_ONLY_PASSIVE: catalog + existing rows; SELECT statements only; no writes, no probes, no rolled-back inserts",
+  "snapshot_cutoff_utc": "2026-11-21T12:40:06Z",
+  "snapshot_rule": "every query restricts to rows with created_at (or start_time for cron) < snapshot_cutoff_utc",
+  "excluded_schemas": ["auth", "vault", "net", "storage", "realtime", "supabase_migrations"],
+  "excluded_columns": ["rendered_text", "literal_text", "quote", "detail", "evidence", "reason", "last_error", "return_message", "command",
+                       "body", "usage", "limitations", "revocation_reason", "partial_source", "provider_request_id", "username", "database"],
+  "excluded_tables": ["public.diw_messages", "public.diw_source_blocks", "public.diw_profiles"],
+  "tables": {
+    "dica.field_claims": "created_at", "dica.source_claim_bindings": "created_at", "dica.field_lineage_events": "created_at",
+    "dica.field_investigations": "created_at", "dica.field_investigation_decisions": "created_at",
+    "dica.extraction_coverage_gaps": "created_at", "dica.extraction_repair_obligations": "created_at",
+    "dica.extraction_jobs": "created_at", "dica.extraction_page_receipts": "created_at", "dica.extraction_semantic_candidates": "created_at",
+    "dica.intelligence_runs": "created_at", "dica.jobs": "created_at", "dica.run_attempts": "created_at", "dica.run_events": "created_at",
+    "cron.job_run_details": "start_time"
+  },
+  "miners": {
+    "M0_profile": "distinct and null counts per non-excluded column",
+    "M1_functional_dependency": "for each pair of categorical columns (2..40 distinct values): A -> B holds when every A value maps to one B value",
+    "M2_inclusion_cardinality": "for shared keys between tables: coverage both ways and multiplicity (1:1, 1:n, partial)",
+    "M3_lifecycle": "event-type transitions within each run, ordered by sequence; terminal types",
+    "M4_timing_threshold": "per cron job: status by duration; a single duration cut separating statuses is a MAGNITUDE_RELATION candidate",
+    "M5_numeric_relations": "within-row numeric invariants (<=, equality) and ratio formulas among numeric columns; status vs a numeric cut"
+  },
+  "settlement_rule": {
+    "functional_dependency": "zero violating rows, at least 2 groups and 30 rows, AND an independent verifier query (self-join NOT EXISTS formulation) finds zero counterexamples",
+    "inclusion": "anti-join counts recomputed by the verifier formulation",
+    "near_rules": "rules with violations are reported with counts and never settled",
+    "silence": "absence of a rule is UNRESOLVED, never settled as independence"
+  },
+  "privacy": "results stored in Density UAP contain column names, category counts, rule statements and hashes only; no free text, no uuids, no row copies",
+  "anchors": "the user confirms or rejects a sample of learned rules after the run; those confirmations become the first real anchors"
+}
