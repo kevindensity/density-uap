@@ -3073,6 +3073,25 @@ begin
   return res || jsonb_build_object('capture_stream', cap, 'content_digest', dig, 'sources', src);
 end $function$
 ;
+CREATE OR REPLACE FUNCTION uac.acquire_openapi(p_scope uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare sc uac.scopes%rowtype; decl jsonb; lim int; body jsonb;
+begin
+  select * into sc from uac.scopes where stream_id = p_scope;
+  if sc.status is distinct from 'DECLARED' or not ('rest.openapi' = any (sc.routes)) then
+    return jsonb_build_object('decision', 'REJECT', 'reason', 'SCOPE_NOT_DECLARED_FOR_ROUTE'); end if;
+  select e.payload into decl from p0.events e where e.stream_id = p_scope and e.event_kind like 'scope:%->DECLARED' order by e.revision desc limit 1;
+  if decl->>'spec_url' is null then return jsonb_build_object('decision', 'REJECT', 'reason', 'SCOPE_DECLARES_NO_SPEC_URL'); end if;
+  lim := least(coalesce((decl->>'max_probes')::int, 0), coalesce(((select budget from uac.routes where route = 'rest.openapi')->>'probes_per_capture')::int, 25));
+  body := uac.openapi_observe(sc.locator, decl->>'spec_url', lim);
+  return uac.admit_capture(p_scope, 'rest.openapi', sc.locator, body,
+    jsonb_build_object('operations', body->'operation_count', 'probes', jsonb_array_length(coalesce(body->'probes', '[]')), 'undeclared_responses', jsonb_array_length(coalesce(body->'undeclared_responses', '[]'))));
+end $function$
+;
 CREATE OR REPLACE FUNCTION uac.acquire_supabase_catalog(p_scope uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -3113,6 +3132,25 @@ begin
                                     'contracts', jsonb_array_length(coalesce(body->'contracts', '[]')), 'previous_digest', prevdig, 'content_changed', prevdig is distinct from dig)),
     'authority_epoch', (select authority_epoch::text from p0_ledger.state where id = 1), 'expected_revision', '0'));
   return res || jsonb_build_object('capture_stream', cap, 'content_digest', dig);
+end $function$
+;
+CREATE OR REPLACE FUNCTION uac.admit_capture(p_scope uuid, p_route text, p_subject text, p_body jsonb, p_summary jsonb)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare cap uuid := gen_random_uuid(); obs timestamptz := clock_timestamp(); dig text; prevdig text; res jsonb;
+begin
+  dig := encode(extensions.digest(p_body::text, 'sha256'), 'hex');
+  select c.content_digest into prevdig from uac.captures c where c.scope_stream = p_scope order by c.observed_at desc, c.recorded_at desc limit 1;
+  insert into uac.capture_bodies (content_digest, body, size_bytes) values (dig, p_body, length(p_body::text)) on conflict (content_digest) do nothing;
+  res := p0.admit_event(jsonb_build_object('event_id', gen_random_uuid(), 'event_kind', 'capture:(none)->RECORDED', 'stream_id', cap,
+    'subject_type', 'capture', 'subject_id', p_subject || ':' || p_route || '@' || to_char(obs at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+    'payload', jsonb_build_object('scope_stream', p_scope, 'route', p_route, 'observed_at', obs, 'content_digest', dig,
+      'summary', coalesce(p_summary, '{}'::jsonb) || jsonb_build_object('sources', p_body->'sources', 'previous_digest', prevdig, 'content_changed', prevdig is distinct from dig)),
+    'authority_epoch', p0.current_epoch(), 'expected_revision', '0'));
+  return res || jsonb_build_object('capture_stream', cap, 'content_digest', dig, 'sources', p_body->'sources');
 end $function$
 ;
 CREATE OR REPLACE FUNCTION uac.credential_watch()
@@ -3171,6 +3209,65 @@ AS $function$
     array[extensions.http_header('Authorization', 'Bearer ' || p_token), extensions.http_header('User-Agent', 'density-uac'),
           extensions.http_header('Accept', 'application/vnd.github+json'), extensions.http_header('X-GitHub-Api-Version', '2022-11-28')],
     null, null)::extensions.http_request) $function$
+;
+CREATE OR REPLACE FUNCTION uac.openapi_observe(p_base text, p_spec_url text, p_max_probes integer)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare r extensions.http_response; spec jsonb; fmt text; ops jsonb := '[]'; cands jsonb := '[]'; probes jsonb := '[]'; secured jsonb := '[]'; undeclared jsonb := '[]'; unsafe jsonb := '[]';
+  -- a GET is not proof of safety: names that suggest mutation or long-running streams are never probed
+  unsafe_rx text := '(^|[^a-z])(delete|remove|destroy|purge|set|update|create|insert|reset|clear|logout|login|signout|send|post|submit|cancel|revoke|grant|approve|pay|charge|refund|transfer|execute|run|trigger|restart|shutdown|drip|delay|stream|sse|websocket|redirect)([^a-z]|$)';
+  p record; m text; op jsonb; global_sec boolean; req_params boolean; declared jsonb; pr extensions.http_response; ct text; keys jsonb; n int := 0; spec_src text; methods jsonb := '{}';
+begin
+  perform extensions.http_set_curlopt('CURLOPT_TIMEOUT_MS', '10000');
+  begin
+    r := extensions.http(('GET', p_spec_url, array[extensions.http_header('User-Agent', 'density-uac/rest.openapi'), extensions.http_header('Accept', 'application/json')], null, null)::extensions.http_request);
+    if r.status = 200 then spec := r.content::jsonb; spec_src := 'ok'; else spec_src := 'failed: HTTP ' || r.status; end if;
+  exception when others then spec_src := 'failed: ' || left(sqlerrm, 80); end;
+  if spec is null then
+    return jsonb_build_object('base_url', p_base, 'spec_url', p_spec_url, 'sources', jsonb_build_object('spec', spec_src, 'probes', 'not run: no spec'));
+  end if;
+  fmt := case when spec ? 'openapi' then 'openapi ' || (spec->>'openapi') when spec ? 'swagger' then 'swagger ' || (spec->>'swagger') else 'unknown' end;
+  global_sec := jsonb_array_length(coalesce(spec->'security', '[]')) > 0;
+  for p in select key as path, value as item from jsonb_each(coalesce(spec->'paths', '{}')) order by key loop
+    foreach m in array array['get','head','post','put','patch','delete','options'] loop
+      op := p.item->m;
+      continue when op is null;
+      ops := ops || to_jsonb(upper(m) || ' ' || p.path);
+      methods := methods || jsonb_build_object(upper(m), coalesce((methods->>upper(m))::int, 0) + 1);
+      req_params := exists (select 1 from jsonb_array_elements(coalesce(op->'parameters', '[]') || coalesce(p.item->'parameters', '[]')) x where coalesce((x->>'required')::boolean, false))
+                    or position('{' in p.path) > 0 or op ? 'requestBody';
+      if (op ? 'security' and jsonb_array_length(op->'security') > 0) or (global_sec and not (op ? 'security')) then
+        secured := secured || to_jsonb(upper(m) || ' ' || p.path);
+      elsif m = 'get' and not req_params and lower(p.path || ' ' || coalesce(op->>'operationId', '') || ' ' || coalesce(op->>'summary', '')) ~ unsafe_rx then
+        unsafe := unsafe || to_jsonb('GET ' || p.path);
+      elsif m = 'get' and not req_params then
+        cands := cands || jsonb_build_object('op', 'GET ' || p.path, 'path', p.path, 'declared', coalesce((select jsonb_agg(k) from jsonb_object_keys(coalesce(op->'responses', '{}')) k), '[]'));
+      end if;
+    end loop;
+  end loop;
+  for op in select * from jsonb_array_elements(cands) limit greatest(least(p_max_probes, 25), 0) loop
+    begin
+      pr := extensions.http(('GET', rtrim(p_base, '/') || (op->>'path'), array[extensions.http_header('User-Agent', 'density-uac/rest.openapi')], null, null)::extensions.http_request);
+      ct := split_part(coalesce((select h.value from unnest(pr.headers) h where lower(h.field) = 'content-type' limit 1), ''), ';', 1);
+      keys := null;
+      if ct like '%json%' then begin keys := (select jsonb_agg(k order by k) from jsonb_object_keys(pr.content::jsonb) k); exception when others then keys := null; end; end if;
+      probes := probes || jsonb_build_object('op', op->>'op', 'status', pr.status, 'content_type', ct, 'json_keys', keys);
+      if not ((op->'declared') ? pr.status::text or (op->'declared') ? 'default' or (op->'declared') ? (left(pr.status::text, 1) || 'XX')) then
+        undeclared := undeclared || to_jsonb((op->>'op') || ' -> ' || pr.status);
+      end if;
+    exception when others then probes := probes || jsonb_build_object('op', op->>'op', 'status', null, 'error', left(sqlerrm, 80)); end;
+    n := n + 1;
+  end loop;
+  return jsonb_build_object('base_url', p_base, 'spec_url', p_spec_url, 'spec_format', fmt,
+    'api_title', spec#>>'{info,title}', 'api_version', spec#>>'{info,version}',
+    'servers', coalesce((select jsonb_agg(s->>'url') from jsonb_array_elements(spec->'servers') s), case when spec ? 'host' then jsonb_build_array(coalesce(spec->>'host', '') || coalesce(spec->>'basePath', '')) end),
+    'operations', ops, 'operation_count', jsonb_array_length(ops), 'methods', methods, 'secured_operations', secured,
+    'probe_candidates', jsonb_array_length(cands), 'skipped_unsafe', unsafe, 'probes', probes, 'undeclared_responses', undeclared,
+    'sources', jsonb_build_object('spec', spec_src, 'probes', case when n = jsonb_array_length(cands) then 'ok' else 'partial: ' || n || ' of ' || jsonb_array_length(cands) || ' safe operations probed (budget)' end));
+end $function$
 ;
 CREATE OR REPLACE FUNCTION uac.reread_admit()
  RETURNS trigger
@@ -4131,9 +4228,10 @@ AS $function$
 declare run_id bigint; st jsonb := '{}'; step text; res jsonb;
 begin
   insert into uap.cycle_runs default values returning cycle_runs.id into run_id;
-  foreach step in array array['credential_watch', 'discover_domain', 'discover_idp', 'discover_capture', 'compile', 'verifier_sweep', 'admit_receipted', 'standings', 'bridges', 'promote', 'reconcile_bridges', 'audit_bridge_loops', 'corroborate'] loop
+  foreach step in array array['credential_watch', 'discover_domain', 'discover_idp', 'discover_capture', 'compile', 'reopen_changed_evidence', 'verifier_sweep', 'admit_receipted', 'standings', 'bridges', 'promote', 'reconcile_bridges', 'audit_bridge_loops', 'corroborate'] loop
     begin
       res := case step
+        when 'reopen_changed_evidence' then uap.reopen_changed_evidence()
         when 'discover_domain'   then uap.discover_domain_claims()
         when 'credential_watch'  then uac.credential_watch()
         when 'discover_idp'      then uap.discover_idp_claims()
@@ -4784,6 +4882,32 @@ begin
     end if;
   end loop;
   return jsonb_build_object('moved', moved);
+end $function$
+;
+CREATE OR REPLACE FUNCTION uap.reopen_changed_evidence(p_limit integer DEFAULT 500)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare c record; a jsonb; st record; r jsonb; reopened int := 0; kept jsonb := '{}'; k text;
+begin
+  for c in select cc.consequence_key, s.id as sid, s.status::text as status from uap.capture_claims cc join sem.settlements s on s.consequence_key = cc.consequence_key
+            where s.status::text in ('SETTLED_TRUE','SETTLED_FALSE') order by cc.consequence_key limit p_limit loop
+    a := port.answer(c.consequence_key, (select array_agg(stream_id) from uac.scopes));
+    continue when a->>'verdict' <> 'NEEDS_EVIDENCE';
+    if coalesce(a->>'custody', '') <> '' or coalesce(a->>'reason', '') <> '' then
+      k := coalesce(nullif(a->>'custody', ''), left(a->>'reason', 60));
+      kept := kept || jsonb_build_object(k, coalesce((kept->>k)::int, 0) + 1);
+      continue;
+    end if;
+    select revision, head_digest into st from p0.streams where stream_id = c.sid;
+    r := p0.admit_event(jsonb_build_object('event_id', gen_random_uuid(), 'event_kind', 'settlement:' || c.status || '->UNRESOLVED', 'stream_id', c.sid,
+      'subject_type', 'settlement', 'subject_id', c.consequence_key, 'payload', jsonb_build_object('reason', 'evidence changed since settlement; re-verification required'),
+      'authority_epoch', p0.current_epoch(), 'expected_revision', st.revision::text, 'expected_predecessor', st.head_digest));
+    if r->>'decision' = 'ACCEPT' then reopened := reopened + 1; else kept := kept || jsonb_build_object('reopen ' || coalesce(r->>'reason', r->>'decision'), 1); end if;
+  end loop;
+  return jsonb_build_object('reopened', reopened, 'kept_flagged', kept);
 end $function$
 ;
 CREATE OR REPLACE FUNCTION uap.rotate_verifier(p_system text)
