@@ -1,0 +1,21 @@
+{
+  "route": "rest.openapi",
+  "family": "rest-openapi",
+  "risk": "probe",
+  "collector": "sql:uac.acquire_openapi",
+  "source_path": "kernel/root/SCHEMA_SNAPSHOT.sql",
+  "scope_kinds": [
+    "api"
+  ],
+  "credential_required": false,
+  "reread_route": "none",
+  "budget": {
+    "methods": [
+      "GET"
+    ],
+    "probes_per_run": 25,
+    "probes_per_capture": 25
+  },
+  "contract_version": 1,
+  "description": "reads a published OpenAPI or Swagger description, catalogues every operation, and probes unsecured parameter-free GETs whose names do not suggest mutation, within the signed limit"
+}

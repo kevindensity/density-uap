@@ -895,7 +895,7 @@ CREATE OR REPLACE FUNCTION gates.provenance_checks()
  SECURITY DEFINER
  SET search_path TO ''
 AS $function$
-declare tok text; r record; prov text; head text; b record; row_line text; src_path text; src_sha text; got text; content text;
+declare tok text; r record; prov text; head text; b record; row_line text; src_path text; src_sha text; got text; content text; build_commit text;
 begin
   tok := broker.redeem(broker.issue_lease('uac_github_token', 'github.git.tree', null, 'provenance gate: read kevindensity/density-uap', interval '5 minutes', 10));
   r := uac.gh('/repos/kevindensity/density-uap/commits/main', tok);
@@ -914,12 +914,17 @@ begin
                                                    else 'admitted build ' || left(b.artifact_digest, 12) || ' listed' end; return next;
     if row_line is null then continue; end if;
     src_path := substring(row_line from '`(services/[^`]+)`'); src_sha := (select m[1] from regexp_matches(row_line, '`([0-9a-f]{64})`', 'g') m where m[1] <> b.artifact_digest limit 1);
-    r := uac.gh('/repos/kevindensity/density-uap/contents/' || src_path || '?ref=' || head, tok);
+    build_commit := substring(row_line from '`([0-9a-f]{40})`');
+    if build_commit is null then
+      check_name := 'provenance.' || b.component || '_source_committed'; passed := false;
+      detail := 'PROVENANCE.md row names no source commit for ' || left(b.artifact_digest, 12); return next; continue;
+    end if;
+    r := uac.gh('/repos/kevindensity/density-uap/contents/' || src_path || '?ref=' || build_commit, tok);
     if r.status = 200 then
       got := encode(extensions.digest(decode(replace((r.content::jsonb)->>'content', E'\n', ''), 'base64'), 'sha256'), 'hex');
     else got := 'unreadable (' || r.status || ')'; end if;
     check_name := 'provenance.' || b.component || '_source_committed'; passed := coalesce(got = src_sha, false);
-    detail := src_path || ' at ' || left(head, 12) || ': ' || left(got, 16) || case when got = src_sha then ' matches' else ' does not match ' || left(coalesce(src_sha, 'nothing'), 16) end; return next;
+    detail := src_path || ' at build commit ' || left(build_commit, 12) || ': ' || left(got, 16) || case when got = src_sha then ' matches' else ' does not match ' || left(coalesce(src_sha, 'nothing'), 16) end; return next;
   end loop;
 end $function$
 ;

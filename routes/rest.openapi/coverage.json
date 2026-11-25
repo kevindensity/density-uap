@@ -1,0 +1,100 @@
+[
+  {
+    "field": "api_title",
+    "coverage": "COMPLETE",
+    "source_key": "spec",
+    "ok_pattern": "^ok$",
+    "basis": "from the description"
+  },
+  {
+    "field": "api_version",
+    "coverage": "COMPLETE",
+    "source_key": "spec",
+    "ok_pattern": "^ok$",
+    "basis": "from the description"
+  },
+  {
+    "field": "base_url",
+    "coverage": "COMPLETE",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "the declared base URL"
+  },
+  {
+    "field": "methods",
+    "coverage": "COMPLETE",
+    "source_key": "spec",
+    "ok_pattern": "^ok$",
+    "basis": "operations per HTTP method in the published description"
+  },
+  {
+    "field": "operation_count",
+    "coverage": "COMPLETE",
+    "source_key": "spec",
+    "ok_pattern": "^ok$",
+    "basis": "count of operations in the published description"
+  },
+  {
+    "field": "operations",
+    "coverage": "COMPLETE",
+    "source_key": "spec",
+    "ok_pattern": "^ok$",
+    "basis": "every operation in the published description"
+  },
+  {
+    "field": "probe_candidates",
+    "coverage": "COMPLETE",
+    "source_key": "spec",
+    "ok_pattern": "^ok$",
+    "basis": "number of operations the safety rules allow probing"
+  },
+  {
+    "field": "probes",
+    "coverage": "PARTIAL",
+    "source_key": "probes",
+    "ok_pattern": "^ok$",
+    "basis": "only unsecured parameter-free GETs that do not suggest mutation, within the signed limit"
+  },
+  {
+    "field": "secured_operations",
+    "coverage": "COMPLETE",
+    "source_key": "spec",
+    "ok_pattern": "^ok$",
+    "basis": "operations whose description requires security (not proof that others are open)"
+  },
+  {
+    "field": "servers",
+    "coverage": "COMPLETE",
+    "source_key": "spec",
+    "ok_pattern": "^ok$",
+    "basis": "servers named in the description"
+  },
+  {
+    "field": "skipped_unsafe",
+    "coverage": "COMPLETE",
+    "source_key": "spec",
+    "ok_pattern": "^ok$",
+    "basis": "every GET excluded by the safety filter"
+  },
+  {
+    "field": "spec_format",
+    "coverage": "COMPLETE",
+    "source_key": "spec",
+    "ok_pattern": "^ok$",
+    "basis": "OpenAPI or Swagger version"
+  },
+  {
+    "field": "spec_url",
+    "coverage": "COMPLETE",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "the declared description URL"
+  },
+  {
+    "field": "undeclared_responses",
+    "coverage": "PARTIAL",
+    "source_key": "probes",
+    "ok_pattern": "^ok$",
+    "basis": "only among the probed operations"
+  }
+]
