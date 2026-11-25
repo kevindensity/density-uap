@@ -3978,6 +3978,7 @@ begin
         select 1 from verify.blind_commitments bc join p0.keys k on k.key_id = bc.key_id and k.role = 'VERIFIER' and k.status = 'active'
          where bc.stream_id = r.stream_id and bc.key_id = r.key_id and bc.commitment_sha256 = r.basis->>'blind_commitment'
            and bc.committed_at <= r.signed_at
+           and bc.evidence = verify.evidence_text(uap.claim_submission(r.consequence_key)->'payload'->'capture_digests')
            and bc.verifier_value = (r.event_kind like '%SETTLED_TRUE')
            and encode(extensions.digest(verify.blind_message(bc.stream_id, bc.verifier_value, bc.evidence), 'sha256'), 'hex') = bc.commitment_sha256
            and pgsodium.crypto_sign_verify_detached(decode(bc.sig, 'hex'), verify.blind_message(bc.stream_id, bc.verifier_value, bc.evidence), k.pubkey)) then
@@ -5253,9 +5254,11 @@ create table verify.kernel_receipts (
   sig text not null,
   basis jsonb not null,
   signed_at timestamp with time zone not null default now(),
-  admitted_event uuid
+  admitted_event uuid,
+  receipt_id uuid not null default gen_random_uuid()
 );
-alter table only verify.kernel_receipts add constraint kernel_receipts_pkey PRIMARY KEY (stream_id);
+alter table only verify.kernel_receipts add constraint kernel_receipts_one_per_event UNIQUE (stream_id, identity_digest);
+alter table only verify.kernel_receipts add constraint kernel_receipts_pkey PRIMARY KEY (receipt_id);
 alter table verify.kernel_receipts enable row level security;
 create policy verify_kernel_receipts_read on verify.kernel_receipts as permissive for select to uacd, uapd, verifierd, p0d, gatewayd, portd using (true);
 create policy verify_kernel_receipts_write on verify.kernel_receipts as permissive for all to verifierd using (true) with check (true);
@@ -5332,4 +5335,23 @@ CREATE OR REPLACE FUNCTION verify.blind_message(p_stream uuid, p_value boolean, 
  IMMUTABLE
 AS $function$
   select convert_to('DENSITY-BLIND/1|' || p_stream::text || '|' || case when p_value then 'true' else 'false' end || '|' || p_evidence, 'UTF8') $function$
+;
+CREATE OR REPLACE FUNCTION verify.evidence_text(p_digests jsonb)
+ RETURNS text
+ LANGUAGE sql
+ IMMUTABLE
+ SET search_path TO ''
+AS $function$
+  select string_agg(key || '=' || value, ',' order by key) from jsonb_each_text(coalesce(p_digests, '{}'::jsonb)) $function$
+;
+CREATE OR REPLACE FUNCTION verify.needs_receipt(p_stream uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+  select not exists (
+    select 1 from verify.kernel_receipts k
+     where k.stream_id = p_stream
+       and k.signed_at > coalesce((select max(e.admitted_at) from p0.events e where e.stream_id = p_stream and e.event_kind like 'settlement:%->UNRESOLVED'), '-infinity'::timestamptz)) $function$
 ;

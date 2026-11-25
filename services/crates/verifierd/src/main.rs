@@ -157,12 +157,12 @@ fn path_values(body: &Value, path: &str) -> Vec<String> {
     } else { body[path].as_str().map(|s| vec![s.to_string()]).unwrap_or_default() }
 }
 
-/// Sweep: find unresolved capture claims without a receipt, take the compiler's requested submission, recompute
+/// Sweep: find unresolved capture claims with no receipt since their latest reopening (verify.needs_receipt), take the compiler's requested submission, recompute
 /// independently, and record a signed receipt only where the verifier's own value agrees.
 async fn sweep(State(a): S, Json(body): Json<Value>) -> (StatusCode, Json<Value>) {
     if let Err(e) = check_trigger(&a, &body, "sweep-capture-claims") { return e; }
     let rows = match a.db.query("select s.id, s.consequence_key from sem.settlements s join uap.capture_claims c using (consequence_key)
-                                  where s.status::text = 'UNRESOLVED' and not exists (select 1 from verify.kernel_receipts k where k.stream_id = s.id)", &[]).await {
+                                  where s.status::text = 'UNRESOLVED' and verify.needs_receipt(s.id)", &[]).await {
         Ok(r) => r, Err(e) => return refuse("RECORDS_UNAVAILABLE", json!(e.to_string())) };
     let (mut signed, mut refused) = (0, vec![]);
     for r in rows {
