@@ -1,0 +1,17 @@
+{
+  "route": "idp.google.workspace",
+  "family": "identity-provider",
+  "risk": "read-only",
+  "collector": "sql:uac.acquire_google_workspace",
+  "source_path": "kernel/root/SCHEMA_SNAPSHOT.sql",
+  "scope_kinds": [
+    "idp"
+  ],
+  "credential_required": true,
+  "reread_route": "none",
+  "budget": {
+    "pages_per_capture": 20
+  },
+  "contract_version": 1,
+  "description": "directory users, groups and app authorizations of a consented Google Workspace, read-only"
+}

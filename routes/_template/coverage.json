@@ -1,0 +1,4 @@
+[
+  { "field": "<top-level field>", "coverage": "COMPLETE | PARTIAL", "source_key": "<key in body.sources, or null>",
+    "ok_pattern": "^ok$", "basis": "why this field is complete or partial" }
+]

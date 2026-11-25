@@ -1,0 +1,17 @@
+{
+  "route": "public.domain",
+  "family": "public-footprint",
+  "risk": "read-only",
+  "collector": "sql:uac.acquire_domain",
+  "source_path": "kernel/root/SCHEMA_SNAPSHOT.sql",
+  "scope_kinds": [
+    "domain"
+  ],
+  "credential_required": false,
+  "reread_route": "reread.verifier-host",
+  "budget": {
+    "requests_per_capture": 40
+  },
+  "contract_version": 1,
+  "description": "DNS over HTTPS, certificate transparency, IP ownership and the homepage of a declared domain"
+}

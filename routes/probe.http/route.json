@@ -1,0 +1,21 @@
+{
+  "route": "probe.http",
+  "family": "http-probe",
+  "risk": "probe",
+  "collector": "service:sprites/kernel/uac_probe_service.py",
+  "source_path": "sprites/kernel/uac_probe_service.py",
+  "scope_kinds": [
+    "probe"
+  ],
+  "credential_required": false,
+  "reread_route": "none",
+  "budget": {
+    "methods": [
+      "GET",
+      "HEAD"
+    ],
+    "probes_per_run": 2500
+  },
+  "contract_version": 1,
+  "description": "budgeted read-only HTTP probes of a declared endpoint, spooled before sealing"
+}

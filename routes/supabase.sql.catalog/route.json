@@ -1,0 +1,17 @@
+{
+  "route": "supabase.sql.catalog",
+  "family": "sql-catalog",
+  "risk": "read-only",
+  "collector": "sql:uac.acquire_supabase_catalog",
+  "source_path": "kernel/root/SCHEMA_SNAPSHOT.sql",
+  "scope_kinds": [
+    "supabase"
+  ],
+  "credential_required": true,
+  "reread_route": "none",
+  "budget": {
+    "queries_per_capture": 20
+  },
+  "contract_version": 1,
+  "description": "catalog and migration history of a declared Postgres project, read-only"
+}

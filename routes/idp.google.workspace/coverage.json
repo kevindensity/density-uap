@@ -1,0 +1,30 @@
+[
+  {
+    "field": "apps",
+    "coverage": "PARTIAL",
+    "source_key": "authorized_apps_180d",
+    "ok_pattern": "^ok$",
+    "basis": "authorizations in the last 180 days only"
+  },
+  {
+    "field": "domain",
+    "coverage": "COMPLETE",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "the workspace domain"
+  },
+  {
+    "field": "groups",
+    "coverage": "PARTIAL",
+    "source_key": "directory_groups",
+    "ok_pattern": "^ok$",
+    "basis": "first 200 groups"
+  },
+  {
+    "field": "users",
+    "coverage": "COMPLETE",
+    "source_key": "directory_users",
+    "ok_pattern": "^ok$",
+    "basis": "every page of the directory"
+  }
+]

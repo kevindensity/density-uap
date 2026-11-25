@@ -1,0 +1,17 @@
+{
+  "route": "github.git.tree",
+  "family": "git",
+  "risk": "read-only",
+  "collector": "sql:uac.acquire_github_tree",
+  "source_path": "kernel/root/SCHEMA_SNAPSHOT.sql",
+  "scope_kinds": [
+    "github"
+  ],
+  "credential_required": true,
+  "reread_route": "none",
+  "budget": {
+    "requests_per_capture": 10
+  },
+  "contract_version": 1,
+  "description": "full recursive tree, head and recent commits of a declared repository"
+}

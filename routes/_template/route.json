@@ -1,0 +1,12 @@
+{
+  "route": "family.name",
+  "family": "one of: public-footprint, sql-catalog, git, identity-provider, http-probe, dns-probe, rest-openapi, linux-host, message-queue, cloud-api",
+  "risk": "read-only | probe",
+  "collector": "sql:uac.acquire_<name>  or  service:<repository path>",
+  "source_path": "routes/<route>/collector.sql",
+  "scope_kinds": ["<scope kind>"],
+  "credential_required": false,
+  "reread_route": "none | <independent route>",
+  "budget": { "requests_per_capture": 20 },
+  "description": "what this route observes, in one sentence"
+}

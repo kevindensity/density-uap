@@ -1,0 +1,9 @@
+[
+  {
+    "field": "*",
+    "coverage": "PARTIAL",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "sampled queries within the signed budget; behaviour outside the samples is not observed"
+  }
+]

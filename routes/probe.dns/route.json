@@ -1,0 +1,17 @@
+{
+  "route": "probe.dns",
+  "family": "dns-probe",
+  "risk": "probe",
+  "collector": "service:sprites/kernel/uac_probe_service.py",
+  "source_path": "sprites/kernel/uac_probe_service.py",
+  "scope_kinds": [
+    "probe"
+  ],
+  "credential_required": false,
+  "reread_route": "none",
+  "budget": {
+    "probes_per_run": 2500
+  },
+  "contract_version": 1,
+  "description": "budgeted DNS queries to a declared resolver, spooled before sealing"
+}

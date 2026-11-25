@@ -1,0 +1,9 @@
+[
+  {
+    "field": "*",
+    "coverage": "COMPLETE",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "full-table reads of the catalog"
+  }
+]

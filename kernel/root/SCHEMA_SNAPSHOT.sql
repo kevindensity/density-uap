@@ -889,6 +889,40 @@ begin
   check_name := 'no_occam.heuristics_without_authority_decide_nothing_final'; passed := n = 0; detail := n || ' authority-less heuristics claiming a final decision'; return next;
 end $function$
 ;
+CREATE OR REPLACE FUNCTION gates.provenance_checks()
+ RETURNS TABLE(check_name text, passed boolean, detail text)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare tok text; r record; prov text; head text; b record; row_line text; src_path text; src_sha text; got text; content text;
+begin
+  tok := broker.redeem(broker.issue_lease('uac_github_token', 'github.git.tree', null, 'provenance gate: read kevindensity/density-uap', interval '5 minutes', 10));
+  r := uac.gh('/repos/kevindensity/density-uap/commits/main', tok);
+  if r.status <> 200 then
+    check_name := 'provenance.repository_readable'; passed := false;
+    detail := 'GitHub returned ' || r.status || ' for kevindensity/density-uap: the provenance credential cannot read the repository'; return next; return;
+  end if;
+  head := (r.content::jsonb)->>'sha';
+  check_name := 'provenance.repository_readable'; passed := true; detail := 'main at ' || head; return next;
+  r := uac.gh('/repos/kevindensity/density-uap/contents/PROVENANCE.md?ref=' || head, tok);
+  prov := convert_from(decode(replace((r.content::jsonb)->>'content', E'\n', ''), 'base64'), 'UTF8');
+  for b in select sb.component, sb.artifact_digest from p0.secure_boot sb where sb.status = 'ADMITTED' order by sb.component loop
+    select l into row_line from regexp_split_to_table(prov, E'\n') l where l like '%`' || b.artifact_digest || '`%' limit 1;
+    check_name := 'provenance.' || b.component || '_listed';
+    passed := row_line is not null; detail := case when row_line is null then 'admitted build ' || left(b.artifact_digest, 12) || ' is not in PROVENANCE.md at ' || left(head, 12)
+                                                   else 'admitted build ' || left(b.artifact_digest, 12) || ' listed' end; return next;
+    if row_line is null then continue; end if;
+    src_path := substring(row_line from '`(services/[^`]+)`'); src_sha := (select m[1] from regexp_matches(row_line, '`([0-9a-f]{64})`', 'g') m where m[1] <> b.artifact_digest limit 1);
+    r := uac.gh('/repos/kevindensity/density-uap/contents/' || src_path || '?ref=' || head, tok);
+    if r.status = 200 then
+      got := encode(extensions.digest(decode(replace((r.content::jsonb)->>'content', E'\n', ''), 'base64'), 'sha256'), 'hex');
+    else got := 'unreadable (' || r.status || ')'; end if;
+    check_name := 'provenance.' || b.component || '_source_committed'; passed := coalesce(got = src_sha, false);
+    detail := src_path || ' at ' || left(head, 12) || ': ' || left(got, 16) || case when got = src_sha then ' matches' else ' does not match ' || left(coalesce(src_sha, 'nothing'), 16) end; return next;
+  end loop;
+end $function$
+;
 CREATE OR REPLACE FUNCTION gates.reconstruction_checks()
  RETURNS TABLE(check_name text, passed boolean, detail text)
  LANGUAGE plpgsql
@@ -1000,6 +1034,46 @@ begin
   detail := 'epoch ' || (r2->>'epoch') || ' > highest seen ' || (r2->>'highest_seen'); return next;
 end $function$
 ;
+CREATE OR REPLACE FUNCTION gates.route_checks()
+ RETURNS TABLE(check_name text, passed boolean, detail text)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare bad text; tok text; r record; snap text; missing text := null; head text;
+begin
+  select string_agg(distinct x, ', ') into bad from uac.scopes s, unnest(s.routes) x where s.status = 'DECLARED' and not exists (select 1 from uac.routes ro where ro.route = x);
+  check_name := 'routes.every_scope_uses_a_registered_route'; passed := bad is null; detail := coalesce('unregistered: ' || bad, (select count(*) from uac.routes) || ' registered routes cover every declared scope'); return next;
+  select string_agg(ro.route, ', ') into bad from uac.routes ro where not exists (select 1 from uac.route_coverage rc where rc.route = ro.route);
+  check_name := 'routes.every_route_declares_coverage'; passed := bad is null; detail := coalesce('no coverage policy: ' || bad, 'every route declares field coverage'); return next;
+  select string_agg(ro.route, ', ') into bad from uac.routes ro where ro.collector like 'sql:%' and to_regprocedure(substring(ro.collector from 5) || '(uuid)') is null;
+  check_name := 'routes.every_sql_collector_exists'; passed := bad is null; detail := coalesce('missing collector: ' || bad, 'every SQL collector is installed'); return next;
+  select string_agg(ro.route, ', ') into bad from uac.routes ro where ro.credential_required
+     and not exists (select 1 from p0.credentials c where ro.route = any (c.routes) and c.status <> 'EXPIRED');
+  check_name := 'routes.credentialed_routes_have_a_leasable_credential'; passed := bad is null; detail := coalesce('no valid credential: ' || bad, 'every credentialed route has a registered, unexpired credential'); return next;
+  select string_agg(ro.route, ', ') into bad from uac.routes ro where ro.collector like 'sql:%' and ro.credential_required
+     and position('broker.issue_lease' in pg_get_functiondef(to_regprocedure(substring(ro.collector from 5) || '(uuid)'))) = 0
+     and position('broker.google_access_token' in pg_get_functiondef(to_regprocedure(substring(ro.collector from 5) || '(uuid)'))) = 0;
+  check_name := 'routes.credentialed_collectors_go_through_the_broker'; passed := bad is null; detail := coalesce('holds credentials directly: ' || bad, 'credentialed collectors lease or ask the broker'); return next;
+  select string_agg(ro.route, ', ') into bad from uac.routes ro where ro.risk = 'probe' and not (ro.budget ? 'probes_per_run');
+  check_name := 'routes.probe_routes_are_budgeted'; passed := bad is null; detail := coalesce('unbudgeted: ' || bad, 'every probe route carries a per-run budget'); return next;
+  select string_agg(ro.route, ', ') into bad from uac.routes ro where ro.risk = 'write';
+  check_name := 'routes.no_write_route_outside_the_effect_chain'; passed := bad is null; detail := coalesce('write routes registered: ' || bad, 'observation routes are read-only or probe; writes go through fenced effects only'); return next;
+  -- committed: every collector's source is on main in the repository
+  tok := broker.redeem(broker.issue_lease('uac_github_token', 'github.git.tree', null, 'route gate: read kevindensity/density-uap', interval '5 minutes', 10));
+  head := ((uac.gh('/repos/kevindensity/density-uap/commits/main', tok)).content::jsonb)->>'sha';
+  snap := convert_from(decode(replace(((uac.gh('/repos/kevindensity/density-uap/contents/kernel/root/SCHEMA_SNAPSHOT.sql?ref=' || head, tok)).content::jsonb)->>'content', E'\n', ''), 'base64'), 'UTF8');
+  for r in select * from uac.routes order by route loop
+    if r.collector like 'sql:%' then
+      if snap is null or position('FUNCTION ' || substring(r.collector from 5) || '(' in snap) = 0 then missing := coalesce(missing || ', ', '') || r.route; end if;
+    elsif (uac.gh('/repos/kevindensity/density-uap/contents/' || r.source_path || '?ref=' || head, tok)).status <> 200 then
+      missing := coalesce(missing || ', ', '') || r.route;
+    end if;
+  end loop;
+  check_name := 'routes.every_collector_committed'; passed := missing is null;
+  detail := coalesce('not on main: ' || missing, 'every collector is committed at ' || left(coalesce(head, '?'), 12)); return next;
+end $function$
+;
 CREATE OR REPLACE FUNCTION gates.run_build_suite(p_component text, p_artifact text, p_external jsonb, p_predecessor uuid DEFAULT NULL::uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -1011,7 +1085,7 @@ begin
   perform p0.admit_event(jsonb_build_object('event_id', gen_random_uuid(), 'event_kind', 'run:(none)->OPENED', 'stream_id', run, 'subject_type', 'run',
     'subject_id', p_component || '@' || p_artifact, 'payload', jsonb_build_object('subject', p_component || '@' || p_artifact, 'purpose', 'build-admission',
     'environment', 'LIVE_SINGLE_ADMIN', 'predecessor', p_predecessor), 'authority_epoch', p0.current_epoch(), 'expected_revision', '0'));
-  foreach setname in array array['spine', 'blind', 'isolation_sql', 'kernel', 'loops_staleness', 'orbit', 'corroboration', 'restore', 'differential', 'reconstruction', 'restore_drills', 'node_admission', 'fence_conformance', 'leases', 'coverage', 'formation', 'identities', 'access_ladders', 'external'] loop
+  foreach setname in array array['spine', 'blind', 'isolation_sql', 'kernel', 'loops_staleness', 'orbit', 'corroboration', 'restore', 'differential', 'reconstruction', 'restore_drills', 'node_admission', 'fence_conformance', 'leases', 'coverage', 'formation', 'identities', 'access_ladders', 'provenance', 'routes', 'external'] loop
     begin
       for r in execute case setname when 'spine' then 'select check_name, passed, detail from uap_test.run_all()'
                                     when 'blind' then 'select * from gates.blind_kernel_checks()'
@@ -1031,6 +1105,8 @@ begin
                                     when 'formation' then 'select * from gates.formation_checks()'
                                     when 'identities' then 'select * from gates.identity_checks()'
                                     when 'access_ladders' then 'select * from gates.access_ladder_checks()'
+                                    when 'provenance' then 'select * from gates.provenance_checks()'
+                                    when 'routes' then 'select * from gates.route_checks()'
                                     else 'select * from gates.external_checks($1)' end using p_external loop
         res := res || jsonb_build_object('set', setname, 'check', r.check_name, 'passed', r.passed, 'detail', left(r.detail, 200));
       end loop;
@@ -2740,8 +2816,30 @@ create table uac.route_coverage (
 alter table only uac.route_coverage add constraint route_coverage_pkey PRIMARY KEY (route, field);
 alter table only uac.route_coverage add constraint route_coverage_coverage_check CHECK ((coverage = ANY (ARRAY['COMPLETE'::text, 'PARTIAL'::text])));
 alter table uac.route_coverage enable row level security;
+create policy coverage_export on uac.route_coverage as permissive for select to repo_exporter using (true);
 CREATE TRIGGER substrate_guard BEFORE INSERT OR DELETE OR UPDATE ON uac.route_coverage FOR EACH ROW EXECUTE FUNCTION p0.substrate_guard();
 alter table uac.route_coverage enable always trigger substrate_guard;
+grant SELECT on uac.route_coverage to repo_exporter;
+create table uac.routes (
+  route text not null,
+  family text not null,
+  risk text not null,
+  collector text not null,
+  source_path text not null,
+  scope_kinds text[] not null,
+  credential_required boolean not null,
+  reread_route text not null,
+  budget jsonb not null default '{}'::jsonb,
+  contract_version integer not null default 1,
+  description text not null
+);
+alter table only uac.routes add constraint routes_pkey PRIMARY KEY (route);
+alter table only uac.routes add constraint routes_risk_check CHECK ((risk = ANY (ARRAY['read-only'::text, 'probe'::text, 'write'::text])));
+alter table uac.routes enable row level security;
+create policy routes_export on uac.routes as permissive for select to repo_exporter using (true);
+CREATE TRIGGER substrate_guard BEFORE INSERT OR DELETE OR UPDATE ON uac.routes FOR EACH ROW EXECUTE FUNCTION p0.substrate_guard();
+alter table uac.routes enable always trigger substrate_guard;
+grant SELECT on uac.routes to repo_exporter;
 create table uac.scopes (
   stream_id uuid not null,
   system text not null,

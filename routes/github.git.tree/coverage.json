@@ -1,0 +1,58 @@
+[
+  {
+    "field": "commit_count",
+    "coverage": "COMPLETE",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "from the commit list's last page"
+  },
+  {
+    "field": "default_branch",
+    "coverage": "COMPLETE",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "repository metadata"
+  },
+  {
+    "field": "directories_*",
+    "coverage": "COMPLETE",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "full recursive tree"
+  },
+  {
+    "field": "files",
+    "coverage": "COMPLETE",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "full recursive tree; truncated trees are refused by the collector"
+  },
+  {
+    "field": "files_md5",
+    "coverage": "COMPLETE",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "digest of the full file list"
+  },
+  {
+    "field": "head",
+    "coverage": "COMPLETE",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "default-branch head"
+  },
+  {
+    "field": "recent_commits",
+    "coverage": "PARTIAL",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "most recent commits only"
+  },
+  {
+    "field": "repository",
+    "coverage": "COMPLETE",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "repository metadata"
+  }
+]

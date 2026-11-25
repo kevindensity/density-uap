@@ -1,0 +1,58 @@
+[
+  {
+    "field": "dmarc",
+    "coverage": "COMPLETE",
+    "source_key": "dns",
+    "ok_pattern": "^ok$",
+    "basis": "the _dmarc TXT record"
+  },
+  {
+    "field": "dns_*",
+    "coverage": "COMPLETE",
+    "source_key": "dns",
+    "ok_pattern": "^ok$",
+    "basis": "every record of the type, as answered by the resolver"
+  },
+  {
+    "field": "domain",
+    "coverage": "COMPLETE",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "the requested name itself"
+  },
+  {
+    "field": "ip_owners",
+    "coverage": "COMPLETE",
+    "source_key": "ip_ownership",
+    "ok_pattern": "^ok$",
+    "basis": "owner of every apex and www address"
+  },
+  {
+    "field": "subdomains",
+    "coverage": "PARTIAL",
+    "source_key": "certificate_logs",
+    "ok_pattern": "^ok$",
+    "basis": "names seen in certificate transparency only; a name without a certificate is never seen"
+  },
+  {
+    "field": "web_*",
+    "coverage": "COMPLETE",
+    "source_key": "website",
+    "ok_pattern": "^ok$",
+    "basis": "the homepage response; partial when only headers were read"
+  },
+  {
+    "field": "web_header_names",
+    "coverage": "COMPLETE",
+    "source_key": "website",
+    "ok_pattern": "^(ok|partial: headers only)",
+    "basis": "all response header names; read in full even when the page body is not"
+  },
+  {
+    "field": "www_*",
+    "coverage": "COMPLETE",
+    "source_key": "dns",
+    "ok_pattern": "^ok$",
+    "basis": "the www name's records"
+  }
+]
