@@ -2474,7 +2474,7 @@ begin
     return jsonb_build_object('verdict', 'DENY', 'claim', p_key, 'reason', 'not visible to this caller'); end if;
   select s.id, s.status::text as status, s.live_class_hash, s.updated_at into st from sem.settlements s where s.consequence_key = p_key;
   foreach scope in array c.scopes loop
-    select l.digest into cur from uap.latest_capture(scope) l;
+    cur := verify.evidence_capture(scope, (select cc.spec from uap.capture_claims cc where cc.consequence_key = p_key));
     bound := substring(coalesce(st.live_class_hash, '') from scope::text || '=([0-9a-f]{64})');
     if bound is not null and bound <> cur then stale := true; end if;
     if exists (select 1 from p0.credentials cr join uac.scopes s2 on s2.routes && cr.routes where s2.stream_id = scope and cr.status = 'EXPIRED') then
@@ -3156,6 +3156,28 @@ begin
       'summary', coalesce(p_summary, '{}'::jsonb) || jsonb_build_object('sources', p_body->'sources', 'previous_digest', prevdig, 'content_changed', prevdig is distinct from dig)),
     'authority_epoch', p0.current_epoch(), 'expected_revision', '0'));
   return res || jsonb_build_object('capture_stream', cap, 'content_digest', dig, 'sources', p_body->'sources');
+end $function$
+;
+CREATE OR REPLACE FUNCTION uac.admit_host_capture(p_scope uuid, p_body text, p_sig text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare sc uac.scopes%rowtype; decl jsonb; body jsonb; msg bytea; ok boolean;
+begin
+  select * into sc from uac.scopes where stream_id = p_scope;
+  if sc.status is distinct from 'DECLARED' or not ('linux.host' = any (sc.routes)) then return jsonb_build_object('decision', 'REJECT', 'reason', 'SCOPE_NOT_DECLARED_FOR_ROUTE'); end if;
+  select e.payload into decl from p0.events e where e.stream_id = p_scope and e.event_kind like 'scope:%->DECLARED' order by e.revision desc limit 1;
+  if decl->>'agent_login' is distinct from session_user::text then return jsonb_build_object('decision', 'REJECT', 'reason', 'WRONG_HOST_LOGIN'); end if;
+  msg := convert_to('DENSITY-HOST/1|' || p_scope::text || '|' || encode(extensions.digest(convert_to(p_body, 'UTF8'), 'sha256'), 'hex'), 'UTF8');
+  begin ok := pgsodium.crypto_sign_verify_detached(decode(p_sig, 'hex'), msg, decode(decl->>'agent_pubkey', 'hex')); exception when others then ok := false; end;
+  if not ok then return jsonb_build_object('decision', 'REJECT', 'reason', 'HOST_SIGNATURE_INVALID'); end if;
+  body := p_body::jsonb;
+  if coalesce((body#>>'{observer,privileged}')::boolean, true) then return jsonb_build_object('decision', 'REJECT', 'reason', 'PRIVILEGED_OBSERVER'); end if;
+  return uac.admit_capture(p_scope, 'linux.host', coalesce(body->>'hostname', sc.locator), body,
+    jsonb_build_object('host_text_sha256', encode(extensions.digest(convert_to(p_body, 'UTF8'), 'sha256'), 'hex'), 'packages', jsonb_array_length(coalesce(body->'packages', '[]')),
+                       'listening_ports', jsonb_array_length(coalesce(body->'listening_ports', '[]')), 'accounts', jsonb_array_length(coalesce(body->'accounts', '[]'))));
 end $function$
 ;
 CREATE OR REPLACE FUNCTION uac.credential_watch()
@@ -4388,7 +4410,7 @@ begin
     v := jsonb_array_length(detail->'missing_on_main') = 0;
   end if;
   foreach s in array cl.scopes loop
-    digests := digests || jsonb_build_object(s::text, (select l.digest from uap.latest_capture(s) l));
+    digests := digests || jsonb_build_object(s::text, verify.evidence_capture(s, (select cc.spec from uap.capture_claims cc where cc.consequence_key = p_key)));
   end loop;
   return jsonb_build_object('value', v, 'capture_digests', digests, 'detail', detail,
     'live_class_hash', 'captures:' || (select string_agg(k || '=' || (digests->>k), ',' order by k) from jsonb_object_keys(digests) k));
@@ -4402,9 +4424,9 @@ CREATE OR REPLACE FUNCTION uap.eval_spec(p_spec jsonb)
 AS $function$
 declare lb jsonb; rb jsonb; missing text[]; mism jsonb; lc int; rc int; ov int;
 begin
-  select l.body into lb from uap.latest_capture((p_spec->'left'->>'scope')::uuid) l;
+  select b.body into lb from uac.capture_bodies b where b.content_digest = verify.evidence_capture((p_spec->'left'->>'scope')::uuid, p_spec);
   if p_spec->>'op' = 'includes' then
-    select l.body into rb from uap.latest_capture((p_spec->'right'->>'scope')::uuid) l;
+    select b.body into rb from uac.capture_bodies b where b.content_digest = verify.evidence_capture((p_spec->'right'->>'scope')::uuid, p_spec);
     missing := array(select uap.capture_values(lb, p_spec->'left'->>'path') except select uap.capture_values(rb, p_spec->'right'->>'path') order by 1);
     select count(distinct v) into lc from uap.capture_values(lb, p_spec->'left'->>'path') v;
     select count(distinct v) into rc from uap.capture_values(rb, p_spec->'right'->>'path') v;
@@ -5354,6 +5376,27 @@ CREATE OR REPLACE FUNCTION verify.blind_message(p_stream uuid, p_value boolean, 
  IMMUTABLE
 AS $function$
   select convert_to('DENSITY-BLIND/1|' || p_stream::text || '|' || case when p_value then 'true' else 'false' end || '|' || p_evidence, 'UTF8') $function$
+;
+CREATE OR REPLACE FUNCTION verify.evidence_capture(p_scope uuid, p_spec jsonb)
+ RETURNS text
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare base jsonb; sw jsonb; d text;
+begin
+  if p_spec->>'op' = 'probe_witness' and (p_spec->'left'->>'scope')::uuid = p_scope then
+    base := p_spec->'base'; sw := base || jsonb_build_object(p_spec->>'input', p_spec->'switch_value');
+    select c.content_digest into d from uac.captures c join uac.capture_bodies b using (content_digest)
+     where c.scope_stream = p_scope
+       and exists (select 1 from jsonb_array_elements(b.body->'probes') p where p->'i' = base)
+       and exists (select 1 from jsonb_array_elements(b.body->'probes') p where p->'i' = sw)
+     order by c.observed_at desc, c.recorded_at desc limit 1;
+    if d is not null then return d; end if;
+  end if;
+  select c.content_digest into d from uac.captures c where c.scope_stream = p_scope order by c.observed_at desc, c.recorded_at desc limit 1;
+  return d;
+end $function$
 ;
 CREATE OR REPLACE FUNCTION verify.evidence_text(p_digests jsonb)
  RETURNS text

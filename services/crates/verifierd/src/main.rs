@@ -71,8 +71,10 @@ async fn evaluate_claim(a: &App, stream: uuid::Uuid) -> Result<(String, String, 
         .map_err(|e| refuse("RECORDS_UNAVAILABLE", json!(e.to_string())))?.ok_or_else(|| refuse("NOT_A_CAPTURE_CLAIM", json!(key)))?;
     let evaluator: String = cl.get(0); let scopes: Vec<uuid::Uuid> = cl.get(1); let spec: Option<Value> = cl.get(2);
     let mut digests = serde_json::Map::new(); let mut bodies: Vec<Value> = vec![];
+    // dependency-exact evidence: the latest capture that bears on this claim (verify.evidence_capture), same rule as the kernel
+    let spec_v: Value = spec.clone().unwrap_or(Value::Null);
     for s in &scopes {
-        let r = a.db.query_opt("select c.content_digest, b.body from uac.captures c join uac.capture_bodies b using (content_digest) where c.scope_stream = $1 order by c.observed_at desc, c.recorded_at desc limit 1", &[s]).await
+        let r = a.db.query_opt("select b.content_digest, b.body from uac.capture_bodies b where b.content_digest = verify.evidence_capture($1, $2)", &[s, &spec_v]).await
             .map_err(|e| refuse("RECORDS_UNAVAILABLE", json!(e.to_string())))?.ok_or_else(|| refuse("NO_CAPTURE", json!(s.to_string())))?;
         digests.insert(s.to_string(), json!(r.get::<_, String>(0))); bodies.push(r.get::<_, Value>(1));
     }
