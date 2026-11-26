@@ -1,0 +1,8 @@
+{"$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "density:core.signed_envelope/1", "title": "SignedEnvelope",
+ "description": "What every service sends another: a payload named by its schema, its RFC 8785 digest, and an Ed25519 signature verified in Rust by the receiver. Signatures survive transport changes because they cover the digest, not the bytes on the wire.",
+ "x-density": {"owner": "dc-types", "authority": "NONE", "encoding": "RFC8785", "wire": "gRPC density.core.v1.Envelope"},
+ "type": "object", "additionalProperties": false,
+ "required": ["schema", "payload", "payload_sha256", "issuer_key_id", "issued_at", "signature"],
+ "properties": {"schema": {"type": "string", "pattern": "^density:[a-z0-9_.]+/[0-9]+$"}, "payload": {},
+  "payload_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "issuer_key_id": {"type": "string"},
+  "issued_at": {"type": "string"}, "signature": {"type": "string", "pattern": "^[0-9a-f]{128}$"}}}

@@ -216,6 +216,96 @@ begin
 end $function$
 ;
 
+-- ===== schema contracts =====
+create schema if not exists contracts;
+create table contracts.schemas (
+  schema_id text not null,
+  sha256 text not null,
+  schema jsonb not null,
+  loaded_at timestamp with time zone not null default now()
+);
+alter table only contracts.schemas add constraint schemas_pkey PRIMARY KEY (schema_id, sha256);
+alter table only contracts.schemas add constraint schemas_sha256_check CHECK ((sha256 ~ '^[0-9a-f]{64}$'::text));
+alter table contracts.schemas enable row level security;
+CREATE TRIGGER schemas_append_only BEFORE DELETE OR UPDATE ON contracts.schemas FOR EACH ROW EXECUTE FUNCTION p0.event_order_append_only();
+CREATE OR REPLACE FUNCTION contracts.canonical(d jsonb)
+ RETURNS text
+ LANGUAGE plpgsql
+ IMMUTABLE STRICT
+ SET search_path TO ''
+AS $function$
+begin
+  return case jsonb_typeof(d)
+    when 'object' then '{' || coalesce((select string_agg(to_jsonb(k)::text || ':' || contracts.canonical(v), ',' order by k collate "C") from jsonb_each(d) e(k, v)), '') || '}'
+    when 'array' then '[' || coalesce((select string_agg(contracts.canonical(v), ',' order by i) from jsonb_array_elements(d) with ordinality a(v, i)), '') || ']'
+    else d::text end;
+end $function$
+;
+CREATE OR REPLACE FUNCTION contracts."check"(p_schema_id text, p_doc jsonb)
+ RETURNS text[]
+ LANGUAGE sql
+ STABLE
+ SET search_path TO ''
+AS $function$
+  select coalesce(contracts.check_node(s.schema, p_doc, '$'), array['$: unknown schema ' || p_schema_id])
+    from (select schema from contracts.schemas where schema_id = p_schema_id order by loaded_at desc limit 1) s
+  union all select array['$: unknown schema ' || p_schema_id] where not exists (select 1 from contracts.schemas where schema_id = p_schema_id)
+  limit 1 $function$
+;
+CREATE OR REPLACE FUNCTION contracts.check_node(s jsonb, d jsonb, path text)
+ RETURNS text[]
+ LANGUAGE plpgsql
+ IMMUTABLE
+ SET search_path TO ''
+AS $function$
+declare errs text[] := '{}'; ty jsonb := s->'type'; types text[]; actual text := jsonb_typeof(d); k text; v jsonb; i int;
+begin
+  if s ? 'enum' then
+    if not exists (select 1 from jsonb_array_elements(s->'enum') e where e = d) then errs := errs || (path || ': not in enum'); end if;
+    return errs;
+  end if;
+  if ty is not null then
+    types := case jsonb_typeof(ty) when 'array' then array(select jsonb_array_elements_text(ty)) else array[ty #>> '{}'] end;
+    if not (actual = any(types) or (actual = 'number' and 'integer' = any(types) and d::text ~ '^-?[0-9]+$')) then
+      return array[path || ': expected ' || array_to_string(types, '|') || ', got ' || actual];
+    end if;
+    if actual = 'number' and 'integer' = any(types) and not ('number' = any(types)) and d::text !~ '^-?[0-9]+$' then errs := errs || (path || ': not an integer'); end if;
+  end if;
+  if actual = 'null' then return errs; end if;
+  if actual = 'string' and s ? 'pattern' and (d #>> '{}') !~ (s->>'pattern') then errs := errs || (path || ': does not match pattern'); end if;
+  if actual = 'number' then
+    if s ? 'minimum' and d::numeric < (s->>'minimum')::numeric then errs := errs || (path || ': below minimum'); end if;
+    if s ? 'maximum' and d::numeric > (s->>'maximum')::numeric then errs := errs || (path || ': above maximum'); end if;
+  end if;
+  if actual = 'array' then
+    if s ? 'minItems' and jsonb_array_length(d) < (s->>'minItems')::int then errs := errs || (path || ': too few items'); end if;
+    if s ? 'items' then
+      for i in 0 .. jsonb_array_length(d) - 1 loop errs := errs || contracts.check_node(s->'items', d->i, path || '[' || i || ']'); end loop;
+    end if;
+  end if;
+  if actual = 'object' then
+    for k in select jsonb_array_elements_text(coalesce(s->'required', '[]')) loop
+      if not (d ? k) then errs := errs || (path || '.' || k || ': required'); end if;
+    end loop;
+    for k, v in select * from jsonb_each(d) loop
+      if s->'properties' ? k then errs := errs || contracts.check_node(s->'properties'->k, v, path || '.' || k);
+      elsif jsonb_typeof(s->'additionalProperties') = 'object' then errs := errs || contracts.check_node(s->'additionalProperties', v, path || '.' || k);
+      elsif s->'additionalProperties' = 'false'::jsonb then errs := errs || (path || '.' || k || ': not allowed');
+      end if;
+    end loop;
+  end if;
+  return errs;
+end $function$
+;
+CREATE OR REPLACE FUNCTION contracts.digest(d jsonb)
+ RETURNS text
+ LANGUAGE sql
+ IMMUTABLE STRICT
+ SET search_path TO ''
+AS $function$
+  select encode(extensions.digest(convert_to(contracts.canonical(d), 'UTF8'), 'sha256'), 'hex') $function$
+;
+
 -- ===== schema core =====
 create schema if not exists core;
 create table core.systems (
@@ -521,6 +611,39 @@ begin
       check_name := t.name; passed := reason = 'NO_PRIOR_BLIND_COMMITMENT'; detail := reason; return next;
     end;
   end loop;
+end $function$
+;
+CREATE OR REPLACE FUNCTION gates.contract_checks()
+ RETURNS TABLE(check_name text, passed boolean, detail text)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare tok text; r record; f jsonb; s jsonb; bad int; total int; head text; repo_ids text[] := '{}';
+begin
+  -- 1. live conformance, one check per contracted table
+  select count(*), count(*) filter (where cardinality(contracts.check('density:capture.public_domain/1', b.body)) > 0) into total, bad
+    from uac.captures c join uac.capture_bodies b using (content_digest) where c.route = 'public.domain';
+  check_name := 'contracts.live.capture_public_domain'; passed := bad = 0; detail := (total - bad) || ' of ' || total || ' captures conform'; return next;
+  select count(*), count(*) filter (where cardinality(contracts.check('density:uap.candidate_system/1', to_jsonb(cs) - 'computed_at')) > 0) into total, bad from uap.candidate_systems cs;
+  check_name := 'contracts.live.candidate_systems'; passed := bad = 0; detail := (total - bad) || ' of ' || total || ' rows conform'; return next;
+  select count(*), count(*) filter (where cardinality(contracts.check('density:uap.connection_plan/1', to_jsonb(cp))) > 0) into total, bad from uap.connection_plans cp;
+  check_name := 'contracts.live.connection_plans'; passed := bad = 0; detail := (total - bad) || ' of ' || total || ' rows conform'; return next;
+  -- 2. the database's contract source equals the repository's, digest for digest
+  tok := broker.redeem(broker.issue_lease('uac_github_token', 'github.git.tree', null, 'contract gate: read contracts/schemas', interval '5 minutes', 20));
+  r := uac.gh('/repos/kevindensity/density-uap/commits/main', tok); head := (r.content::jsonb)->>'sha';
+  r := uac.gh('/repos/kevindensity/density-uap/contents/contracts/schemas?ref=' || head, tok);
+  if r.status <> 200 then check_name := 'contracts.repository_readable'; passed := false; detail := 'GitHub returned ' || r.status; return next; return; end if;
+  for f in select * from jsonb_array_elements(r.content::jsonb) loop
+    continue when f->>'name' !~ '\.json$';
+    r := uac.gh('/repos/kevindensity/density-uap/contents/' || (f->>'path') || '?ref=' || head, tok);
+    s := convert_from(decode(replace((r.content::jsonb)->>'content', E'\n', ''), 'base64'), 'UTF8')::jsonb;
+    repo_ids := repo_ids || (s->>'$id');
+    check_name := 'contracts.source.' || (s->>'$id'); passed := exists (select 1 from contracts.schemas cs where cs.schema_id = s->>'$id' and cs.sha256 = contracts.digest(s));
+    detail := 'repository ' || left(contracts.digest(s), 12) || ' at ' || left(head, 12) || case when passed then ' loaded' else ' NOT loaded in the database' end; return next;
+  end loop;
+  check_name := 'contracts.no_unsourced_schema'; passed := not exists (select 1 from contracts.schemas cs where not (cs.schema_id = any(repo_ids)));
+  detail := cardinality(repo_ids) || ' schemas in the repository; every loaded schema has a source'; return next;
 end $function$
 ;
 CREATE OR REPLACE FUNCTION gates.corroboration_checks()

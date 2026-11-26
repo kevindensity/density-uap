@@ -1,0 +1,8 @@
+{"$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "density:uap.connection_plan/1", "title": "ConnectionPlan",
+ "description": "How a candidate system would be connected next, at the lowest tier that can answer; ranks, never authorizes.",
+ "x-density": {"owner": "uapd", "table": "uap.connection_plans", "authority": "NONE", "encoding": "RFC8785", "oracle": "uap.corroborate_seed_ports"},
+ "type": "object", "additionalProperties": false,
+ "required": ["candidate_key", "tiers_observed", "next_tier", "next_step", "value", "cost", "write_path", "rationale"],
+ "properties": {"candidate_key": {"type": "string"}, "tiers_observed": {"type": "array", "items": {"type": "string"}},
+  "next_tier": {"enum": ["O0", "O1", "O2", "O3"]}, "next_step": {"type": "string"}, "value": {"type": "number", "minimum": 0, "maximum": 1},
+  "cost": {"type": "string"}, "write_path": {"enum": ["None"]}, "rationale": {"type": "string"}}}

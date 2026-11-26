@@ -1,0 +1,18 @@
+{"$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "density:capture.public_domain/1", "title": "PublicDomainCapture",
+ "description": "Body of a public.domain capture (tier O0): public DNS, certificate logs, IP ownership and the homepage headers of one domain.",
+ "x-density": {"owner": "uacd", "route": "public.domain", "table": "uac.capture_bodies", "authority": "NONE", "encoding": "RFC8785", "oracle": "uac.acquire_domain",
+   "quirks": ["web_status is a decimal string, as the oracle records it"]},
+ "type": "object", "additionalProperties": false,
+ "required": ["domain", "dns_a", "dns_aaaa", "dns_mx", "dns_ns", "dns_txt", "dns_caa", "dmarc", "www_a", "www_cname", "subdomains", "ip_owners", "web_server", "web_status", "web_header_names", "web_script_hosts", "sources"],
+ "properties": {
+  "domain": {"type": "string"},
+  "dns_a": {"type": "array", "items": {"type": "string"}}, "dns_aaaa": {"type": "array", "items": {"type": "string"}},
+  "dns_mx": {"type": "array", "items": {"type": "string"}}, "dns_ns": {"type": "array", "items": {"type": "string"}},
+  "dns_txt": {"type": "array", "items": {"type": "string"}}, "dns_caa": {"type": "array", "items": {"type": "string"}},
+  "dmarc": {"type": "array", "items": {"type": "string"}}, "www_a": {"type": "array", "items": {"type": "string"}},
+  "www_cname": {"type": "array", "items": {"type": "string"}}, "subdomains": {"type": "array", "items": {"type": "string"}},
+  "ip_owners": {"type": "array", "items": {"type": "object", "x-density": {"name": "IpOwner"}, "additionalProperties": false, "required": ["ip", "asn", "as_name"],
+     "properties": {"ip": {"type": "string"}, "asn": {"type": ["string", "null"]}, "as_name": {"type": ["string", "null"]}}}},
+  "web_server": {"type": ["string", "null"]}, "web_status": {"type": ["string", "null"]},
+  "web_header_names": {"type": "array", "items": {"type": "string"}}, "web_script_hosts": {"type": "array", "items": {"type": "string"}},
+  "sources": {"type": "object", "additionalProperties": {"type": "string"}}}}

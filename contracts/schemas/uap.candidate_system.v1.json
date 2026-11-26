@@ -1,0 +1,15 @@
+{"$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "density:uap.candidate_system/1", "title": "CandidateSystem",
+ "description": "A system seen by one or more seed ports; a candidate, never a connection (master: Connection and onboarding).",
+ "x-density": {"owner": "uapd", "table": "uap.candidate_systems", "authority": "NONE", "encoding": "RFC8785", "oracle": "uap.corroborate_seed_ports"},
+ "type": "object", "additionalProperties": false,
+ "required": ["candidate_key", "product", "category", "witnesses", "independent_witnesses", "status", "access", "inputs"],
+ "properties": {
+  "candidate_key": {"type": "string", "pattern": "^[a-z0-9]+$"}, "product": {"type": "string"}, "category": {"type": ["string", "null"]},
+  "witnesses": {"type": "array", "minItems": 1, "items": {"type": "object", "x-density": {"name": "Witness"}, "required": ["seed_kind", "scope", "evidence", "determines", "basis"],
+     "properties": {"seed_kind": {"enum": ["public_footprint", "identity_catalog", "code_host"]}, "scope": {"type": "string"}, "evidence": {}, "determines": {"type": "string"},
+       "basis": {"type": "string"}, "orbit": {"type": "array", "items": {"type": "string"}}}}},
+  "independent_witnesses": {"type": "integer", "minimum": 1},
+  "status": {"enum": ["DISCOVERED", "CORROBORATED"]},
+  "access": {"type": ["object", "null"], "x-density": {"name": "AccessSummary"}, "properties": {"users": {"type": "integer"}, "workspace_users": {"type": "integer"},
+     "scope_class": {"enum": ["data", "sign-in only"]}, "scopes": {"type": "array", "items": {"type": "string"}}}},
+  "inputs": {"type": "object", "additionalProperties": {"type": "string"}}}}

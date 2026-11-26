@@ -1,0 +1,9 @@
+[package]
+name = "dc-contracts"
+version = "0.1.0"
+edition = "2021"
+description = "Rust types generated from contracts/schemas (do not edit src/lib.rs by hand)"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

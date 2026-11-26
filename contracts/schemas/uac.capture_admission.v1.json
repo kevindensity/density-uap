@@ -1,0 +1,5 @@
+{"$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "density:uac.capture_admission/1", "title": "CaptureAdmission",
+ "description": "What uacd submits to admit one capture: the scope, the route, the subject, the sealed body and its summary.",
+ "x-density": {"owner": "uacd", "function": "uac.admit_capture", "authority": "NONE", "encoding": "RFC8785"},
+ "type": "object", "additionalProperties": false, "required": ["scope", "route", "subject", "body", "summary"],
+ "properties": {"scope": {"type": "string", "format": "uuid"}, "route": {"type": "string"}, "subject": {"type": "string"}, "body": {"type": "object"}, "summary": {"type": "object"}}}
