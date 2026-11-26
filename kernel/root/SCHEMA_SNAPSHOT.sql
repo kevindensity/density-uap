@@ -5007,6 +5007,9 @@ begin
   r := extensions.http(('POST', url || '/v1/sweep-capture-claims', array[extensions.http_header('User-Agent', 'density-root-scheduler')],
                         'application/json', jsonb_build_object('trigger', p0.sign_trigger('sweep-capture-claims'))::text)::extensions.http_request);
   if r.status = 200 and left(ltrim(coalesce(r.content, '')), 1) = '{' then
+    -- every refusal is kept with its reason: a refusal is evidence about a claim, not noise
+    insert into verify.sweep_refusals (consequence_key, reason, detail)
+    select coalesce(x->>'claim', '?'), coalesce(x->>'reason', 'UNSPECIFIED'), x->'detail' from jsonb_array_elements(coalesce(r.content::jsonb->'refused', '[]')) x;
     return jsonb_build_object('status', 200) || (r.content::jsonb - 'refused') || jsonb_build_object('refused', jsonb_array_length(coalesce(r.content::jsonb->'refused', '[]')));
   elsif r.status = 200 then
     return jsonb_build_object('status', 200, 'error', 'VERIFIER_NOT_PUBLIC', 'detail', 'the address answered with a non-JSON page (an access or sign-in page): the verifier URL is not publicly routable');
@@ -5320,6 +5323,17 @@ grant SELECT on verify.refinement_receipts to uapd;
 grant INSERT on verify.refinement_receipts to verifierd;
 grant SELECT on verify.refinement_receipts to verifierd;
 grant UPDATE on verify.refinement_receipts to verifierd;
+create table verify.sweep_refusals (
+  id bigint not null default nextval('verify.sweep_refusals_id_seq'::regclass),
+  refused_at timestamp with time zone not null default clock_timestamp(),
+  consequence_key text not null,
+  reason text not null,
+  detail jsonb
+);
+alter table only verify.sweep_refusals add constraint sweep_refusals_pkey PRIMARY KEY (id);
+CREATE INDEX sweep_refusals_consequence_key_refused_at_idx ON verify.sweep_refusals USING btree (consequence_key, refused_at DESC);
+alter table verify.sweep_refusals enable row level security;
+CREATE TRIGGER sweep_refusals_append_only BEFORE DELETE OR UPDATE ON verify.sweep_refusals FOR EACH ROW EXECUTE FUNCTION p0.event_order_append_only();
 CREATE OR REPLACE FUNCTION verify.blind_commitment_material(p_stream uuid, p_value boolean, p_evidence text)
  RETURNS TABLE(msg bytea, sha256 text)
  LANGUAGE sql
