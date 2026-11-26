@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 /// (schema id, SHA-256 of the canonical schema, Rust type)
 pub const SCHEMAS: &[(&str, &str, &str)] = &[
     ("density:capture.public_domain/1", "c83b95ef4194f818d5ef00af5d4ffa9d23a360f24f0e703e0b0d9ef1ed54f7a8", "PublicDomainCapture"),
+    ("density:capture.public_domain/2", "db7cc929ac69cde1db076a1f727aeebbc8186e8f362df03a016a3564dd951e47", "PublicDomainCaptureV2"),
     ("density:core.signed_envelope/1", "5c334747d97513990d049d0f14b832834e662a67f02808351e794f450e485577", "SignedEnvelope"),
     ("density:uac.capture_admission/1", "58d24a90b108a364d2bc97442fee1c6c0252af0eb82d44681bff10b45f05cbfc", "CaptureAdmission"),
     ("density:uap.candidate_system/1", "4cbe7d4d15906c0fc02def2145aa06aaab7c41bc6438fed3cca3210ae94d882b", "CandidateSystem"),
@@ -46,6 +47,63 @@ pub struct PublicDomainCapture {
     pub subdomains: Option<Vec<String>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ip_owners: Option<Vec<IpOwner>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub web_server: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub web_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub web_header_names: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub web_script_hosts: Option<Vec<String>>,
+    pub sources: std::collections::BTreeMap<String, String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum IpOwnerV2Lookup {
+    #[serde(rename = "ok")]
+    Ok,
+    #[serde(rename = "no_record")]
+    NoRecord,
+    #[serde(rename = "failed")]
+    Failed,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct IpOwnerV2 {
+    pub ip: String,
+    pub asn: Option<String>,
+    pub as_name: Option<String>,
+    pub lookup: IpOwnerV2Lookup,
+}
+
+/// Body of a public.domain capture (tier O0): public DNS, certificate logs, IP ownership and the homepage headers of one domain. Version 2: every IP owner records its lookup outcome; an unread page body leaves script references absent.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PublicDomainCaptureV2 {
+    pub domain: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dns_a: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dns_aaaa: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dns_mx: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dns_ns: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dns_txt: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dns_caa: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dmarc: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub www_a: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub www_cname: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subdomains: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ip_owners: Option<Vec<IpOwnerV2>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub web_server: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]

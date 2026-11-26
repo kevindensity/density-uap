@@ -1854,10 +1854,12 @@ name = "uacd"
 version = "0.1.0"
 dependencies = [
  "dc-contracts",
+ "p0-core",
  "regex",
  "reqwest",
  "serde_json",
  "tokio",
+ "tokio-postgres",
 ]
 
 [[package]]

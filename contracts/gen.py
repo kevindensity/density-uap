@@ -41,6 +41,8 @@ class Gen:
             else: r, t = 'serde_json::Map<String, serde_json::Value>', 'Record<string, unknown>'
         return ('Option<%s>' % r, t + ' | null') if nullable else (r, t)
     def struct(self, s, name):
+        if name in getattr(self, 'seen', set()): raise SystemExit('DUPLICATE_TYPE_NAME ' + name + ': give the nested schema a distinct x-density.name')
+        self.seen = getattr(self, 'seen', set()) | {name}
         fields_rs, fields_ts = [], []
         req = set(s.get('required', []))
         for f, fs in s.get('properties', {}).items():

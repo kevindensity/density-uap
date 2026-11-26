@@ -1,0 +1,162 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "density:capture.public_domain/2",
+ "title": "PublicDomainCaptureV2",
+ "description": "Body of a public.domain capture (tier O0): public DNS, certificate logs, IP ownership and the homepage headers of one domain. Version 2: every IP owner records its lookup outcome; an unread page body leaves script references absent.",
+ "x-density": {
+  "owner": "uacd",
+  "route": "public.domain",
+  "table": "uac.capture_bodies",
+  "authority": "NONE",
+  "encoding": "RFC8785",
+  "oracle": "uac.acquire_domain",
+  "quirks": [
+   "web_status is a decimal string, as the oracle records it",
+   "a field is present only when its source succeeded (sources.dns, certificate_logs, ip_ownership, website say which)",
+   "web_script_hosts is absent when the page body could not be read; absence is not zero"
+  ],
+  "supersedes": "density:capture.public_domain/1"
+ },
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "domain",
+  "sources"
+ ],
+ "properties": {
+  "domain": {
+   "type": "string"
+  },
+  "dns_a": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "dns_aaaa": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "dns_mx": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "dns_ns": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "dns_txt": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "dns_caa": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "dmarc": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "www_a": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "www_cname": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "subdomains": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "ip_owners": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "x-density": {
+     "name": "IpOwnerV2"
+    },
+    "additionalProperties": false,
+    "required": [
+     "ip",
+     "asn",
+     "as_name",
+     "lookup"
+    ],
+    "properties": {
+     "ip": {
+      "type": "string"
+     },
+     "asn": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "as_name": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "lookup": {
+      "enum": [
+       "ok",
+       "no_record",
+       "failed"
+      ],
+      "description": "ok: the registry answered; no_record: it answered with no record; failed: the lookup itself failed after one retry"
+     }
+    }
+   }
+  },
+  "web_server": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "web_status": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "web_header_names": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "web_script_hosts": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "sources": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "string"
+   }
+  }
+ }
+}

@@ -11,7 +11,7 @@ fn domain_body() -> serde_json::Value {
 fn live_shaped_domain_capture_parses_and_round_trips() {
     let v = domain_body();
     let c: PublicDomainCapture = serde_json::from_value(v.clone()).expect("parses");
-    assert_eq!(c.ip_owners[0].as_name, None);
+    assert_eq!(c.ip_owners.as_ref().unwrap()[0].as_name, None);
     assert_eq!(serde_json::to_value(&c).unwrap(), v);
 }
 
@@ -37,6 +37,6 @@ fn enums_are_closed() {
 
 #[test]
 fn every_schema_has_a_digest() {
-    assert_eq!(SCHEMAS.len(), 5);
+    assert_eq!(SCHEMAS.len(), 6);
     assert!(SCHEMAS.iter().all(|(_, d, _)| d.len() == 64));
 }

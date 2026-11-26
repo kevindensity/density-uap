@@ -2913,6 +2913,40 @@ grant SELECT on uac.captures to portd;
 grant SELECT on uac.captures to uacd;
 grant SELECT on uac.captures to uapd;
 grant SELECT on uac.captures to verifierd;
+create table uac.differential_reviews (
+  run_id uuid not null,
+  field text not null,
+  classification text not null,
+  reason text not null,
+  reviewed_by text not null default SESSION_USER,
+  reviewed_at timestamp with time zone not null default now()
+);
+alter table only uac.differential_reviews add constraint differential_reviews_pkey PRIMARY KEY (run_id, field);
+alter table only uac.differential_reviews add constraint differential_reviews_run_id_fkey FOREIGN KEY (run_id) REFERENCES uac.differential_runs(run_id);
+alter table only uac.differential_reviews add constraint differential_reviews_classification_check CHECK ((classification = ANY (ARRAY['EXPLAINED_ORACLE_DEFECT'::text, 'EXPLAINED_RUST_DEFECT'::text, 'EXPLAINED_WORLD_CHANGED'::text, 'EXPLAINED_UPSTREAM_FLAKY'::text, 'UNEXPLAINED'::text])));
+alter table uac.differential_reviews enable row level security;
+CREATE TRIGGER differential_reviews_append_only BEFORE DELETE OR UPDATE ON uac.differential_reviews FOR EACH ROW EXECUTE FUNCTION p0.event_order_append_only();
+create table uac.differential_runs (
+  run_id uuid not null default gen_random_uuid(),
+  scope_stream uuid not null,
+  route text not null,
+  rust_at timestamp with time zone not null,
+  rust_collector text not null,
+  rust_body jsonb not null,
+  oracle_at timestamp with time zone,
+  oracle_digest text,
+  oracle_decision text,
+  fields jsonb,
+  agreed integer,
+  diverged integer,
+  unavailable integer,
+  verdict text,
+  recorded_at timestamp with time zone not null default now()
+);
+alter table only uac.differential_runs add constraint differential_runs_pkey PRIMARY KEY (run_id);
+alter table only uac.differential_runs add constraint differential_runs_verdict_check CHECK ((verdict = ANY (ARRAY['AGREE'::text, 'DIVERGE'::text, 'ORACLE_FAILED'::text])));
+alter table uac.differential_runs enable row level security;
+CREATE TRIGGER differential_runs_append_only BEFORE DELETE OR UPDATE ON uac.differential_runs FOR EACH ROW EXECUTE FUNCTION p0.event_order_append_only();
 create table uac.reread_captures (
   content_digest text not null,
   scope_stream uuid not null,
@@ -3009,7 +3043,7 @@ CREATE OR REPLACE FUNCTION uac.acquire_domain(p_scope uuid)
  SECURITY DEFINER
  SET search_path TO ''
 AS $function$
-declare sc uac.scopes%rowtype; d text; body jsonb := '{}'; src jsonb := '{}'; r extensions.http_response; ips text[]; ip text; owners jsonb := '[]';
+declare nres jsonb; sc uac.scopes%rowtype; d text; body jsonb := '{}'; src jsonb := '{}'; r extensions.http_response; ips text[]; ip text; owners jsonb := '[]';
   asn text; asname text; html text; loc text; i int; dig text; prevdig text; obs timestamptz := now(); cap uuid := gen_random_uuid(); res jsonb; subs text[];
 begin
   select * into sc from uac.scopes where stream_id = p_scope;
@@ -3035,9 +3069,16 @@ begin
     ips := array(select distinct x from (select jsonb_array_elements_text(coalesce(body->'dns_a', '[]')) x union select jsonb_array_elements_text(coalesce(body->'www_a', '[]'))) y
                   where x ~ '^\d+\.\d+\.\d+\.\d+$' order by 1 limit 6);
     foreach ip in array coalesce(ips, '{}') loop
-      asn := trim(split_part((uac.doh(array_to_string(array(select p from unnest(string_to_array(ip, '.')) with ordinality t(p, n) order by n desc), '.') || '.origin.asn.cymru.com', 'TXT'))[1], '|', 1));
-      asname := case when asn <> '' then trim(split_part((uac.doh('as' || split_part(asn, ' ', 1) || '.asn.cymru.com', 'TXT'))[1], '|', 5)) end;
-      owners := owners || jsonb_build_array(jsonb_build_object('ip', ip, 'asn', asn, 'as_name', asname));
+      res := uac.doh_full(array_to_string(array(select p from unnest(string_to_array(ip, '.')) with ordinality t(p, n) order by n desc), '.') || '.origin.asn.cymru.com', 'TXT');
+      asn := nullif(trim(split_part(res->'answers'->>0, '|', 1)), '');
+      asname := null;
+      if asn is not null then
+        nres := uac.doh_full('as' || split_part(asn, ' ', 1) || '.asn.cymru.com', 'TXT');
+        asname := nullif(trim(split_part(nres->'answers'->>0, '|', 5)), '');
+        -- the ownership lookup is two registry queries; if the second fails the whole lookup is failed (the ASN is kept)
+        if nres->>'lookup' = 'failed' then res := res || '{"lookup": "failed"}'; end if;
+      end if;
+      owners := owners || jsonb_build_array(jsonb_build_object('ip', ip, 'asn', asn, 'as_name', asname, 'lookup', res->>'lookup'));
     end loop;
     body := body || jsonb_build_object('ip_owners', owners); src := src || jsonb_build_object('ip_ownership', 'ok');
   exception when others then src := src || jsonb_build_object('ip_ownership', 'failed: ' || left(sqlerrm, 80)); end;
@@ -3052,7 +3093,7 @@ begin
     html := coalesce(r.content, '');
     body := body || jsonb_build_object('web_status', r.status::text,
       'web_server', coalesce((select lower(h.value) from unnest(r.headers) h where lower(h.field) = 'server' limit 1), ''),
-      'web_header_names', to_jsonb(array(select distinct lower(h.field) from unnest(r.headers) h order by 1)),
+      'web_header_names', to_jsonb(array(select distinct lower(h.field) from unnest(r.headers) h where lower(h.field) not in ('connection','keep-alive','proxy-connection','transfer-encoding','te','trailer','upgrade','content-encoding','content-length') order by 1)),
       'web_script_hosts', to_jsonb(array(select distinct lower(m[1]) from regexp_matches(html, '(?:src|href)\s*=\s*["'']?(?:https?:)?//([a-zA-Z0-9.-]+)', 'g') m order by 1)));
     src := src || jsonb_build_object('website', 'ok');
   exception when others then
@@ -3061,8 +3102,8 @@ begin
       r := extensions.http(('HEAD', 'https://' || d || '/', array[extensions.http_header('User-Agent', 'Mozilla/5.0 (compatible; density-uac; passive public observation)')], null, null)::extensions.http_request);
       body := body || jsonb_build_object('web_status', r.status::text,
         'web_server', coalesce((select lower(h.value) from unnest(r.headers) h where lower(h.field) = 'server' limit 1), ''),
-        'web_header_names', to_jsonb(array(select distinct lower(h.field) from unnest(r.headers) h order by 1)), 'web_script_hosts', '[]'::jsonb);
-      src := src || jsonb_build_object('website', 'partial: headers only (page body is not text)');
+        'web_header_names', to_jsonb(array(select distinct lower(h.field) from unnest(r.headers) h where lower(h.field) not in ('connection','keep-alive','proxy-connection','transfer-encoding','te','trailer','upgrade','content-encoding','content-length') order by 1)));
+      src := src || jsonb_build_object('website', 'partial: headers only (page body compressed or not text; script references not read)');
     exception when others then src := src || jsonb_build_object('website', 'failed: ' || left(sqlerrm, 80)); end;
   end;
   if not exists (select 1 from jsonb_each_text(src) where value = 'ok') then return jsonb_build_object('decision', 'REJECT', 'reason', 'ALL_SOURCES_FAILED', 'sources', src); end if;
@@ -3298,6 +3339,22 @@ begin
   return res || jsonb_build_object('capture_stream', cap, 'content_digest', dig, 'sources', p_body->'sources');
 end $function$
 ;
+CREATE OR REPLACE FUNCTION uac.compare_domain_bodies(o jsonb, r jsonb)
+ RETURNS jsonb
+ LANGUAGE sql
+ IMMUTABLE
+ SET search_path TO ''
+AS $function$
+  select jsonb_object_agg(k, case
+      when k = 'sources' then (select jsonb_object_agg(s, case when split_part(o->'sources'->>s, ':', 1) = split_part(r->'sources'->>s, ':', 1) then 'EQUAL' else 'DIFFERS' end)
+                               from (select jsonb_object_keys(o->'sources') s union select jsonb_object_keys(r->'sources')) x)
+      when not (o ? k) or not (r ? k) then to_jsonb('UNAVAILABLE'::text)
+      when k = 'ip_owners' then to_jsonb(case when (select bool_and(coalesce(oo->>'lookup', 'ok') <> 'failed' and rr->>'lookup' <> 'failed' and oo - 'lookup' = rr - 'lookup' or coalesce(oo->>'lookup','') = 'failed' or rr->>'lookup' = 'failed')
+                                                     from jsonb_array_elements(o->'ip_owners') with ordinality a(oo, i) join jsonb_array_elements(r->'ip_owners') with ordinality b(rr, j) on i = j)
+                                                    and jsonb_array_length(o->'ip_owners') = jsonb_array_length(r->'ip_owners') then 'EQUAL' else 'DIFFERS' end)
+      when o->k = r->k then to_jsonb('EQUAL'::text) else to_jsonb('DIFFERS'::text) end)
+  from (select jsonb_object_keys(o) k union select jsonb_object_keys(r)) ks $function$
+;
 CREATE OR REPLACE FUNCTION uac.credential_watch()
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -3342,6 +3399,29 @@ begin
                  from jsonb_array_elements(coalesce(r.content::jsonb->'Answer', '[]')) a
                 where (a->>'type')::int = case p_type when 'A' then 1 when 'NS' then 2 when 'CNAME' then 5 when 'MX' then 15 when 'TXT' then 16 when 'AAAA' then 28 when 'CAA' then 257 end
                 order by 1);
+end $function$
+;
+CREATE OR REPLACE FUNCTION uac.doh_full(p_name text, p_type text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare r extensions.http_response; attempt int; st int; ans text[];
+begin
+  for attempt in 1..2 loop
+    begin
+      r := extensions.http(('GET', 'https://cloudflare-dns.com/dns-query?name=' || p_name || '&type=' || p_type,
+            array[extensions.http_header('accept', 'application/dns-json')], null, null)::extensions.http_request);
+      if r.status = 200 then
+        st := (r.content::jsonb->>'Status')::int;
+        ans := array(select distinct lower(rtrim(replace(replace(a->>'data', '" "', ''), '"', ''), '.')) from jsonb_array_elements(coalesce(r.content::jsonb->'Answer', '[]')) a
+                      where (a->>'type')::int = case p_type when 'A' then 1 when 'NS' then 2 when 'CNAME' then 5 when 'MX' then 15 when 'TXT' then 16 when 'AAAA' then 28 when 'CAA' then 257 end order by 1);
+        if st in (0, 3) then return jsonb_build_object('lookup', case when cardinality(ans) > 0 then 'ok' else 'no_record' end, 'answers', to_jsonb(ans)); end if;
+      end if;
+    exception when others then null; end;
+  end loop;
+  return jsonb_build_object('lookup', 'failed', 'answers', '[]'::jsonb);
 end $function$
 ;
 CREATE OR REPLACE FUNCTION uac.gh(p_path text, p_token text)
@@ -3476,6 +3556,39 @@ begin
   if not exists (select 1 from uac.scopes s where s.stream_id = new.scope_stream and s.status = 'DECLARED' and s.kind = 'domain') then raise exception 'REREAD_SCOPE_NOT_A_DECLARED_DOMAIN'; end if;
   if new.route = 'public.domain' then raise exception 'REREAD_ROUTE_MUST_DIFFER_FROM_ORIGINAL'; end if;
   return new;
+end $function$
+;
+CREATE OR REPLACE FUNCTION uac.submit_shadow_capture(p_admission jsonb)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare errs text[]; sc uac.scopes%rowtype; o jsonb; ob jsonb; cmp jsonb; run uuid; ag int; dv int; un int; rust_at timestamptz := clock_timestamp();
+begin
+  errs := contracts.check('density:uac.capture_admission/1', p_admission);
+  if cardinality(errs) > 0 then return jsonb_build_object('decision', 'REJECT', 'reason', 'ADMISSION_CONTRACT', 'errors', to_jsonb(errs)); end if;
+  if p_admission->>'route' <> 'public.domain' then return jsonb_build_object('decision', 'REJECT', 'reason', 'ROUTE_NOT_IN_SHADOW'); end if;
+  errs := contracts.check('density:capture.public_domain/2', p_admission->'body');
+  if cardinality(errs) > 0 then return jsonb_build_object('decision', 'REJECT', 'reason', 'BODY_CONTRACT', 'errors', to_jsonb(errs)); end if;
+  select * into sc from uac.scopes where stream_id = (p_admission->>'scope')::uuid;
+  if sc.status is distinct from 'DECLARED' or not ('public.domain' = any (sc.routes)) or lower(sc.locator) <> p_admission->'body'->>'domain' then
+    return jsonb_build_object('decision', 'REJECT', 'reason', 'SCOPE_NOT_DECLARED_FOR_ROUTE_AND_SUBJECT'); end if;
+  -- the oracle observes the same domain immediately after (seconds apart)
+  o := uac.acquire_domain(sc.stream_id);
+  select body into ob from uac.capture_bodies where content_digest = o->>'content_digest';
+  if ob is null then
+    insert into uac.differential_runs (scope_stream, route, rust_at, rust_collector, rust_body, oracle_at, oracle_decision, verdict)
+    values (sc.stream_id, 'public.domain', rust_at, session_user, p_admission->'body', clock_timestamp(), o->>'decision', 'ORACLE_FAILED') returning run_id into run;
+    return jsonb_build_object('decision', 'RECORDED', 'run', run, 'verdict', 'ORACLE_FAILED');
+  end if;
+  cmp := uac.compare_domain_bodies(ob, p_admission->'body');
+  select count(*) filter (where v = 'EQUAL'), count(*) filter (where v = 'DIFFERS'), count(*) filter (where v = 'UNAVAILABLE') into ag, dv, un
+    from (select value #>> '{}' v from jsonb_each(cmp - 'sources') union all select value #>> '{}' from jsonb_each(cmp->'sources')) x;
+  insert into uac.differential_runs (scope_stream, route, rust_at, rust_collector, rust_body, oracle_at, oracle_digest, oracle_decision, fields, agreed, diverged, unavailable, verdict)
+  values (sc.stream_id, 'public.domain', rust_at, session_user, p_admission->'body', clock_timestamp(), o->>'content_digest', o->>'decision', cmp, ag, dv, un,
+          case when dv = 0 then 'AGREE' else 'DIVERGE' end) returning run_id into run;
+  return jsonb_build_object('decision', 'RECORDED', 'run', run, 'verdict', case when dv = 0 then 'AGREE' else 'DIVERGE' end, 'agreed', ag, 'diverged', dv, 'unavailable', un, 'fields', cmp);
 end $function$
 ;
 CREATE OR REPLACE FUNCTION uac.verify_body()
