@@ -3078,6 +3078,22 @@ begin
   return res || jsonb_build_object('capture_stream', cap, 'content_digest', dig, 'sources', src);
 end $function$
 ;
+CREATE OR REPLACE FUNCTION uac.acquire_host_external(p_scope uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare sc uac.scopes%rowtype; decl jsonb; body jsonb;
+begin
+  select * into sc from uac.scopes where stream_id = p_scope;
+  if sc.status is distinct from 'DECLARED' or not ('host.external' = any (sc.routes)) then return jsonb_build_object('decision', 'REJECT', 'reason', 'SCOPE_NOT_DECLARED_FOR_ROUTE'); end if;
+  select e.payload into decl from p0.events e where e.stream_id = p_scope and e.event_kind like 'scope:%->DECLARED' order by e.revision desc limit 1;
+  body := uac.observe_host_external(array(select jsonb_array_elements_text(decl->'hosts')), array(select jsonb_array_elements_text(coalesce(decl->'urls', '[]'))));
+  return uac.admit_capture(p_scope, 'host.external', sc.locator, body,
+    jsonb_build_object('hosts', jsonb_array_length(body->'hosts'), 'endpoints', jsonb_array_length(body->'endpoints')));
+end $function$
+;
 CREATE OR REPLACE FUNCTION uac.acquire_openapi(p_scope uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -3158,28 +3174,6 @@ begin
   return res || jsonb_build_object('capture_stream', cap, 'content_digest', dig, 'sources', p_body->'sources');
 end $function$
 ;
-CREATE OR REPLACE FUNCTION uac.admit_host_capture(p_scope uuid, p_body text, p_sig text)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO ''
-AS $function$
-declare sc uac.scopes%rowtype; decl jsonb; body jsonb; msg bytea; ok boolean;
-begin
-  select * into sc from uac.scopes where stream_id = p_scope;
-  if sc.status is distinct from 'DECLARED' or not ('linux.host' = any (sc.routes)) then return jsonb_build_object('decision', 'REJECT', 'reason', 'SCOPE_NOT_DECLARED_FOR_ROUTE'); end if;
-  select e.payload into decl from p0.events e where e.stream_id = p_scope and e.event_kind like 'scope:%->DECLARED' order by e.revision desc limit 1;
-  if decl->>'agent_login' is distinct from session_user::text then return jsonb_build_object('decision', 'REJECT', 'reason', 'WRONG_HOST_LOGIN'); end if;
-  msg := convert_to('DENSITY-HOST/1|' || p_scope::text || '|' || encode(extensions.digest(convert_to(p_body, 'UTF8'), 'sha256'), 'hex'), 'UTF8');
-  begin ok := pgsodium.crypto_sign_verify_detached(decode(p_sig, 'hex'), msg, decode(decl->>'agent_pubkey', 'hex')); exception when others then ok := false; end;
-  if not ok then return jsonb_build_object('decision', 'REJECT', 'reason', 'HOST_SIGNATURE_INVALID'); end if;
-  body := p_body::jsonb;
-  if coalesce((body#>>'{observer,privileged}')::boolean, true) then return jsonb_build_object('decision', 'REJECT', 'reason', 'PRIVILEGED_OBSERVER'); end if;
-  return uac.admit_capture(p_scope, 'linux.host', coalesce(body->>'hostname', sc.locator), body,
-    jsonb_build_object('host_text_sha256', encode(extensions.digest(convert_to(p_body, 'UTF8'), 'sha256'), 'hex'), 'packages', jsonb_array_length(coalesce(body->'packages', '[]')),
-                       'listening_ports', jsonb_array_length(coalesce(body->'listening_ports', '[]')), 'accounts', jsonb_array_length(coalesce(body->'accounts', '[]'))));
-end $function$
-;
 CREATE OR REPLACE FUNCTION uac.credential_watch()
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -3236,6 +3230,51 @@ AS $function$
     array[extensions.http_header('Authorization', 'Bearer ' || p_token), extensions.http_header('User-Agent', 'density-uac'),
           extensions.http_header('Accept', 'application/vnd.github+json'), extensions.http_header('X-GitHub-Api-Version', '2022-11-28')],
     null, null)::extensions.http_request) $function$
+;
+CREATE OR REPLACE FUNCTION uac.observe_host_external(p_hosts text[], p_urls text[])
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare h text; u text; t text; ip text; hosts jsonb := '[]'; eps jsonb := '[]'; certs jsonb := '[]'; owners jsonb; r extensions.http_response;
+  src jsonb := jsonb_build_object('dns', 'ok', 'ip_ownership', 'ok', 'certificate_logs', 'ok', 'endpoints', 'ok'); a jsonb; aaaa jsonb; cname jsonb; asn text; asname text; ci jsonb;
+begin
+  perform extensions.http_set_curlopt('CURLOPT_TIMEOUT_MS', '10000');
+  foreach h in array (coalesce(p_hosts, '{}'::text[]))[1:5] loop
+    begin a := to_jsonb(coalesce(uac.doh(h, 'A'), '{}'::text[])); aaaa := to_jsonb(coalesce(uac.doh(h, 'AAAA'), '{}'::text[])); cname := to_jsonb(coalesce(uac.doh(h, 'CNAME'), '{}'::text[]));
+    exception when others then a := '[]'; aaaa := '[]'; cname := '[]'; src := src || jsonb_build_object('dns', 'partial: ' || left(sqlerrm, 60)); end;
+    owners := '[]';
+    for ip in select jsonb_array_elements_text(a) loop
+      continue when ip !~ '^\d+\.\d+\.\d+\.\d+$';
+      begin
+        t := split_part(ip, '.', 4) || '.' || split_part(ip, '.', 3) || '.' || split_part(ip, '.', 2) || '.' || split_part(ip, '.', 1);
+        asn := split_part(trim(both '"' from coalesce((uac.doh(t || '.origin.asn.cymru.com', 'TXT'))[1], '')), ' | ', 1);
+        asname := case when asn <> '' then split_part(trim(both '"' from coalesce((uac.doh('AS' || split_part(asn, ' ', 1) || '.asn.cymru.com', 'TXT'))[1], '')), ' | ', 5) end;
+        owners := owners || jsonb_build_object('ip', ip, 'asn', nullif(asn, ''), 'as_name', nullif(asname, ''));
+      exception when others then src := src || jsonb_build_object('ip_ownership', 'partial: ' || left(sqlerrm, 60)); end;
+    end loop;
+    hosts := hosts || jsonb_build_object('name', h, 'a', a, 'aaaa', aaaa, 'cname', cname, 'owners', owners);
+    begin
+      r := extensions.http(('GET', 'https://api.certspotter.com/v1/issuances?domain=' || h || '&expand=issuer', array[extensions.http_header('User-Agent', 'density-uac/host.external')], null, null)::extensions.http_request);
+      if r.status = 200 then
+        select jsonb_build_object('host', h, 'issuances', jsonb_array_length(r.content::jsonb), 'latest_issuer', (x->'issuer'->>'friendly_name'), 'latest_not_after', x->>'not_after') into ci
+          from jsonb_array_elements(r.content::jsonb) x order by x->>'not_after' desc limit 1;
+        certs := certs || coalesce(ci, jsonb_build_object('host', h, 'issuances', 0));
+      else src := src || jsonb_build_object('certificate_logs', 'partial: HTTP ' || r.status); end if;
+    exception when others then src := src || jsonb_build_object('certificate_logs', 'partial: ' || left(sqlerrm, 60)); end;
+  end loop;
+  foreach u in array (coalesce(p_urls, '{}'::text[]))[1:5] loop
+    begin
+      r := extensions.http(('GET', u, array[extensions.http_header('User-Agent', 'density-uac/host.external')], null, null)::extensions.http_request);
+      eps := eps || jsonb_build_object('url', u, 'status', r.status,
+        'server', (select h2.value from unnest(r.headers) h2 where lower(h2.field) = 'server' limit 1),
+        'content_type', split_part(coalesce((select h2.value from unnest(r.headers) h2 where lower(h2.field) = 'content-type' limit 1), ''), ';', 1),
+        'header_names', (select jsonb_agg(distinct lower(h2.field)) from unnest(r.headers) h2));
+    exception when others then eps := eps || jsonb_build_object('url', u, 'status', null, 'error', left(sqlerrm, 80)); src := src || jsonb_build_object('endpoints', 'partial'); end;
+  end loop;
+  return jsonb_build_object('tier', 'O0+O1', 'hosts', hosts, 'certificates', certs, 'endpoints', eps, 'sources', src);
+end $function$
 ;
 CREATE OR REPLACE FUNCTION uac.openapi_observe(p_base text, p_spec_url text, p_max_probes integer)
  RETURNS jsonb
@@ -5287,8 +5326,8 @@ create table verify.kernel_receipts (
   admitted_event uuid,
   receipt_id uuid not null default gen_random_uuid()
 );
-alter table only verify.kernel_receipts add constraint kernel_receipts_one_per_event UNIQUE (stream_id, identity_digest);
 alter table only verify.kernel_receipts add constraint kernel_receipts_pkey PRIMARY KEY (receipt_id);
+CREATE UNIQUE INDEX kernel_receipts_one_unconsumed_per_event ON verify.kernel_receipts USING btree (stream_id, identity_digest) WHERE (admitted_event IS NULL);
 alter table verify.kernel_receipts enable row level security;
 create policy verify_kernel_receipts_read on verify.kernel_receipts as permissive for select to uacd, uapd, verifierd, p0d, gatewayd, portd using (true);
 create policy verify_kernel_receipts_write on verify.kernel_receipts as permissive for all to verifierd using (true) with check (true);
@@ -5385,6 +5424,9 @@ CREATE OR REPLACE FUNCTION verify.evidence_capture(p_scope uuid, p_spec jsonb)
 AS $function$
 declare base jsonb; sw jsonb; d text;
 begin
+  if p_spec ? 'capture_digest' and exists (select 1 from uac.captures c where c.scope_stream = p_scope and c.content_digest = p_spec->>'capture_digest') then
+    return p_spec->>'capture_digest';
+  end if;
   if p_spec->>'op' = 'probe_witness' and (p_spec->'left'->>'scope')::uuid = p_scope then
     base := p_spec->'base'; sw := base || jsonb_build_object(p_spec->>'input', p_spec->'switch_value');
     select c.content_digest into d from uac.captures c join uac.capture_bodies b using (content_digest)
