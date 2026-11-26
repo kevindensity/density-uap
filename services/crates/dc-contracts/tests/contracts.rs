@@ -25,7 +25,7 @@ fn unknown_field_is_refused() {
 #[test]
 fn missing_required_field_is_refused() {
     let mut v = domain_body();
-    v.as_object_mut().unwrap().remove("dns_mx");
+    v.as_object_mut().unwrap().remove("sources");
     assert!(serde_json::from_value::<PublicDomainCapture>(v).is_err());
 }
 

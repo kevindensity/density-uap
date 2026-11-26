@@ -1,0 +1,12 @@
+[package]
+name = "uacd"
+version = "0.1.0"
+edition = "2021"
+description = "UAC acquisition process: observes foreign systems outside-in and emits contract-checked captures (never interprets them)"
+
+[dependencies]
+dc-contracts = { path = "../dc-contracts" }
+reqwest = { version = "=0.12.9", default-features = false, features = ["rustls-tls", "json"] }
+regex = "=1.11.1"
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }

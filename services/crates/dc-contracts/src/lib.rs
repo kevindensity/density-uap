@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 /// (schema id, SHA-256 of the canonical schema, Rust type)
 pub const SCHEMAS: &[(&str, &str, &str)] = &[
-    ("density:capture.public_domain/1", "e4d908841e559f9bb720e3f6eda3b23f3044265ec93f2bf26ee4ba6a6cfa15f5", "PublicDomainCapture"),
+    ("density:capture.public_domain/1", "c83b95ef4194f818d5ef00af5d4ffa9d23a360f24f0e703e0b0d9ef1ed54f7a8", "PublicDomainCapture"),
     ("density:core.signed_envelope/1", "5c334747d97513990d049d0f14b832834e662a67f02808351e794f450e485577", "SignedEnvelope"),
     ("density:uac.capture_admission/1", "58d24a90b108a364d2bc97442fee1c6c0252af0eb82d44681bff10b45f05cbfc", "CaptureAdmission"),
     ("density:uap.candidate_system/1", "4cbe7d4d15906c0fc02def2145aa06aaab7c41bc6438fed3cca3210ae94d882b", "CandidateSystem"),
@@ -24,21 +24,36 @@ pub struct IpOwner {
 #[serde(deny_unknown_fields)]
 pub struct PublicDomainCapture {
     pub domain: String,
-    pub dns_a: Vec<String>,
-    pub dns_aaaa: Vec<String>,
-    pub dns_mx: Vec<String>,
-    pub dns_ns: Vec<String>,
-    pub dns_txt: Vec<String>,
-    pub dns_caa: Vec<String>,
-    pub dmarc: Vec<String>,
-    pub www_a: Vec<String>,
-    pub www_cname: Vec<String>,
-    pub subdomains: Vec<String>,
-    pub ip_owners: Vec<IpOwner>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dns_a: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dns_aaaa: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dns_mx: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dns_ns: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dns_txt: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dns_caa: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dmarc: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub www_a: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub www_cname: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subdomains: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ip_owners: Option<Vec<IpOwner>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub web_server: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub web_status: Option<String>,
-    pub web_header_names: Vec<String>,
-    pub web_script_hosts: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub web_header_names: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub web_script_hosts: Option<Vec<String>>,
     pub sources: std::collections::BTreeMap<String, String>,
 }
 

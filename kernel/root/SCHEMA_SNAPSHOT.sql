@@ -1213,7 +1213,7 @@ begin
   perform p0.admit_event(jsonb_build_object('event_id', gen_random_uuid(), 'event_kind', 'run:(none)->OPENED', 'stream_id', run, 'subject_type', 'run',
     'subject_id', p_component || '@' || p_artifact, 'payload', jsonb_build_object('subject', p_component || '@' || p_artifact, 'purpose', 'build-admission',
     'environment', 'LIVE_SINGLE_ADMIN', 'predecessor', p_predecessor), 'authority_epoch', p0.current_epoch(), 'expected_revision', '0'));
-  foreach setname in array array['spine', 'blind', 'isolation_sql', 'kernel', 'loops_staleness', 'orbit', 'corroboration', 'restore', 'differential', 'reconstruction', 'restore_drills', 'node_admission', 'fence_conformance', 'leases', 'coverage', 'formation', 'identities', 'access_ladders', 'provenance', 'routes', 'external'] loop
+  foreach setname in array array['spine', 'blind', 'isolation_sql', 'kernel', 'loops_staleness', 'orbit', 'corroboration', 'restore', 'differential', 'reconstruction', 'restore_drills', 'node_admission', 'fence_conformance', 'leases', 'coverage', 'formation', 'identities', 'access_ladders', 'provenance', 'routes', 'contracts', 'external'] loop
     begin
       for r in execute case setname when 'spine' then 'select check_name, passed, detail from uap_test.run_all()'
                                     when 'blind' then 'select * from gates.blind_kernel_checks()'
@@ -1235,6 +1235,7 @@ begin
                                     when 'access_ladders' then 'select * from gates.access_ladder_checks()'
                                     when 'provenance' then 'select * from gates.provenance_checks()'
                                     when 'routes' then 'select * from gates.route_checks()'
+                                    when 'contracts' then 'select * from gates.contract_checks()'
                                     else 'select * from gates.external_checks($1)' end using p_external loop
         res := res || jsonb_build_object('set', setname, 'check', r.check_name, 'passed', r.passed, 'detail', left(r.detail, 200));
       end loop;
