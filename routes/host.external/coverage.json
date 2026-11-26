@@ -1,0 +1,30 @@
+[
+  {
+    "field": "certificates",
+    "coverage": "PARTIAL",
+    "source_key": "certificate_logs",
+    "ok_pattern": "^ok$",
+    "basis": "issuances logged for the exact hostname only; wildcard certificates for a parent domain are not attributed to the host"
+  },
+  {
+    "field": "endpoints",
+    "coverage": "PARTIAL",
+    "source_key": "endpoints",
+    "ok_pattern": "^ok$",
+    "basis": "only the declared public URLs, one ordinary GET each; nothing else on the host is observed"
+  },
+  {
+    "field": "hosts",
+    "coverage": "COMPLETE",
+    "source_key": "dns",
+    "ok_pattern": "^ok$",
+    "basis": "A, AAAA and CNAME records of each declared hostname, with the owner of each IPv4 address"
+  },
+  {
+    "field": "tier",
+    "coverage": "COMPLETE",
+    "source_key": null,
+    "ok_pattern": "^ok$",
+    "basis": "the observation tier of the capture"
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "route": "host.external",
+  "family": "host-external",
+  "risk": "read-only",
+  "collector": "sql:uac.acquire_host_external",
+  "source_path": "kernel/root/SCHEMA_SNAPSHOT.sql",
+  "scope_kinds": [
+    "host"
+  ],
+  "credential_required": false,
+  "reread_route": "none",
+  "budget": {
+    "tier": "O0+O1",
+    "methods": [
+      "GET"
+    ],
+    "urls_per_capture": 5,
+    "hosts_per_capture": 5
+  },
+  "contract_version": 1,
+  "description": "observes a host from the outside only: DNS, owner of every address, certificate history, and one ordinary GET per declared public URL; nothing installed, no credentials, no scanning"
+}
