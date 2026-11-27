@@ -622,9 +622,11 @@ AS $function$
 declare tok text; r record; f jsonb; s jsonb; bad int; total int; head text; repo_ids text[] := '{}';
 begin
   -- 1. live conformance, one check per contracted table
-  select count(*), count(*) filter (where cardinality(contracts.check('density:capture.public_domain/1', b.body)) > 0) into total, bad
+  -- each capture is checked against the contract version in force when it was recorded (v2 from the moment it was loaded)
+  select count(*), count(*) filter (where cardinality(contracts.check(case when c.recorded_at >= (select min(loaded_at) from contracts.schemas where schema_id = 'density:capture.public_domain/2')
+                                                                     then 'density:capture.public_domain/2' else 'density:capture.public_domain/1' end, b.body)) > 0) into total, bad
     from uac.captures c join uac.capture_bodies b using (content_digest) where c.route = 'public.domain';
-  check_name := 'contracts.live.capture_public_domain'; passed := bad = 0; detail := (total - bad) || ' of ' || total || ' captures conform'; return next;
+  check_name := 'contracts.live.capture_public_domain'; passed := bad = 0; detail := (total - bad) || ' of ' || total || ' captures conform to the version in force when recorded'; return next;
   select count(*), count(*) filter (where cardinality(contracts.check('density:uap.candidate_system/1', to_jsonb(cs) - 'computed_at')) > 0) into total, bad from uap.candidate_systems cs;
   check_name := 'contracts.live.candidate_systems'; passed := bad = 0; detail := (total - bad) || ' of ' || total || ' rows conform'; return next;
   select count(*), count(*) filter (where cardinality(contracts.check('density:uap.connection_plan/1', to_jsonb(cp))) > 0) into total, bad from uap.connection_plans cp;
