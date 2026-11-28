@@ -11,9 +11,10 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 EMITTER = "gatewayd@mcp-density-kernel"
 OWNER_PUB = "9aa6b00cc07e6ebf7edbcc961aa8059dfcc4b7c41370a2e550d0d4fa4ee095e2"
-ISSUERS = {"p0d": "10b3f7311525cbe5f4395360a82ccc1609ca0ed4f13a7c1f4f6ecd29c1369463", "owner-policy": "3e48dc90787f3765288e8b5bbf1fbea433de060c7db9c5fb9e3475b6c01c2fbb"}
+# Issuer keys are read from the ledger (ledger.active_issuers) at every release, never copied here: a hard-coded copy
+# missed the 28 Nov 2026 rotation and would have refused every grant.
 POLICIES = "/var/lib/gatewayd/policies"
-def _dsn(user, pwfile): return "host={h} port=5432 dbname=postgres sslmode=require connect_timeout=10 user=" + user + " password=" + open(pwfile).read().strip()
+def _dsn(user, pwfile): return "host={h} port=5432 dbname=postgres sslmode=verify-full sslrootcert=/etc/density/supabase-root-ca.pem connect_timeout=10 user=" + user + " password=" + open(pwfile).read().strip()
 DB = _dsn("gatewayd_ledger.mzglmdydfcoljrwleooq", "/var/lib/gatewayd/secrets/db_password")              # the ledger: SENT for every target
 TARGETS = {   # audience -> how to reach that target and which table its fence protects
     "pg://density-ledger/sandbox": {"dsn": DB, "table": "sandbox.flags"},
@@ -57,6 +58,14 @@ def cfp_signing_input(g):
             + lp(g["effect"]["pk"]) + lp(g["prestate"]["digest"]) + lp(g["history"]["head"]) + lp(g["authority_epoch"]) + lp(g["intent"])
             + lp(g["not_before"]) + lp(g["not_after"]) + lp(str(g["quorum"]["t"])))
 
+def release_check(g):
+    """Issuers whose signature verifies under the key AND generation the ledger enrols right now."""
+    msg = cfp_signing_input(g)
+    with connect() as c:
+        enrolled = {r[0]: (r[1], r[2]) for r in c.execute("select issuer_id, pubkey_hex, root_gen from ledger.active_issuers()").fetchall()}
+    return {s["issuer"] for s in g["signatures"] if s["issuer"] in enrolled and s.get("root_gen") == enrolled[s["issuer"]][1]
+            and verify(enrolled[s["issuer"]][0], msg, s["sig"])}
+
 def effect(req):
     stream, key, value, simulate = req["policy"], req["key"], req["value"], req.get("simulate")
     pl = check_policy(stream)
@@ -85,7 +94,7 @@ def effect(req):
     if res.get("decision") != "ISSUED": raise Refused("GRANT_NOT_ISSUED: " + str(res.get("reason")))
     g = res["grant"]
     # re-check at release: both issuers' signatures and the window, here, independently of the kernel's word
-    msg = cfp_signing_input(g); ok = {s["issuer"] for s in g["signatures"] if s["issuer"] in ISSUERS and verify(ISSUERS[s["issuer"]], msg, s["sig"])}
+    ok = release_check(g)
     if len(ok) < int(g["quorum"]["t"]): raise Refused("GRANT_SIGNATURES_INVALID")
     now = datetime.datetime.now(datetime.timezone.utc)
     if not (datetime.datetime.fromisoformat(g["not_before"][:26] + "+00:00") <= now <= datetime.datetime.fromisoformat(g["not_after"][:26] + "+00:00")): raise Refused("GRANT_OUTSIDE_WINDOW")

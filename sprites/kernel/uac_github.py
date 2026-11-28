@@ -9,7 +9,7 @@ import psycopg
 SECRETS = "/var/lib/uacd/secrets"
 TOKEN = open(f"{SECRETS}/github_token").read().strip()
 DBPW = open(f"{SECRETS}/db_password").read().strip()
-DB = f"host=aws-1-us-west-1.pooler.supabase.com port=5432 dbname=postgres sslmode=require user=uacd_login.rtkslhpxdcjoeqhucebp password={DBPW}"
+DB = f"host=aws-1-us-west-1.pooler.supabase.com port=5432 dbname=postgres sslmode=verify-full sslrootcert=/etc/density/supabase-root-ca.pem user=uacd_login.rtkslhpxdcjoeqhucebp password={DBPW}"
 
 def pg_jsonb_text(v):
     if isinstance(v, dict):

@@ -8,7 +8,7 @@ import psycopg
 sys.path.insert(0, "/opt/density/uap")
 from uapcore.probe_carriers import HttpbinCarrier, DnsCarrier
 
-DB = "host=aws-1-us-west-1.pooler.supabase.com port=5432 dbname=postgres sslmode=require user=uacd_login.rtkslhpxdcjoeqhucebp password=" + open("/var/lib/uacd/secrets/db_password").read().strip()
+DB = "host=aws-1-us-west-1.pooler.supabase.com port=5432 dbname=postgres sslmode=verify-full sslrootcert=/etc/density/supabase-root-ca.pem user=uacd_login.rtkslhpxdcjoeqhucebp password=" + open("/var/lib/uacd/secrets/db_password").read().strip()
 CARRIERS = {"probe.http": lambda: HttpbinCarrier("http://httpbin.org"), "probe.dns": lambda: DnsCarrier("1.1.1.1", 53)}
 LOCK = threading.Lock(); RUNS = {}; LAST = {}; SCOPES = {}
 SPOOL = "/var/lib/uacd/spool"; os.makedirs(SPOOL, exist_ok=True)      # every probe is on disk the moment it happens

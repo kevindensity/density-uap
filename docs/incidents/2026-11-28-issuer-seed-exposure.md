@@ -35,6 +35,9 @@ rotated: no grant signed with the old keys can verify any more.
 | D10 | Watchdog killed `p0d` after one 5-second miss | Four consecutive misses; runs the hygiene gate every minute | `sprites/kernel/watchdog.sh` (with the new `p0d`) |
 | D11 | Both issuers on one host under one administrator | Not fixable by software alone | Open |
 | D12 | Build-admission gate runs accepted self-reported external checks (`gates.external_checks` trusted any list of passes), so a run could be padded to meet the suite-size floor | External evidence must be signed by an enrolled `BUILD_ATTESTOR` key for this exact component@sha256, within 24 hours; the attestor (`scripts/attest.py`) hashes the binary and runs every check itself, and refuses to sign unless the run used `verify-full`. Unverified evidence yields one failing check and no passes. 7/7 forgery cases refused (unsigned, replayed for another build, tampered, padded, stale, unenrolled key). Limit: root on the build host can still sign (D11) | root `g3_0001` |
+| D13 | The effect gateway kept a hard-coded copy of the issuer public keys; the rotation updated the ledger but not this copy, so from 03:24 UTC on 28 Nov the gateway would have refused every grant (none was attempted: last SENT 24 Nov) | Copy removed: the gateway reads active keys and generations from the ledger (`ledger.active_issuers`) at every release and also checks each signature's generation. Tested on a live grant: genuine passes; tampered signature, wrong generation and altered body refused | ledger `s6_0002`, `sprites/kernel/effect_gateway.py` |
+| D14 | The same launcher pattern on mcp-density-verifier: `verifierd`'s signing seed and database URL were on a command line readable by every account there; `/proc` not hidden | Launcher fixed, `hidepid`; key rotated (`verifier-2` enrolled, `verifier-1` revoked); `verifierd_login` password replaced by a SCRAM verifier generated on the Sprite; seed, env and password copies shredded; gate suites naming `verifier-1` still 3/3 and 3/3. Misuse cannot be ruled out for the 294 settlements the old key signed: see Open | `sprites/verifier/run-verifier.sh` |
+| D15 | Database TLS was unverified everywhere, including the Python services (`sslmode=require`) | CA verified against the pooler's presented root through an independent channel (fingerprint `80:70:25:AD...CA:FA`, valid to 26 Apr 2031); every client on both Sprites runs `verify-full`; proven by a negative control (without the root: `UnknownIssuer`). The hygiene gate refuses any unverified client mode | live 28 Nov |
 
 ## Operator errors during the response
 
@@ -49,6 +52,8 @@ rotated: no grant signed with the old keys can verify any more.
 | E7 | A migration created a trigger before its function | None (caught by the dry run) | Rule kept: every migration is dry-run on the live database in a forced rollback first |
 | E8 | The first resilience test silently could not install its firewall rule | None (the test asserts failure and so failed) | Rule kept: every test must be able to fail; replaced by an isolated frozen relay |
 | E9 | Listed fixable gaps as to-dos | Delay | This record and the fixes above |
+| E10 | The rotation updated the ledger and the kernel records but missed a fifth copy of the keys, in the gateway | Every effect would have been refused | D13: the copy no longer exists. Rule: a key has one authoritative location; consumers read it, never copy it |
+| E11 | Applied the launcher fix to one Sprite and did not check the other for the same pattern | The verifier exposure (D14) ran a day longer | Rule: a fix for a pattern is applied to every host and every service, and the gate runs on every host |
 
 ## Prevention now in force
 
@@ -67,6 +72,10 @@ Gate runs for the rebuilt binaries must exercise them for real (health, enrolmen
 grant verified at the fence, frozen-connection recovery) in their `verify-full` configuration, so they follow the CA.
 Admission (owner signature) cites those runs and must happen within 7 days of them. The recovery root is independent
 and can be created first (`owner-tools/density_recovery_root_genesis.py`).
+
+## Open (operator)
+
+- Re-verify the 294 settlements signed by `verifier-1` under `verifier-2` (D14), so no current standing depends on the exposed key.
 
 ## Open (owner)
 

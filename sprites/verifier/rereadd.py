@@ -99,7 +99,7 @@ def reread(domain):
 def connect():
     last = None
     for h in HOSTS:
-        try: return psycopg.connect(f"host={h} port=5432 dbname=postgres sslmode=require connect_timeout=10 user=rereadd_login.rtkslhpxdcjoeqhucebp password={PW}", autocommit=True)
+        try: return psycopg.connect(f"host={h} port=5432 dbname=postgres sslmode=verify-full sslrootcert=/etc/density/supabase-root-ca.pem connect_timeout=10 user=rereadd_login.rtkslhpxdcjoeqhucebp password={PW}", autocommit=True)
         except Exception as e: last = e
     raise last
 
