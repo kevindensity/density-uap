@@ -142,6 +142,25 @@ pub mod db {
     /// One connection; the process exits when it ends so the supervisor restarts it (unchanged contract).
     pub async fn connect(url: &str) -> anyhow::Result<tokio_postgres::Client> { open(url, true).await }
 
+    /// One retry rule for every query kind: bounded by QUERY_TIMEOUT; on a dead or timed-out connection, reconnect and
+    /// retry once; a real SQL error is returned at once, never retried.
+    macro_rules! retrying {
+        ($self:ident, $c:ident => $call:expr) => {{
+            for attempt in 0..2 {
+                let $c = $self.current().await?;
+                match tokio::time::timeout(QUERY_TIMEOUT, $call).await {
+                    Ok(Ok(v)) => return Ok(v),
+                    Ok(Err(e)) if !$c.is_closed() || attempt == 1 => return Err(e.into()),
+                    Ok(Err(e)) => eprintln!("database: connection lost ({e}); retrying once"),
+                    Err(_) if attempt == 1 => anyhow::bail!("database query timed out twice"),
+                    Err(_) => eprintln!("database: query timed out; dropping the connection and retrying once"),
+                }
+                $self.drop_client().await;
+            }
+            unreachable!()
+        }};
+    }
+
     /// A connection that reconnects in place. Every query is bounded by QUERY_TIMEOUT; after a failure on a dead or
     /// timed-out connection it reconnects and retries once. Use only for statements that are safe to repeat (reads,
     /// and submissions the database makes idempotent, such as p0.admit_event keyed by event_id).
@@ -163,18 +182,17 @@ pub mod db {
         async fn drop_client(&self) { *self.client.lock().await = None; }
 
         pub async fn query_one(&self, sql: &str, params: &[&(dyn tokio_postgres::types::ToSql + Sync)]) -> anyhow::Result<tokio_postgres::Row> {
-            for attempt in 0..2 {
-                let c = self.current().await?;
-                match tokio::time::timeout(QUERY_TIMEOUT, c.query_one(sql, params)).await {
-                    Ok(Ok(row)) => return Ok(row),
-                    Ok(Err(e)) if !c.is_closed() || attempt == 1 => return Err(e.into()),   // a real SQL error: do not retry
-                    Ok(Err(e)) => eprintln!("database: connection lost ({e}); retrying once"),
-                    Err(_) if attempt == 1 => anyhow::bail!("database query timed out twice"),
-                    Err(_) => eprintln!("database: query timed out; dropping the connection and retrying once"),
-                }
-                self.drop_client().await;
-            }
-            unreachable!()
+            retrying!(self, c => c.query_one(sql, params))
+        }
+        pub async fn query_opt(&self, sql: &str, params: &[&(dyn tokio_postgres::types::ToSql + Sync)]) -> anyhow::Result<Option<tokio_postgres::Row>> {
+            retrying!(self, c => c.query_opt(sql, params))
+        }
+        pub async fn query(&self, sql: &str, params: &[&(dyn tokio_postgres::types::ToSql + Sync)]) -> anyhow::Result<Vec<tokio_postgres::Row>> {
+            retrying!(self, c => c.query(sql, params))
+        }
+        /// Returns the number of rows affected, so callers can tell an insert that did nothing from one that wrote.
+        pub async fn execute(&self, sql: &str, params: &[&(dyn tokio_postgres::types::ToSql + Sync)]) -> anyhow::Result<u64> {
+            retrying!(self, c => c.execute(sql, params))
         }
     }
 }

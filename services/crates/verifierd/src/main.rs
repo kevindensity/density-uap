@@ -7,7 +7,7 @@ use p0_core::{verify_hex, Key};
 use serde_json::{json, Value};
 use std::sync::Arc;
 
-struct App { db: tokio_postgres::Client, key: Key, key_id: String, trigger_pub: String, nonces: std::sync::Mutex<std::collections::HashMap<String, i64>> }
+struct App { db: p0_core::db::Db, key: Key, key_id: String, trigger_pub: String, nonces: std::sync::Mutex<std::collections::HashMap<String, i64>> }
 type S = State<Arc<App>>;
 
 fn refuse(reason: &str, detail: Value) -> (StatusCode, Json<Value>) { (StatusCode::CONFLICT, Json(json!({"decision": "REFUSE", "reason": reason, "detail": detail}))) }
@@ -178,9 +178,13 @@ async fn sweep(State(a): S, Json(body): Json<Value>) -> (StatusCode, Json<Value>
         let mat = match a.db.query_one("select msg, sha256 from verify.blind_commitment_material($1, $2, $3)", &[&stream, &value, &evidence]).await {
             Ok(x) => x, Err(e) => { refused.push(json!({"claim": key, "reason": e.to_string()})); continue } };
         let (bmsg, bsha): (Vec<u8>, String) = (mat.get(0), mat.get(1));
-        if let Err(e) = a.db.execute("insert into verify.blind_commitments (stream_id, consequence_key, verifier_value, evidence, commitment_sha256, key_id, sig) values ($1,$2,$3,$4,$5,$6,$7) on conflict do nothing",
-                                     &[&stream, &key, &value, &evidence, &bsha, &a.key_id, &a.key.sign_hex(&bmsg)]).await {
-            refused.push(json!({"claim": key, "reason": e.to_string()})); continue }
+        // the commitment must be stored by THIS key before anything else is read: no stored commitment, no receipt (D18)
+        match a.db.execute("insert into verify.blind_commitments (stream_id, consequence_key, verifier_value, evidence, commitment_sha256, key_id, sig) values ($1,$2,$3,$4,$5,$6,$7) on conflict do nothing",
+                           &[&stream, &key, &value, &evidence, &bsha, &a.key_id, &a.key.sign_hex(&bmsg)]).await {
+            Ok(1) => {}
+            Ok(_) => { refused.push(json!({"claim": key, "reason": "BLIND_COMMITMENT_NOT_STORED", "detail": {"blind_commitment": bsha}})); continue }
+            Err(e) => { refused.push(json!({"claim": key, "reason": e.to_string()})); continue }
+        }
         // 3. only now read the compiler's submission, and compare against the committed value
         let sub: Value = match a.db.query_one("select uap.claim_submission($1)", &[&key]).await { Ok(x) => x.get(0), Err(e) => { refused.push(json!({"claim": key, "reason": e.to_string()})); continue } };
         let Some(kind) = sub["event_kind"].as_str().map(String::from) else { refused.push(json!({"claim": key, "reason": "NO_SUBMISSION", "detail": sub})); continue };
@@ -240,8 +244,18 @@ async fn main() -> anyhow::Result<()> {
         return Ok(());
     }
     let need = |k: &str| std::env::var(k).map_err(|_| anyhow::anyhow!("missing environment variable {k}"));
-    let app = Arc::new(App { db: p0_core::db::connect(&need("DATABASE_URL")?).await?, key: Key::from_seed_hex(&need("VERIFIER_KEY_SEED")?)?,
-                             key_id: std::env::var("VERIFIER_KEY_ID").unwrap_or_else(|_| "verifier-1".into()),
+    eprintln!("verifierd: database TLS mode {}", p0_core::db::mode());
+    let db = p0_core::db::Db::new(&need("DATABASE_URL")?).await?;
+    let key = Key::from_seed_hex(&need("VERIFIER_KEY_SEED")?)?;
+    let key_id = need("VERIFIER_KEY_ID")?;
+    // refuse to run unless this key is the active VERIFIER key in p0.keys AND registered as a verifier in verify.keys:
+    // a rotation that misses either registry fails here, loudly, at start (D16)
+    let ok: bool = db.query_one("select exists (select 1 from p0.keys where key_id = $1 and role = 'VERIFIER' and status = 'active' and encode(pubkey, 'hex') = $2)
+                                   and exists (select 1 from verify.keys where key_id = $1 and role = 'VERIFIER')", &[&key_id, &key.public_hex()]).await
+        .map_err(|e| anyhow::anyhow!("cannot read this verifier's enrolment: {e}"))?.get(0);
+    if !ok { anyhow::bail!("ENROLMENT_MISMATCH: key {key_id} ({}...) is not the active VERIFIER key in p0.keys and verify.keys", &key.public_hex()[..8]); }
+    eprintln!("verifierd: key {key_id} matches its enrolment");
+    let app = Arc::new(App { db, key, key_id,
                              trigger_pub: need("VERIFIER_TRIGGER_PUBKEY")?, nonces: std::sync::Mutex::new(std::collections::HashMap::new()) });
     let router = Router::new().route("/v1/receipts", post(receipts)).route("/v1/sweep-capture-claims", post(sweep)).route("/v1/pubkey", get(pubkey)).route("/v1/health", get(health)).with_state(app);
     axum::serve(tokio::net::TcpListener::bind(std::env::var("LISTEN").unwrap_or_else(|_| "0.0.0.0:8090".into())).await?, router).await?;
