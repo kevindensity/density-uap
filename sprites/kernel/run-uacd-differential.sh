@@ -6,7 +6,7 @@ SCOPES=("5c0a7f12-3e41-4b8a-9d2c-0d0a1a0b0003 density.dev" "5c0a7f12-3e41-4b8a-9
 while true; do
   for s in "${SCOPES[@]}"; do
     set -- $s
-    out=$(sudo -u uacd env $(sudo cat /var/lib/uacd/env) /opt/density/bin/uacd submit "$1" "$2" 2>&1)
+    out=$(sudo -u uacd /bin/bash -c 'while IFS= read -r l || [ -n "$l" ]; do [[ "$l" == *=* ]] && export "$l"; done < /var/lib/uacd/env; exec /opt/density/bin/uacd submit "$1" "$2"' _ "$1" "$2" 2>&1)
     echo "$(date -u +%FT%TZ) $2 $(echo "$out" | python3 -c 'import json,sys
 try:
  r=json.load(sys.stdin); print(r.get("verdict"), "agreed", r.get("agreed"), "diverged", r.get("diverged"), "unavailable", r.get("unavailable"))
