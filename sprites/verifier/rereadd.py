@@ -109,20 +109,30 @@ def run_once():
         for stream, locator in c.execute("select stream_id, locator from uac.scopes where kind = 'domain' and status = 'DECLARED' order by locator").fetchall():
             body = reread(locator)
             digest = hashlib.sha256(pg_jsonb_text(body).encode()).hexdigest()
-            sig = KEY.sign(f"DENSITY-REREAD/1|{digest}".encode()).hex()
             observed = datetime.datetime.now(datetime.timezone.utc)
+            # v2 binds the observation time, so a signed row cannot be replayed with a fresh time (D21)
+            sig = KEY.sign(f"DENSITY-REREAD/2|{digest}|{observed.strftime('%Y-%m-%dT%H:%M:%S.%fZ')}".encode()).hex()
             try:
-                c.execute("insert into uac.reread_captures (content_digest, scope_stream, route, body, key_id, sig, observed_at) values (%s, %s, %s, %s::jsonb, 'reread-1', %s, %s) on conflict do nothing",
+                cur = c.execute("insert into uac.reread_captures (content_digest, scope_stream, route, body, key_id, sig, observed_at) values (%s, %s, %s, %s::jsonb, 'reread-1', %s, %s) on conflict do nothing",
                           (digest, stream, ROUTE, json.dumps(body), sig, observed))
+                if cur.rowcount != 1: out.append({"domain": locator, "refused": "NOT_STORED"}); continue   # never a silent drop
                 out.append({"domain": locator, "digest": digest[:16], "sources": body["sources"]})
             except Exception as e: out.append({"domain": locator, "refused": str(e).split("\n")[0][:120]})
     return out
 
 if __name__ == "__main__":
     if sys.argv[1:] == ["once"]: print(json.dumps(run_once())); sys.exit(0)
-    while True:                                                               # daily at 06:42 UTC
-        now = datetime.datetime.now(datetime.timezone.utc); nxt = now.replace(hour=6, minute=42, second=0, microsecond=0)
-        if nxt <= now: nxt += datetime.timedelta(days=1)
-        time.sleep((nxt - now).total_seconds())
-        try: print(json.dumps(run_once()), flush=True)
-        except Exception as e: print(f"run failed: {e}", file=sys.stderr, flush=True)
+    # Catch-up, not a wall-clock alarm: this Sprite hibernates, so a sleep until 06:42 silently missed every run from
+    # 25 to 28 Nov 2026 (incident D20). Every 5 minutes it re-reads if the last successful run is 23 hours old or more;
+    # the root wakes this Sprite daily for the verifier sweep, so a missed slot is caught up the same day.
+    STATE = f"{SECRETS}/../last_success"
+    while True:
+        try: last = float(open(STATE).read().strip())
+        except Exception: last = 0.0
+        if time.time() - last >= 23 * 3600:
+            try:
+                out = run_once(); print(json.dumps(out), flush=True)
+                if not any("refused" in x for x in out):
+                    open(STATE, "w").write(str(time.time()))
+            except Exception as e: print(f"run failed: {e}", file=sys.stderr, flush=True)
+        time.sleep(300)

@@ -1,0 +1,5 @@
+-- uac_0011 (root, D19): a source that either side could not fully observe ('partial' or 'failed') is UNAVAILABLE, not
+-- DIFFERS; DIFFERS means both observed it and disagree. Every density.dev differential since 26 Nov had falsely diverged.
+-- uac_0012 (root, D21): re-reads keyed by (content_digest, observed_at); signature v2 binds the observation time
+-- ('DENSITY-REREAD/2|digest|observed_at', observed_at as YYYY-MM-DDTHH24:MI:SS.USZ in UTC); observation time must be
+-- within 10 minutes of the insert. Applied as executed on 28 Nov 2026 (see the incident record).

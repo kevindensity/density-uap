@@ -1,0 +1,7 @@
+-- v2_0003 and v2_0004 (root). Applied 28 Nov 2026. Corrections to v2_0001, both caught by the build-admission suite.
+-- v2_0003: NULL-safe role checks (a key missing from the registry compared as NULL and passed the guard).
+-- v2_0004: role from verify.keys as before; a key also enrolled in p0.keys must be active there with role VERIFIER, so
+-- a revoked production key cannot strengthen, and the spine fixtures (test verifier ver-uap) reach their own branches.
+-- Final guard text: see SCHEMA_SNAPSHOT; the two edits are:
+--   'or vrole <> ''VERIFIER'' or srole <> ''SYNTHESIZER''' -> 'or vrole is distinct from ''VERIFIER'' or srole is distinct from ''SYNTHESIZER'''
+--   vrole lookup -> verify.keys, plus: raise ILLEGAL_STRENGTHENING_CAST if the key exists in p0.keys and is not an active VERIFIER

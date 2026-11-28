@@ -3,6 +3,8 @@
 
     attest.py pair <p0d-binary> <owner-issuer-binary> <commit> [--sign]
     attest.py uapd <uapd-binary> <commit> [--sign]
+    attest.py uacd <uacd-binary> <commit> [--sign]
+    attest.py verifierd <verifierd-binary> <commit> [--sign]      (on the verifier Sprite, ATTESTOR_KEY_ID=attestor-verifier-1)
 
 It hashes each binary itself, starts the candidates itself, runs every check itself, and only then signs: the
 evidence binds component@sha256 and the commit, and the database verifies it (gates.external_checks). It refuses to
@@ -13,7 +15,7 @@ nothing secret is printed.
 import datetime, hashlib, json, os, socket, subprocess, sys, time, urllib.error, urllib.request, uuid
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 
-KEY_ID, KEY_FILE = "attestor-kernel-1", "/var/lib/attestor/key"
+KEY_ID, KEY_FILE = os.environ.get("ATTESTOR_KEY_ID", "attestor-kernel-1"), "/var/lib/attestor/key"
 CA = "/etc/density/supabase-root-ca.pem"
 
 def sha(p): return hashlib.sha256(open(p, "rb").read()).hexdigest()
@@ -107,6 +109,54 @@ def uapd(bin_, mode):
     check("uapd.reports_tls_mode", mode in r.stderr or mode == "verify-full", f"mode {mode}")
     return checks
 
+def uacd(bin_, mode):
+    checks = []
+    def check(name, ok, detail): checks.append({"check_name": name, "passed": bool(ok), "detail": str(detail).encode("ascii", "replace").decode()[:180]})
+    e = envfile("/var/lib/uacd/env")
+    r = subprocess.run([bin_, "submit", "5c0a7f12-3e41-4b8a-9d2c-0d0a1a0b0003", "density.dev"], user="uacd",
+                       env={"PATH": "/usr/bin:/bin", **e, "PG_SSLMODE": mode, "PG_CA_CERT": CA}, capture_output=True, text=True, timeout=180)
+    try: out = json.loads(r.stdout)
+    except Exception: out = {}
+    check("uacd.shadow_capture_recorded", r.returncode == 0 and out.get("decision") == "RECORDED", f"exit {r.returncode} {out.get('decision')}")
+    check("uacd.agrees_with_oracle", out.get("verdict") == "AGREE" and out.get("diverged") == 0, f"verdict {out.get('verdict')} agreed {out.get('agreed')} diverged {out.get('diverged')} unavailable {out.get('unavailable')}")
+    check("uacd.log_has_no_secret", not any(v and len(v) > 12 and v in (r.stdout + r.stderr) for v in e.values()), "scanned for every secret value")
+    return checks
+
+def verifierd(bin_, mode):
+    checks = []
+    def check(name, ok, detail): checks.append({"check_name": name, "passed": bool(ok), "detail": str(detail).encode("ascii", "replace").decode()[:180]})
+    ve = envfile("/var/lib/verifier/secrets/env")
+    tls = {"PG_SSLMODE": mode, "PG_CA_CERT": CA}
+    p, log = start(bin_, "verifier", {**ve, **tls, "LISTEN": "127.0.0.1:18090"}, "verifierd")
+    try:
+        up = wait_port(18090)
+        s, h = http("GET", "http://127.0.0.1:18090/v1/health")
+        check("verifierd.starts_and_is_healthy", up and s == 200 and h.get("status") == "ok", f"health {s} {h}")
+        lt = open(log).read()
+        check("verifierd.reports_tls_mode", f"database TLS mode {mode}" in lt, f"mode {mode}")
+        check("verifierd.enrolment_matches_both_registries", "matches its enrolment" in lt, "p0.keys and verify.keys")
+        _, pk = http("GET", "http://127.0.0.1:18090/v1/pubkey")
+        check("verifierd.serves_configured_key", pk.get("key_id") == ve.get("VERIFIER_KEY_ID"), f"key_id {pk.get('key_id')}")
+        for label, extra, drop in (("revoked_key_id", {"VERIFIER_KEY_ID": "verifier-1"}, None), ("missing_key_id", {}, "VERIFIER_KEY_ID"),
+                                   ("unenrolled_key", {"VERIFIER_KEY_SEED": os.urandom(32).hex()}, None)):
+            env = {**ve, **tls, **extra, "LISTEN": "127.0.0.1:18091"}
+            if drop: env.pop(drop, None)
+            b, bl = start(bin_, "verifier", env, label)
+            try: code = b.wait(25)
+            except subprocess.TimeoutExpired: b.kill(); code = "still running"
+            check(f"verifierd.refuses_{label}", code not in (0, "still running"), f"exit {code}")
+        s, d = http("POST", "http://127.0.0.1:18090/v1/sweep-capture-claims", {})
+        check("verifierd.sweep_refuses_missing_trigger", s == 401 and d.get("reason") == "TRIGGER_MISSING", f"{s} {d.get('reason')}")
+        now = str(int(time.time()))
+        s, d = http("POST", "http://127.0.0.1:18090/v1/sweep-capture-claims", {"trigger": {"action": "sweep-capture-claims", "issued_at": now, "nonce": uuid.uuid4().hex, "sig": "00" * 64, "key_id": "root-scheduler"}})
+        check("verifierd.sweep_refuses_forged_trigger", s == 401 and d.get("reason") == "TRIGGER_BAD_SIGNATURE", f"{s} {d.get('reason')}")
+        s, d = http("POST", "http://127.0.0.1:18090/v1/receipts", {"trigger": {"action": "sweep-capture-claims", "issued_at": now, "nonce": uuid.uuid4().hex, "sig": "00" * 64}})
+        check("verifierd.receipts_refuses_trigger_for_another_action", s == 401 and d.get("reason") == "TRIGGER_WRONG_ACTION", f"{s} {d.get('reason')}")
+        check("verifierd.log_has_no_secret", not any(v and len(v) > 12 and v in open(log).read() for v in ve.values() if v != mode), "scanned for every secret value")
+    finally:
+        p.kill()
+    return checks
+
 def evidence(component, binary, commit, checks, sign):
     subj = f"{component}@{sha(binary)}"
     at = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -125,6 +175,10 @@ if __name__ == "__main__":
     if a[0] == "pair":
         c = pair(a[1], a[2], mode)
         out = [evidence("p0d", a[1], a[3], c, sign), evidence("owner-issuer", a[2], a[3], c, sign)]
+    elif a[0] == "uacd":
+        out = [evidence("uacd", a[1], a[2], uacd(a[1], mode), sign)]
+    elif a[0] == "verifierd":
+        out = [evidence("verifierd", a[1], a[2], verifierd(a[1], mode), sign)]
     elif a[0] == "uapd":
         out = [evidence("uapd", a[1], a[2], uapd(a[1], mode), sign)]
     else: sys.exit(__doc__)
