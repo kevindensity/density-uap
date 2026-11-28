@@ -5,7 +5,7 @@ use p0_core::{verify_hex, Grant, GrantSignature, Key};
 use serde_json::{json, Value};
 use std::sync::Arc;
 
-struct App { key: Key, p0d_pub: String, audiences: Vec<String>, max_ttl_s: i64 }
+struct App { root_gen: u32, key: Key, p0d_pub: String, audiences: Vec<String>, max_ttl_s: i64 }
 
 fn refuse(reason: &str) -> (StatusCode, Json<Value>) { (StatusCode::FORBIDDEN, Json(json!({"decision": "REFUSE", "reason": reason}))) }
 
@@ -20,7 +20,7 @@ async fn cosign(State(a): State<Arc<App>>, Json(body): Json<Value>) -> (StatusCo
     let msg = g.signing_input();
     let kernel_ok = g.signatures.iter().any(|s| s.issuer == "p0d" && verify_hex(&a.p0d_pub, &msg, &s.sig));
     if !kernel_ok { return refuse("NOT_SIGNED_BY_KERNEL"); }
-    (StatusCode::OK, Json(serde_json::to_value(GrantSignature { issuer: "owner-policy".into(), root_gen: 1, sig: a.key.sign_hex(&msg) }).unwrap()))
+    (StatusCode::OK, Json(serde_json::to_value(GrantSignature { issuer: "owner-policy".into(), root_gen: a.root_gen, sig: a.key.sign_hex(&msg) }).unwrap()))
 }
 async fn pubkey(State(a): State<Arc<App>>) -> Json<Value> { Json(json!({"key_id": "owner-policy", "role": "OWNER_POLICY", "pubkey": a.key.public_hex()})) }
 
@@ -33,6 +33,7 @@ async fn main() -> anyhow::Result<()> {
     }
     let need = |k: &str| std::env::var(k).map_err(|_| anyhow::anyhow!("missing environment variable {k}"));
     let app = Arc::new(App {
+        root_gen: std::env::var("ISSUER_ROOT_GEN").ok().and_then(|v| v.parse().ok()).unwrap_or(1),
         key: Key::from_seed_hex(&need("OWNER_KEY_SEED")?)?, p0d_pub: need("P0D_PUBKEY")?,
         audiences: need("ALLOWED_AUDIENCES")?.split(',').map(|s| s.trim().to_string()).collect(),
         max_ttl_s: std::env::var("MAX_GRANT_TTL_S").ok().and_then(|v| v.parse().ok()).unwrap_or(300),

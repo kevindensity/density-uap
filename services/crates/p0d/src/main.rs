@@ -8,7 +8,7 @@ use serde_json::{json, Value};
 use std::sync::Arc;
 
 
-struct App { db: tokio_postgres::Client, key: Key, key_id: String, owner_addr: String, owner_pub: String, max_ttl_s: i64 }
+struct App { db: p0_core::db::Db, root_gen: u32, key: Key, key_id: String, owner_addr: String, owner_pub: String, max_ttl_s: i64 }
 type S = State<Arc<App>>;
 
 fn env(k: &str) -> anyhow::Result<String> { std::env::var(k).map_err(|_| anyhow::anyhow!("missing environment variable {k}")) }
@@ -52,7 +52,7 @@ async fn grants(State(a): S, Json(r): Json<GrantRequest>) -> (StatusCode, Json<V
         quorum: Quorum { t: 2 }, signatures: vec![],
     };
     let msg = g.signing_input();
-    g.signatures.push(GrantSignature { issuer: "p0d".into(), root_gen: 1, sig: a.key.sign_hex(&msg) });
+    g.signatures.push(GrantSignature { issuer: "p0d".into(), root_gen: a.root_gen, sig: a.key.sign_hex(&msg) });
     let co = match post_json(&a.owner_addr, "/v1/cosign", &json!({"grant": g})).await {
         Ok((200, v)) => v,
         Ok((code, v)) => return (StatusCode::CONFLICT, Json(json!({"decision": "REFUSE", "reason": "OWNER_ISSUER_REFUSED", "status": code, "detail": v}))),
@@ -73,9 +73,20 @@ async fn main() -> anyhow::Result<()> {
         println!("{}", json!({"role": "KERNEL", "seed_hex_store_as_secret": k.seed_hex(), "pubkey_hex_enrol": k.public_hex()}));
         return Ok(());
     }
-    let db = p0_core::db::connect(&env("DATABASE_URL")?).await?;
+    eprintln!("p0d: database TLS mode {}", p0_core::db::mode());
+    let db = p0_core::db::Db::new(&env("DATABASE_URL")?).await?;
+    let key = Key::from_seed_hex(&env("P0D_KEY_SEED")?)?;
+    let root_gen: u32 = std::env::var("ISSUER_ROOT_GEN").ok().and_then(|v| v.parse().ok()).unwrap_or(1);
+    // refuse to run with a key the ledger does not enrol: a half-finished rotation fails here, loudly, at start
+    let row = db.query_one("select encode(pubkey, 'hex'), root_gen, status from p0_ledger.issuers where issuer_id = 'p0d'", &[]).await
+        .map_err(|e| anyhow::anyhow!("cannot read this issuer's enrolment from the ledger: {e}"))?;
+    let (enrolled, gen, status): (String, i32, String) = (row.get(0), row.get(1), row.get(2));
+    if enrolled != key.public_hex() || gen as u32 != root_gen || status != "active" {
+        anyhow::bail!("ENROLMENT_MISMATCH: this key {}… root_gen {root_gen}; ledger enrols {}… root_gen {gen} status {status}", &key.public_hex()[..8], &enrolled[..8]);
+    }
+    eprintln!("p0d: key {}… root_gen {root_gen} matches its ledger enrolment", &key.public_hex()[..8]);
     let app = Arc::new(App {
-        db, key: Key::from_seed_hex(&env("P0D_KEY_SEED")?)?, key_id: std::env::var("P0D_KEY_ID").unwrap_or_else(|_| "p0d-kernel".into()),
+        db, root_gen, key, key_id: std::env::var("P0D_KEY_ID").unwrap_or_else(|_| "p0d-kernel".into()),
         owner_addr: env("OWNER_ISSUER_ADDR")?, owner_pub: env("OWNER_ISSUER_PUBKEY")?,
         max_ttl_s: std::env::var("MAX_GRANT_TTL_S").ok().and_then(|v| v.parse().ok()).unwrap_or(300),
     });

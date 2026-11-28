@@ -68,14 +68,25 @@ pub async fn post_json(addr: &str, path: &str, body: &Value) -> Result<(u16, Val
 }
 
 
-/// Database connection shared by every Density service. PG_SSLMODE: "require" (default; encrypted, server
-/// certificate not verified, like libpq), "verify-full" (verified against PG_CA_CERT, a PEM file), or
-/// "disable" (local tests only).
+/// Database connection shared by every Density service.
+///
+/// TLS (PG_SSLMODE): "verify-full" is the default. The server certificate must chain to the CA in PG_CA_CERT (default
+/// /etc/density/supabase-root-ca.pem) and match the host name; a missing CA file is a startup error, never a silent
+/// downgrade. "require" (encrypted, certificate NOT verified) must be asked for explicitly and logs a warning on
+/// every start. "disable" is for local tests only.
+///
+/// Liveness: every connection sets TCP keepalives and a TCP user timeout, so a connection that died while the host
+/// slept is detected in seconds instead of hanging every request. `connect` keeps its contract (the process exits
+/// when the connection ends); `Db` reconnects in place and bounds every query with a timeout.
 pub mod db {
-
     use rustls::client::danger::{HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier};
     use rustls::pki_types::{CertificateDer, ServerName, UnixTime};
     use rustls::{DigitallySignedStruct, SignatureScheme};
+    use std::time::Duration;
+
+    pub const DEFAULT_CA: &str = "/etc/density/supabase-root-ca.pem";
+    pub const QUERY_TIMEOUT: Duration = Duration::from_secs(8);
+
     #[derive(Debug)]
     pub struct EncryptOnly(pub rustls::crypto::CryptoProvider);
     impl ServerCertVerifier for EncryptOnly {
@@ -84,35 +95,87 @@ pub mod db {
         fn verify_tls13_signature(&self, m: &[u8], c: &CertificateDer<'_>, d: &DigitallySignedStruct) -> Result<HandshakeSignatureValid, rustls::Error> { rustls::crypto::verify_tls13_signature(m, c, d, &self.0.signature_verification_algorithms) }
         fn supported_verify_schemes(&self) -> Vec<SignatureScheme> { self.0.signature_verification_algorithms.supported_schemes() }
     }
+
+    /// The TLS mode in force: what the service will log and what the hygiene gate checks.
+    pub fn mode() -> String { std::env::var("PG_SSLMODE").unwrap_or_else(|_| "verify-full".into()) }
+
     pub fn config() -> anyhow::Result<Option<rustls::ClientConfig>> {
         let provider = rustls::crypto::ring::default_provider();
-        match std::env::var("PG_SSLMODE").unwrap_or_else(|_| "require".into()).as_str() {
-            "disable" => Ok(None),
+        match mode().as_str() {
+            "disable" => { eprintln!("WARNING: PG_SSLMODE=disable: database traffic is not encrypted (local tests only)"); Ok(None) }
+            "require" => {
+                eprintln!("WARNING: PG_SSLMODE=require: encrypted, but the database certificate is NOT verified; set verify-full");
+                Ok(Some(rustls::ClientConfig::builder_with_provider(std::sync::Arc::new(provider.clone())).with_safe_default_protocol_versions()?
+                    .dangerous().with_custom_certificate_verifier(std::sync::Arc::new(EncryptOnly(provider))).with_no_client_auth()))
+            }
             "verify-full" => {
+                let path = std::env::var("PG_CA_CERT").unwrap_or_else(|_| DEFAULT_CA.into());
+                let f = std::fs::File::open(&path).map_err(|e| anyhow::anyhow!("verify-full needs the CA at {path}: {e}"))?;
                 let mut roots = rustls::RootCertStore::empty();
-                let path = std::env::var("PG_CA_CERT").map_err(|_| anyhow::anyhow!("verify-full needs PG_CA_CERT"))?;
-                for c in rustls_pemfile::certs(&mut std::io::BufReader::new(std::fs::File::open(path)?)) { roots.add(c?)?; }
+                for c in rustls_pemfile::certs(&mut std::io::BufReader::new(f)) { roots.add(c?)?; }
+                if roots.is_empty() { anyhow::bail!("verify-full: no certificate in {path}"); }
                 Ok(Some(rustls::ClientConfig::builder_with_provider(provider.into()).with_safe_default_protocol_versions()?.with_root_certificates(roots).with_no_client_auth()))
             }
-            _ => Ok(Some(rustls::ClientConfig::builder_with_provider(std::sync::Arc::new(provider.clone())).with_safe_default_protocol_versions()?
-                .dangerous().with_custom_certificate_verifier(std::sync::Arc::new(EncryptOnly(provider))).with_no_client_auth())),
+            other => anyhow::bail!("unknown PG_SSLMODE {other:?} (verify-full, require or disable)"),
         }
     }
 
-    /// A service holds one database connection. When it ends (an idle timeout at the pooler, a network break, a
-    /// database restart), the service exits so its supervisor restarts it with a fresh connection, rather than
-    /// failing every later request. Replace with a reconnecting pool when traffic warrants one.
-    fn exit_on_close(err: Option<tokio_postgres::Error>) {
-        match err { Some(e) => eprintln!("database connection ended: {e}; exiting for a clean restart"), None => eprintln!("database connection closed; exiting for a clean restart") }
-        std::process::exit(70);
+    fn pg_config(url: &str) -> anyhow::Result<tokio_postgres::Config> {
+        let mut c: tokio_postgres::Config = url.parse()?;
+        c.connect_timeout(Duration::from_secs(10)).keepalives(true).keepalives_idle(Duration::from_secs(20))
+         .keepalives_interval(Duration::from_secs(5)).keepalives_retries(3).tcp_user_timeout(Duration::from_secs(15));
+        Ok(c)
     }
 
-    pub async fn connect(url: &str) -> anyhow::Result<tokio_postgres::Client> {
-        let client = match config()? {
-            None => { let (c, conn) = tokio_postgres::connect(url, tokio_postgres::NoTls).await?; tokio::spawn(async move { let r = conn.await; exit_on_close(r.err()); }); c }
-            Some(cfg) => { let (c, conn) = tokio_postgres::connect(url, tokio_postgres_rustls::MakeRustlsConnect::new(cfg)).await?; tokio::spawn(async move { let r = conn.await; exit_on_close(r.err()); }); c }
+    async fn open(url: &str, exit_on_end: bool) -> anyhow::Result<tokio_postgres::Client> {
+        let c = pg_config(url)?;
+        let watch = move |r: Result<(), tokio_postgres::Error>| {
+            match &r { Err(e) => eprintln!("database connection ended: {e}"), Ok(()) => eprintln!("database connection closed") }
+            if exit_on_end { eprintln!("exiting for a clean restart"); std::process::exit(70); }
         };
-        Ok(client)
+        Ok(match config()? {
+            None => { let (cl, conn) = c.connect(tokio_postgres::NoTls).await?; tokio::spawn(async move { watch(conn.await) }); cl }
+            Some(cfg) => { let (cl, conn) = c.connect(tokio_postgres_rustls::MakeRustlsConnect::new(cfg)).await?; tokio::spawn(async move { watch(conn.await) }); cl }
+        })
+    }
+
+    /// One connection; the process exits when it ends so the supervisor restarts it (unchanged contract).
+    pub async fn connect(url: &str) -> anyhow::Result<tokio_postgres::Client> { open(url, true).await }
+
+    /// A connection that reconnects in place. Every query is bounded by QUERY_TIMEOUT; after a failure on a dead or
+    /// timed-out connection it reconnects and retries once. Use only for statements that are safe to repeat (reads,
+    /// and submissions the database makes idempotent, such as p0.admit_event keyed by event_id).
+    pub struct Db { url: String, client: tokio::sync::Mutex<Option<std::sync::Arc<tokio_postgres::Client>>> }
+
+    impl Db {
+        pub async fn new(url: &str) -> anyhow::Result<Self> {
+            let c = open(url, false).await?;
+            Ok(Db { url: url.into(), client: tokio::sync::Mutex::new(Some(std::sync::Arc::new(c))) })
+        }
+        async fn current(&self) -> anyhow::Result<std::sync::Arc<tokio_postgres::Client>> {
+            let mut g = self.client.lock().await;
+            if let Some(c) = g.as_ref() { if !c.is_closed() { return Ok(c.clone()); } }
+            eprintln!("database: reconnecting");
+            let c = std::sync::Arc::new(tokio::time::timeout(Duration::from_secs(15), open(&self.url, false)).await.map_err(|_| anyhow::anyhow!("reconnect timed out"))??);
+            *g = Some(c.clone());
+            Ok(c)
+        }
+        async fn drop_client(&self) { *self.client.lock().await = None; }
+
+        pub async fn query_one(&self, sql: &str, params: &[&(dyn tokio_postgres::types::ToSql + Sync)]) -> anyhow::Result<tokio_postgres::Row> {
+            for attempt in 0..2 {
+                let c = self.current().await?;
+                match tokio::time::timeout(QUERY_TIMEOUT, c.query_one(sql, params)).await {
+                    Ok(Ok(row)) => return Ok(row),
+                    Ok(Err(e)) if !c.is_closed() || attempt == 1 => return Err(e.into()),   // a real SQL error: do not retry
+                    Ok(Err(e)) => eprintln!("database: connection lost ({e}); retrying once"),
+                    Err(_) if attempt == 1 => anyhow::bail!("database query timed out twice"),
+                    Err(_) => eprintln!("database: query timed out; dropping the connection and retrying once"),
+                }
+                self.drop_client().await;
+            }
+            unreachable!()
+        }
     }
 }
 

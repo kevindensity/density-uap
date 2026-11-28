@@ -71,3 +71,17 @@ session while diagnosing it.
   (`ledger.revocations`, signer plus recovery signature, epoch bump) cannot run. Enrol one, held offline.
 - Both issuers still share one Sprite and one administrator; custody independence (K50) needs `owner-issuer`
   under a separate host and administrator.
+
+## Candidate builds for admission, 28 Nov 2026 (not yet admitted)
+
+Changes: database layer (`verify-full` by default, keepalives, bounded queries, reconnect in place), configurable
+`ISSUER_ROOT_GEN`, `p0d` startup check against its ledger enrolment, `uapd` added as its own build unit. Built twice
+with `scripts/build-reproducible.sh` in two directories (`/home/sprite/fix`, `/home/sprite/fixB`): identical.
+
+| Component | Hash |
+| --- | --- |
+| `p0d` | `597d60ab1d8a06ba9856acd2e2e03d6d29ac43c734bcf8accea4f099590ec845` |
+| `owner-issuer` | `c15136b665672a5ddcfb29a1694c558cd017bbf3d24aa2f3d0291d99e7c9d7e7` |
+| `verifierd` | `122a026f28b1679e9ac6bc292d34a43c078576b41aa732fe37899249f497d180` |
+| `uacd` | `ecf660f6cfacdd8bbf9bab848a09e64b3abaacd0260b0a59edc9ec33faceef7f` |
+| `uapd` | `290d85d49cb2c62027ef076340fb0217437ebf40244ac3a8dc9e75672ee6c927` |
