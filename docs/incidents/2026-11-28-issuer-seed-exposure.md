@@ -38,6 +38,9 @@ rotated: no grant signed with the old keys can verify any more.
 | D13 | The effect gateway kept a hard-coded copy of the issuer public keys; the rotation updated the ledger but not this copy, so from 03:24 UTC on 28 Nov the gateway would have refused every grant (none was attempted: last SENT 24 Nov) | Copy removed: the gateway reads active keys and generations from the ledger (`ledger.active_issuers`) at every release and also checks each signature's generation. Tested on a live grant: genuine passes; tampered signature, wrong generation and altered body refused | ledger `s6_0002`, `sprites/kernel/effect_gateway.py` |
 | D14 | The same launcher pattern on mcp-density-verifier: `verifierd`'s signing seed and database URL were on a command line readable by every account there; `/proc` not hidden | Launcher fixed, `hidepid`; key rotated (`verifier-2` enrolled, `verifier-1` revoked); `verifierd_login` password replaced by a SCRAM verifier generated on the Sprite; seed, env and password copies shredded; gate suites naming `verifier-1` still 3/3 and 3/3. Misuse cannot be ruled out for the 294 settlements the old key signed: see Open | `sprites/verifier/run-verifier.sh` |
 | D15 | Database TLS was unverified everywhere, including the Python services (`sslmode=require`) | CA verified against the pooler's presented root through an independent channel (fingerprint `80:70:25:AD...CA:FA`, valid to 26 Apr 2031); every client on both Sprites runs `verify-full`; proven by a negative control (without the root: `UnknownIssuer`). The hygiene gate refuses any unverified client mode | live 28 Nov |
+| D16 | `verify.keys` was a second registry of verifier key ids; the rotation to `verifier-2` did not update it, so every re-settlement, including the daily sweep, would have been refused | The settlement guard takes the verifier's role and status from `p0.keys` (the single authority, where signatures are checked) and requires an active key, so a revoked key cannot strengthen by any path | root `v2_0001` |
+| D17 | The verifier watchdog killed `verifierd` after one slow health check; health shares the database connection with sweeps, so the daily 06:50 sweep was killed on 26 and 27 Nov | Restart only after about two minutes of consecutive failure; the lasting fix is the reconnecting database layer in `verifierd`'s rebuild | `sprites/verifier/watchdog.sh` |
+| D18 | Blind commitments were unique per (claim, value, evidence) regardless of verifier, so a second verifier's commitment to an unchanged claim was silently dropped, and `verifierd` signed its receipt anyway; admission also never checked that the commitment preceded the receipt | Commitments unique per verifier; admission requires commitment time <= receipt time; receipts can be voided with a reason (never deleted). Open for the rebuild: `verifierd` must refuse to sign when its commitment was not stored | root `v2_0002` |
 
 ## Operator errors during the response
 
@@ -54,6 +57,8 @@ rotated: no grant signed with the old keys can verify any more.
 | E9 | Listed fixable gaps as to-dos | Delay | This record and the fixes above |
 | E10 | The rotation updated the ledger and the kernel records but missed a fifth copy of the keys, in the gateway | Every effect would have been refused | D13: the copy no longer exists. Rule: a key has one authoritative location; consumers read it, never copy it |
 | E11 | Applied the launcher fix to one Sprite and did not check the other for the same pattern | The verifier exposure (D14) ran a day longer | Rule: a fix for a pattern is applied to every host and every service, and the gate runs on every host |
+| E12 | Checked key enrolment in `p0.keys` and the ledger but not `verify.keys`, a third registry | Found before the daily sweep would have failed | D16; same rule as E10 |
+| E13 | Triggered the sweep through the SQL tool, whose statement timeout cut the request; with the single-miss watchdog this also killed `verifierd` mid-sweep | None lasting; led to finding D17 | Long operations are run on the host with an explicit timeout, never through a tool with a shorter one |
 
 ## Prevention now in force
 
@@ -73,9 +78,18 @@ grant verified at the fence, frozen-connection recovery) in their `verify-full` 
 Admission (owner signature) cites those runs and must happen within 7 days of them. The recovery root is independent
 and can be created first (`owner-tools/density_recovery_root_genesis.py`).
 
-## Open (operator)
+## Re-verification after D14 (done 28 Nov)
 
-- Re-verify the 294 settlements signed by `verifier-1` under `verifier-2` (D14), so no current standing depends on the exposed key.
+Of the 294 settlements `verifier-1` signed, 215 had already been superseded; 79 still stood on its receipts. Each was
+demoted through the kernel (`REVERIFY_AFTER_KEY_EXPOSURE`, recorded in `verify.reverification_2026_11_28`) and
+re-evaluated by `verifier-2` from current evidence, committing its value blind before reading the compiler's. All 79
+reached the same outcome as before (76 true, 3 false) and are settled again under `verifier-2`, each with a prior
+`verifier-2` commitment. No current standing depends on the exposed key. Limit: this confirms each claim against
+today's evidence, not the evidence of its original settlement.
+
+## Open (rebuild)
+
+- `verifierd`: refuse to sign when its blind commitment was not stored (D18); adopt the reconnecting database layer (D17).
 
 ## Open (owner)
 
