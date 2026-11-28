@@ -1,0 +1,12 @@
+[package]
+name = "uapd"
+version = "0.1.0"
+edition = "2021"
+description = "UAP process, O1 onboarding: corroborates seed-port captures into candidate systems and connection plans (shadow mode; the SQL function is the oracle)"
+
+[dependencies]
+p0-core = { path = "../p0-core" }
+tokio-postgres = { workspace = true }
+tokio = { workspace = true }
+regex = "=1.11.1"
+serde_json = "1"

@@ -1,0 +1,27 @@
+// Wire form of contract density:core.signed_envelope/1.
+// RULE: the payload travels as payload_jcs, the RFC 8785 bytes exactly as hashed and signed.
+// It must never be re-expressed as protobuf fields: protobuf encoding is not canonical, so the
+// receiver could not recompute the digest. tests/proto_contract.rs enforces this.
+syntax = "proto3";
+package density.envelope.v1;
+
+message SignedEnvelope {
+  string schema = 1;
+  bytes payload_jcs = 2;
+  string payload_sha256 = 3;
+  string issuer_key_id = 4;
+  string issued_at = 5;
+  string signature = 6;
+}
+
+message Ack {
+  // ACCEPTED, REFUSED or SINK_REJECTED
+  string decision = 1;
+  string reason = 2;
+  // the digest the receiver recomputed, never the stated one
+  string payload_sha256 = 3;
+}
+
+service EnvelopeExchange {
+  rpc Submit(SignedEnvelope) returns (Ack);
+}

@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/p0-core", "crates/p0d", "crates/owner-issuer", "crates/verifierd", "crates/dc-contracts", "crates/uacd", "crates/dc-canonical", "crates/dc-envelope"]
+members = ["crates/p0-core", "crates/p0d", "crates/owner-issuer", "crates/verifierd", "crates/dc-contracts", "crates/uacd", "crates/dc-canonical", "crates/dc-envelope", "crates/dc-transport", "crates/uapd"]
 resolver = "2"
 
 [workspace.dependencies]
