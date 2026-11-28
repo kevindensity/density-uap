@@ -34,6 +34,7 @@ rotated: no grant signed with the old keys can verify any more.
 | D9 | Database TLS defaulted to encrypt-only: no certificate verification anywhere | Default `verify-full`, missing CA is a startup error, `require` must be explicit and warns every start | `p0-core` (live after CA and admission) |
 | D10 | Watchdog killed `p0d` after one 5-second miss | Four consecutive misses; runs the hygiene gate every minute | `sprites/kernel/watchdog.sh` (with the new `p0d`) |
 | D11 | Both issuers on one host under one administrator | Not fixable by software alone | Open |
+| D12 | Build-admission gate runs accept self-reported external checks (`gates.external_checks` trusts any list of passes), so a run could be padded to meet the suite-size floor | Bind external evidence to a signature from the build host, verified by the database as the ledger now does for rotations; until then, external checks are run and reported by the operator from real test executions only | Open |
 
 ## Operator errors during the response
 
@@ -59,6 +60,13 @@ rotated: no grant signed with the old keys can verify any more.
 - **Ledger** (D5): no silent key change, even by the superuser through ordinary SQL.
 - **Service** (D7): an issuer refuses to start with a key its ledger does not enrol.
 - **Kernel projections** (D2): reductions are admitted events, so the kernel's account cannot drift from the ledger.
+
+## Order of the remaining work
+
+Gate runs for the rebuilt binaries must exercise them for real (health, enrolment self-check, admission, a co-signed
+grant verified at the fence, frozen-connection recovery) in their `verify-full` configuration, so they follow the CA.
+Admission (owner signature) cites those runs and must happen within 7 days of them. The recovery root is independent
+and can be created first (`owner-tools/density_recovery_root_genesis.py`).
 
 ## Open (owner)
 
