@@ -44,6 +44,7 @@ rotated: no grant signed with the old keys can verify any more.
 | D19 | The uacd differential counted a source the SQL oracle could only partly observe (compressed page: 'partial') as a disagreement, so every density.dev run since 26 Nov read DIVERGE | Partial or failed on either side is UNAVAILABLE; DIFFERS means both observed and disagree. Fresh run: AGREE, 18 agree, 2 unavailable | root `uac_0011` |
 | D20 | `rereadd` slept until 06:42 UTC on a Sprite that hibernates, so no independent re-read had happened since 24 Nov | Catch-up schedule: re-read whenever the last success is 23 hours old, checked every 5 minutes; the root's daily sweep wakes the Sprite | `sprites/verifier/rereadd.py` |
 | D21 | Re-reads were keyed by content alone, so re-observing an unchanged domain was silently dropped and the domain looked stale | Keyed by (content, time); signature binds the observation time; time must be within 10 minutes of the insert; an insert that stores nothing is a failure, never a silent success | root `uac_0012`, `rereadd.py` |
+| D22 | `uap.promote_read_ladder()` was neither scheduled nor in the daily cycle, so after any demotion a port stayed below the rung its evidence earns (caught by u07.ports_at_earned_read_rung after the re-verification) | Scheduled every 15 minutes, three idempotent passes; the three ports returned to BRIDGE_AUTHORIZED through admitted events | root `u07_0003` |
 
 ## Operator errors during the response
 
@@ -75,6 +76,16 @@ rotated: no grant signed with the old keys can verify any more.
 - **Ledger** (D5): no silent key change, even by the superuser through ordinary SQL.
 - **Service** (D7): an issuer refuses to start with a key its ledger does not enrol.
 - **Kernel projections** (D2): reductions are admitted events, so the kernel's account cannot drift from the ledger.
+
+## Admission gate runs, 28 Nov (commit 6cd76dbb, signed evidence under verify-full)
+
+| Component | Build | Gates | Run |
+| --- | --- | --- | --- |
+| p0d | a261ad18... | 161/161 PROMOTED | d8dc467c |
+| owner-issuer | c15136b6... | 161/161 PROMOTED | 5953e838 |
+| uacd | ecf660f6... | 150/150 PROMOTED | 6bd032da |
+| uapd | 290d85d4... | 150/150 PROMOTED | b9c2e453 |
+| verifierd | 2a6a2d2d... | waits for the verifier Sprite's read-only deploy key (build and attest on its own host) | |
 
 ## Order of the remaining work
 
