@@ -34,7 +34,7 @@ rotated: no grant signed with the old keys can verify any more.
 | D9 | Database TLS defaulted to encrypt-only: no certificate verification anywhere | Default `verify-full`, missing CA is a startup error, `require` must be explicit and warns every start | `p0-core` (live after CA and admission) |
 | D10 | Watchdog killed `p0d` after one 5-second miss | Four consecutive misses; runs the hygiene gate every minute | `sprites/kernel/watchdog.sh` (with the new `p0d`) |
 | D11 | Both issuers on one host under one administrator | Not fixable by software alone | Open |
-| D12 | Build-admission gate runs accept self-reported external checks (`gates.external_checks` trusts any list of passes), so a run could be padded to meet the suite-size floor | Bind external evidence to a signature from the build host, verified by the database as the ledger now does for rotations; until then, external checks are run and reported by the operator from real test executions only | Open |
+| D12 | Build-admission gate runs accepted self-reported external checks (`gates.external_checks` trusted any list of passes), so a run could be padded to meet the suite-size floor | External evidence must be signed by an enrolled `BUILD_ATTESTOR` key for this exact component@sha256, within 24 hours; the attestor (`scripts/attest.py`) hashes the binary and runs every check itself, and refuses to sign unless the run used `verify-full`. Unverified evidence yields one failing check and no passes. 7/7 forgery cases refused (unsigned, replayed for another build, tampered, padded, stale, unenrolled key). Limit: root on the build host can still sign (D11) | root `g3_0001` |
 
 ## Operator errors during the response
 
