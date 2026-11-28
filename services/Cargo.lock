@@ -308,6 +308,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "dc-canonical"
+version = "0.1.0"
+dependencies = [
+ "hex",
+ "serde",
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
 name = "dc-contracts"
 version = "0.1.0"
 dependencies = [

@@ -1,0 +1,16 @@
+{"description": "RFC 8785 (JCS) vectors replayed by the Rust (dc-canonical), SQL (contracts.canonical) and TypeScript implementations. Scope: object keys in the Basic Multilingual Plane; numbers integral within +/-2^53 or with |x| in [1e-6, 1e21).",
+ "vectors": [
+  {"name": "key order", "input": "{\"b\": 2, \"a\": 1, \"aa\": 3, \"A\": 0}", "canonical": "{\"A\":0,\"a\":1,\"aa\":3,\"b\":2}"},
+  {"name": "nested and whitespace", "input": "{ \"x\" : [ 1 , { \"z\" : null , \"y\" : true } ] }", "canonical": "{\"x\":[1,{\"y\":true,\"z\":null}]}"},
+  {"name": "integral float", "input": "[1.0, 100.00, 1e2, -0, 0.0]", "canonical": "[1,100,100,0,0]"},
+  {"name": "decimals", "input": "[0.5, 0.1, 2.25, 3.14159, -1.5]", "canonical": "[0.5,0.1,2.25,3.14159,-1.5]"},
+  {"name": "large integers", "input": "[9007199254740991, -9007199254740991, 1000000]", "canonical": "[9007199254740991,-9007199254740991,1000000]"},
+  {"name": "string escapes", "input": "[\"q\\\"b\\\\s\", \"\\n\\t\\r\\b\\f\", \"\\u0001\\u001f\", \"\\/\"]", "canonical": "[\"q\\\"b\\\\s\",\"\\n\\t\\r\\b\\f\",\"\\u0001\\u001f\",\"/\"]"},
+  {"name": "non-ascii raw", "input": "{\"caf\\u00e9\": \"\\u2192 \\u00e9\"}", "canonical": "{\"café\":\"→ é\"}"},
+  {"name": "empty containers", "input": "{\"o\": {}, \"a\": []}", "canonical": "{\"a\":[],\"o\":{}}"},
+  {"name": "literals", "input": "[true, false, null]", "canonical": "[true,false,null]"}
+ ],
+ "must_reject": [
+  {"name": "duplicate keys", "input": "{\"a\": 1, \"a\": 2}"},
+  {"name": "lone surrogate", "input": "[\"\\ud800\"]"}
+ ]}

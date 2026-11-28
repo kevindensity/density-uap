@@ -235,10 +235,29 @@ CREATE OR REPLACE FUNCTION contracts.canonical(d jsonb)
  SET search_path TO ''
 AS $function$
 begin
+  if jsonb_typeof(d) = 'object' and exists (select 1 from jsonb_object_keys(d) k where k ~ '[\U00010000-\U0010FFFF]') then raise exception 'KEY_OUTSIDE_BMP'; end if;
   return case jsonb_typeof(d)
     when 'object' then '{' || coalesce((select string_agg(to_jsonb(k)::text || ':' || contracts.canonical(v), ',' order by k collate "C") from jsonb_each(d) e(k, v)), '') || '}'
     when 'array' then '[' || coalesce((select string_agg(contracts.canonical(v), ',' order by i) from jsonb_array_elements(d) with ordinality a(v, i)), '') || ']'
+    when 'number' then contracts.canonical_number((d #>> '{}')::numeric)
     else d::text end;
+end $function$
+;
+CREATE OR REPLACE FUNCTION contracts.canonical_number(n numeric)
+ RETURNS text
+ LANGUAGE plpgsql
+ IMMUTABLE STRICT
+ SET search_path TO ''
+AS $function$
+declare f float8; t text;
+begin
+  if n = 0 then return '0'; end if;                                       -- includes -0
+  if n = trunc(n) and abs(n) <= 9007199254740992 then return trunc(n)::bigint::text; end if;
+  f := n::float8;
+  if abs(f) < 1e-6 or abs(f) >= 1e21 then raise exception 'NUMBER_OUT_OF_SCOPE %', n; end if;
+  t := f::text;                                                             -- shortest round-trip (extra_float_digits = 1)
+  if t ~ 'e' then raise exception 'NUMBER_FORMAT_UNEXPECTED %', t; end if;
+  return t;
 end $function$
 ;
 CREATE OR REPLACE FUNCTION contracts."check"(p_schema_id text, p_doc jsonb)
@@ -2923,7 +2942,7 @@ create table uac.differential_reviews (
   reviewed_by text not null default SESSION_USER,
   reviewed_at timestamp with time zone not null default now()
 );
-alter table only uac.differential_reviews add constraint differential_reviews_pkey PRIMARY KEY (run_id, field);
+alter table only uac.differential_reviews add constraint differential_reviews_pkey PRIMARY KEY (run_id, field, reviewed_at);
 alter table only uac.differential_reviews add constraint differential_reviews_run_id_fkey FOREIGN KEY (run_id) REFERENCES uac.differential_runs(run_id);
 alter table only uac.differential_reviews add constraint differential_reviews_classification_check CHECK ((classification = ANY (ARRAY['EXPLAINED_ORACLE_DEFECT'::text, 'EXPLAINED_RUST_DEFECT'::text, 'EXPLAINED_WORLD_CHANGED'::text, 'EXPLAINED_UPSTREAM_FLAKY'::text, 'UNEXPLAINED'::text])));
 alter table uac.differential_reviews enable row level security;
@@ -3030,6 +3049,15 @@ grant SELECT on uac.scopes to portd;
 grant SELECT on uac.scopes to uacd;
 grant SELECT on uac.scopes to uapd;
 grant SELECT on uac.scopes to verifierd;
+create view uac.differential_current_reviews as
+ SELECT DISTINCT ON (run_id, field) run_id,
+    field,
+    classification,
+    reason,
+    reviewed_by,
+    reviewed_at
+   FROM uac.differential_reviews
+  ORDER BY run_id, field, reviewed_at DESC;
 CREATE OR REPLACE FUNCTION uac.acquire_all_domains()
  RETURNS jsonb
  LANGUAGE sql
@@ -3110,6 +3138,13 @@ begin
   end;
   if not exists (select 1 from jsonb_each_text(src) where value = 'ok') then return jsonb_build_object('decision', 'REJECT', 'reason', 'ALL_SOURCES_FAILED', 'sources', src); end if;
   body := body || jsonb_build_object('domain', d, 'sources', src);
+  -- the SQL client follows redirects itself and merges every response's headers; a Location header on a non-redirect
+  -- status proves the merge, so the header names are reported unavailable rather than as a mixed list
+  if r.status is not null and r.status not between 300 and 399 and exists (select 1 from unnest(r.headers) hh where lower(hh.field) = 'location') and body ? 'web_header_names' then
+    body := body - 'web_header_names';
+    src := src || jsonb_build_object('website', 'partial: header names unavailable (the client merged headers across a redirect)');
+    body := body || jsonb_build_object('sources', src);
+  end if;
   dig := encode(extensions.digest(body::text, 'sha256'), 'hex');
   select c.content_digest into prevdig from uac.captures c where c.scope_stream = p_scope order by c.observed_at desc, c.recorded_at desc limit 1;
   insert into uac.capture_bodies (content_digest, body, size_bytes) values (dig, body, 0) on conflict (content_digest) do nothing;
