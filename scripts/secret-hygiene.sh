@@ -16,7 +16,7 @@ done
 grep -qE ' /proc proc .*hidepid=(2|invisible)' /proc/mounts || say "/proc is not mounted with hidepid: any user can read other processes' command lines"
 
 # 3. secret files: mode 600, owned by the service user that uses them
-for f in /var/lib/kernel/secrets/* /var/lib/issuer/secrets/* /var/lib/uacd/env /var/lib/uapd/env; do
+for f in /var/lib/kernel/secrets/* /var/lib/issuer/secrets/* /var/lib/uacd/env /var/lib/uapd/env /var/lib/attestor/key; do
   [ -e "$f" ] || continue
   m=$(stat -c '%a' "$f"); o=$(stat -c '%U' "$f"); want=$(echo "$f" | cut -d/ -f4)
   [ "$m" = "600" ] || say "$f has mode $m (want 600)"
